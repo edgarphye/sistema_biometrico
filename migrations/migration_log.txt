@@ -1,0 +1,3 @@
+2025-11-20T05:59:30+00:00 - Migration failed: There is no active transaction
+2025-11-20T06:00:13+00:00 - Migration succeeded: migrations\20251119_add_sanciones_retardos_soporte.sql
+2025-11-20T06:02:45+00:00 - Migration succeeded: migrations\20251119_add_sanciones_modificados.sql

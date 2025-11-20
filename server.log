@@ -1,0 +1,4 @@
+[Sat Nov 15 23:00:59 2025] PHP 8.4.7 Development Server (http://localhost:8000) started
+[Sat Nov 15 23:08:00 2025] [::1]:51777 Accepted
+[Sat Nov 15 23:08:00 2025] [::1]:51777 [200]: POST /asistencia/calcular-horas-laborables
+[Sat Nov 15 23:08:00 2025] [::1]:51777 Closing
