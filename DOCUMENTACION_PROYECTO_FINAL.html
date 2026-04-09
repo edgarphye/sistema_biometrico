@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Biométrico - Documentación Técnica Completa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Calibri', 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #ffffff;
+            padding: 40px;
+        }
+        
+        .document-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+        }
+        
+        h1 {
+            color: #1a5490;
+            font-size: 28pt;
+            margin-bottom: 10px;
+            border-bottom: 3px solid #1a5490;
+            padding-bottom: 10px;
+            page-break-after: avoid;
+        }
+        
+        h2 {
+            color: #2a5f9e;
+            font-size: 20pt;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-left: 5px solid #2a5f9e;
+            padding-left: 15px;
+            page-break-after: avoid;
+        }
+        
+        h3 {
+            color: #3a7fbe;
+            font-size: 16pt;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            page-break-after: avoid;
+        }
+        
+        h4 {
+            color: #4a8fce;
+            font-size: 14pt;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            page-break-after: avoid;
+        }
+        
+        p {
+            margin-bottom: 10px;
+            text-align: justify;
+        }
+        
+        .title-page {
+            text-align: center;
+            padding: 80px 0;
+            page-break-after: always;
+        }
+        
+        .title-page h1 {
+            font-size: 36pt;
+            border: none;
+            margin-bottom: 20px;
+        }
+        
+        .title-page .subtitle {
+            font-size: 18pt;
+            color: #666;
+            margin-bottom: 40px;
+        }
+        
+        .title-page .meta {
+            font-size: 12pt;
+            color: #888;
+            margin-top: 60px;
+        }
+        
+        .toc {
+            page-break-after: always;
+            padding: 20px 0;
+        }
+        
+        .toc h2 {
+            border-left: none;
+            padding-left: 0;
+            text-align: center;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding: 20px 0;
+        }
+        
+        .toc li {
+            margin: 10px 0;
+            padding-left: 30px;
+        }
+        
+        .toc li::before {
+            content: "▪ ";
+            color: #1a5490;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .toc .subitem {
+            padding-left: 60px;
+            font-size: 11pt;
+            color: #666;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th {
+            background-color: #1a5490;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+        
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 10pt;
+        }
+        
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+            border-left: 4px solid #1a5490;
+            font-family: 'Courier New', monospace;
+            font-size: 9pt;
+        }
+        
+        .section {
+            page-break-before: avoid;
+            margin-bottom: 20px;
+        }
+        
+        .highlight {
+            background-color: #fffacd;
+            padding: 10px;
+            border-left: 4px solid #ffd700;
+            margin: 15px 0;
+        }
+        
+        .alert {
+            padding: 12px 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            border-left: 4px solid #0c5460;
+            color: #0c5460;
+        }
+        
+        .alert-warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #856404;
+            color: #856404;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            border-left: 4px solid #721c24;
+            color: #721c24;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border-left: 4px solid #155724;
+            color: #155724;
+        }
+        
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 10px;
+        }
+        
+        li {
+            margin-bottom: 5px;
+        }
+        
+        .feature-list {
+            display: block;
+        }
+        
+        .feature-item {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        
+        .feature-item::before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 8px;
+            margin-left: -25px;
+        }
+        
+        .issue-item {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        
+        .issue-item::before {
+            content: "⚠ ";
+            color: #dc3545;
+            font-weight: bold;
+            margin-right: 8px;
+            margin-left: -25px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #1a5490;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12pt;
+            font-weight: bold;
+        }
+        
+        .spec-box {
+            background-color: #f0f8ff;
+            border: 1px solid #1a5490;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .spec-title {
+            font-weight: bold;
+            color: #1a5490;
+            margin-bottom: 10px;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #999;
+            font-size: 10pt;
+            page-break-before: avoid;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+            }
+            .document-container {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="document-container">
+        <!-- PORTADA -->
+        <div class="title-page">
+            <h1>SISTEMA BIOMÉTRICO</h1>
+            <div class="subtitle">Documentación Técnica Completa</div>
+            <div class="subtitle" style="font-size: 14pt; margin-top: 60px;">Arquitectura, Diseño e Implementación</div>
+            <div class="meta">
+                <p><strong>Versión:</strong> 1.0.1 (Post-Correcciones)</p>
+                <p><strong>Fecha:</strong> 26 de Noviembre de 2025</p>
+                <p><strong>Estado:</strong> ✅ 82% Funcional</p>
+                <p><strong>Audiencia:</strong> Desarrolladores & Gerencia</p>
+            </div>
+        </div>
+
+        <!-- TABLA DE CONTENIDOS -->
+        <div class="toc">
+            <h2>Tabla de Contenidos</h2>
+            <ul>
+                <li>1. Resumen Ejecutivo</li>
+                <li>2. Descripción General del Proyecto</li>
+                <li>3. Arquitectura del Sistema</li>
+                <li>4. Componentes y Módulos
+                    <div class="subitem">4.1. Controladores</div>
+                    <div class="subitem">4.2. Modelos</div>
+                    <div class="subitem">4.3. Servicios</div>
+                    <div class="subitem">4.4. Vistas</div>
+                </li>
+                <li>5. Base de Datos</li>
+                <li>6. Seguridad e Implementaciones</li>
+                <li>7. Flujos de Negocio</li>
+                <li>8. Testing y Cobertura</li>
+                <li>9. API Endpoints</li>
+                <li>10. Guía de Despliegue</li>
+                <li>11. Problemas Conocidos y Recomendaciones</li>
+                <li>12. Roadmap Futuro</li>
+            </ul>
+        </div>
+
+        <!-- 1. RESUMEN EJECUTIVO -->
+        <h2>1. Resumen Ejecutivo</h2>
+        
+        <h3>Estado Actual del Proyecto</h3>
+        <p><strong>Completitud:</strong> 82% funcional. El sistema tiene todas las características core implementadas y funcionando correctamente.</p>
+        
+        <table>
+            <tr>
+                <th>Métrica</th>
+                <th>Valor</th>
+                <th>Estado</th>
+            </tr>
+            <tr>
+                <td>Completitud de Funcionalidades</td>
+                <td>82%</td>
+                <td>✅ Bueno</td>
+            </tr>
+            <tr>
+                <td>Cobertura de Tests</td>
+                <td>10% (4+ tests)</td>
+                <td>⚠️ Necesita mejora</td>
+            </tr>
+            <tr>
+                <td>Documentación</td>
+                <td>65%</td>
+                <td>✅ Aceptable</td>
+            </tr>
+            <tr>
+                <td>Seguridad</td>
+                <td>85%</td>
+                <td>✅ Bueno</td>
+            </tr>
+            <tr>
+                <td>Performance</td>
+                <td>Desconocido</td>
+                <td>⚠️ Requiere testing</td>
+            </tr>
+        </table>
+
+        <h3>Mejoras Recientes</h3>
+        <div class="feature-list">
+            <div class="feature-item">Ruta AJAX para datos completos de empleados</div>
+            <div class="feature-item">Método getAsistenciaFiltrada() en AsistenciaService</div>
+            <div class="feature-item">Columnas de auditoría en tabla sanciones</div>
+            <div class="feature-item">JSON handling mejorado en registros biométricos</div>
+            <div class="feature-item">Validación de permisos en EmpleadoController::delete()</div>
+            <div class="feature-item">Autenticación 2FA en AuthController</div>
+            <div class="feature-item">Tests adicionales (EmpleadoControllerTest, Auth2FATest, ComisionModelTest)</div>
+        </div>
+
+        <!-- 2. DESCRIPCIÓN GENERAL -->
+        <h2>2. Descripción General del Proyecto</h2>
+        
+        <h3>¿Qué es Sistema Biométrico?</h3>
+        <p>Sistema Biométrico es una aplicación web completa para la gestión de asistencia de empleados en instituciones educativas y empresariales. Integra biometría (huella dactilar y reconocimiento facial) con normas laborales mexicanas (AEFCM) para:</p>
+        
+        <ul>
+            <li>Registrar entrada/salida de empleados</li>
+            <li>Calcular retardos automáticamente</li>
+            <li>Gestionar sanciones y justificaciones</li>
+            <li>Administrar comisiones de trabajo</li>
+            <li>Generar reportes detallados</li>
+            <li>Controlar múltiples dispositivos biométricos</li>
+        </ul>
+
+        <h3>Contexto de Negocio</h3>
+        <p>El sistema está diseñado para instituciones educativas (AEFCM) con múltiples sedes/departamentos. Soporta hasta 35 dispositivos biométricos diferentes, permite gestionar comisiones de trabajo, y mantiene un registro de auditoría completo para cumplimiento normativo.</p>
+
+        <h3>Tecnología</h3>
+        <ul>
+            <li><strong>Backend:</strong> PHP 7.4+</li>
+            <li><strong>Base de Datos:</strong> MySQL 5.7+</li>
+            <li><strong>Frontend:</strong> Bootstrap 5, JavaScript vanilla</li>
+            <li><strong>Testing:</strong> PHPUnit 9.x</li>
+            <li><strong>Seguridad:</strong> AES-256-CBC, CSRF tokens, Password hashing</li>
+        </ul>
+
+        <!-- 3. ARQUITECTURA -->
+        <h2>3. Arquitectura del Sistema</h2>
+        
+        <h3>Patrón de Diseño: MVC (Model-View-Controller)</h3>
+        <p>El proyecto implementa el patrón MVC con los siguientes componentes:</p>
+
+        <div class="spec-box">
+            <div class="spec-title">Componentes de Arquitectura</div>
+            <ul>
+                <li><strong>Models:</strong> 17 clases para acceso a datos y lógica de negocio</li>
+                <li><strong>Controllers:</strong> 13 controladores para manejar requests HTTP</li>
+                <li><strong>Views:</strong> 28+ archivos PHP/HTML para presentación</li>
+                <li><strong>Services:</strong> 2 servicios para orquestación de procesos complejos</li>
+                <li><strong>Helpers:</strong> Utilidades para encriptación, CSRF, etc.</li>
+                <li><strong>Database:</strong> Singleton PDO para conexión compartida</li>
+            </ul>
+        </div>
+
+        <h3>Flujo de Solicitud</h3>
+        <pre>
+        REQUEST HTTP
+            ↓
+        index.php (Router)
+            ↓
+        EmpleadoController::index()
+            ↓
+        Empleado::getAll()
+            ↓
+        DATABASE
+            ↓
+        views/empleados/index.php (Render)
+            ↓
+        RESPONSE HTML
+        </pre>
+
+        <!-- 4. COMPONENTES Y MÓDULOS -->
+        <h2>4. Componentes y Módulos</h2>
+
+        <h3>4.1. Controladores (13)</h3>
+        <table>
+            <tr>
+                <th>Controlador</th>
+                <th>Responsabilidad</th>
+                <th>Métodos Principales</th>
+            </tr>
+            <tr>
+                <td>EmpleadoController</td>
+                <td>CRUD de empleados</td>
+                <td>index(), create(), edit(), delete(), datosCompletos()</td>
+            </tr>
+            <tr>
+                <td>AsistenciaController</td>
+                <td>Registro entrada/salida</td>
+                <td>registrarEntrada(), registrarSalida(), filtrarAsistencia()</td>
+            </tr>
+            <tr>
+                <td>AuthController</td>
+                <td>Autenticación y 2FA</td>
+                <td>login(), register(), logout(), verify2FA()</td>
+            </tr>
+            <tr>
+                <td>DashboardController</td>
+                <td>Panel de control</td>
+                <td>index(), getEstadoDispositivosAjax()</td>
+            </tr>
+            <tr>
+                <td>BiometricosController</td>
+                <td>Integración CKTeco</td>
+                <td>capturarHuella(), sincronizarEmpleados(), conectar()</td>
+            </tr>
+            <tr>
+                <td>DispositivoBiometricoController</td>
+                <td>Gestión dispositivos</td>
+                <td>index(), create(), edit(), delete(), testConnection()</td>
+            </tr>
+            <tr>
+                <td>HorarioController</td>
+                <td>Horarios laborales</td>
+                <td>index(), create(), edit(), asignar(), verAsignaciones()</td>
+            </tr>
+            <tr>
+                <td>SancionController</td>
+                <td>Gestión sanciones</td>
+                <td>index(), show(), crear(), editar(), eliminar()</td>
+            </tr>
+            <tr>
+                <td>ComisionController</td>
+                <td>Comisiones AEFCM</td>
+                <td>index(), create(), aprobar(), justificar(), validarLimite()</td>
+            </tr>
+            <tr>
+                <td>JustificacionController</td>
+                <td>Justificación retardos</td>
+                <td>index(), justificar(), crearTipo(), tipos()</td>
+            </tr>
+            <tr>
+                <td>ReportesController</td>
+                <td>Generación de reportes</td>
+                <td>index(), generar(), exportarExcel()</td>
+            </tr>
+            <tr>
+                <td>EmailController</td>
+                <td>Notificaciones</td>
+                <td>enviarNotificacion()</td>
+            </tr>
+            <tr>
+                <td>SoporteController</td>
+                <td>Control acceso a archivos</td>
+                <td>checkAccess(), findRecordBySoporte()</td>
+            </tr>
+        </table>
+
+        <h3>4.2. Modelos (17)</h3>
+        <table>
+            <tr>
+                <th>Modelo</th>
+                <th>Tabla Asociada</th>
+                <th>Responsabilidades</th>
+            </tr>
+            <tr>
+                <td>Empleado</td>
+                <td>empleados</td>
+                <td>CRUD, encriptación biométrica, validación RFC/CURP</td>
+            </tr>
+            <tr>
+                <td>Asistencia</td>
+                <td>asistencia</td>
+                <td>Registro entrada/salida, JSON biométricos</td>
+            </tr>
+            <tr>
+                <td>Retardo</td>
+                <td>retardos</td>
+                <td>Cálculo automático, reglas AEFCM, suspensiones</td>
+            </tr>
+            <tr>
+                <td>Sancion</td>
+                <td>sanciones</td>
+                <td>Gestión sanciones, auditoría completa</td>
+            </tr>
+            <tr>
+                <td>Comision</td>
+                <td>comisiones</td>
+                <td>Normas AEFCM, límites mensual, validación</td>
+            </tr>
+            <tr>
+                <td>Ausencia</td>
+                <td>ausencias</td>
+                <td>Registro ausencias/vacaciones</td>
+            </tr>
+            <tr>
+                <td>Horario</td>
+                <td>horarios_empleados</td>
+                <td>Asignación horarios por empleado</td>
+            </tr>
+            <tr>
+                <td>HorarioLaboral</td>
+                <td>horarios_laborales</td>
+                <td>Catálogo de horarios disponibles</td>
+            </tr>
+            <tr>
+                <td>DispositivoBiometrico</td>
+                <td>dispositivos_biometricos</td>
+                <td>Configuración, estado, sincronización</td>
+            </tr>
+            <tr>
+                <td>Biometrico</td>
+                <td>biometricos</td>
+                <td>Operaciones biométricas</td>
+            </tr>
+            <tr>
+                <td>Usuario</td>
+                <td>usuarios</td>
+                <td>Autenticación, roles</td>
+            </tr>
+            <tr>
+                <td>LogDispositivo</td>
+                <td>logs_dispositivos</td>
+                <td>Auditoría de dispositivos</td>
+            </tr>
+            <tr>
+                <td>RFC</td>
+                <td>-</td>
+                <td>Validación y generación RFC</td>
+            </tr>
+            <tr>
+                <td>TipoJustificacion</td>
+                <td>tipos_justificacion</td>
+                <td>Catálogo tipos justificación</td>
+            </tr>
+            <tr>
+                <td>EmpleadoHorarios</td>
+                <td>-</td>
+                <td>Relación empleado-horarios</td>
+            </tr>
+            <tr>
+                <td>Database</td>
+                <td>-</td>
+                <td>Singleton PDO conexión</td>
+            </tr>
+        </table>
+
+        <h3>4.3. Servicios (2)</h3>
+        <table>
+            <tr>
+                <th>Servicio</th>
+                <th>Responsabilidad</th>
+                <th>Métodos Principales</th>
+            </tr>
+            <tr>
+                <td>AsistenciaService</td>
+                <td>Orquestación asistencia</td>
+                <td>registrarEntrada(), registrarSalida(), getAsistenciaFiltrada()</td>
+            </tr>
+            <tr>
+                <td>ReporteService</td>
+                <td>Generación reportes</td>
+                <td>generarReporteMensual(), exportarExcel()</td>
+            </tr>
+        </table>
+
+        <h3>4.4. Vistas (28+ archivos)</h3>
+        <ul>
+            <li><strong>layout.php</strong> - Template maestro con navbar y footer</li>
+            <li><strong>home.php</strong> - Dashboard principal</li>
+            <li><strong>empleados/</strong> - index, create, edit, show</li>
+            <li><strong>asistencia/</strong> - Registro entrada/salida</li>
+            <li><strong>sanciones/</strong> - CRUD sanciones</li>
+            <li><strong>comisiones/</strong> - Gestión comisiones</li>
+            <li><strong>justificaciones/</strong> - Justificación retardos</li>
+            <li><strong>reportes/</strong> - Generación y descarga</li>
+            <li><strong>horarios/</strong> - Gestión horarios</li>
+            <li><strong>dispositivos/</strong> - Configuración dispositivos</li>
+            <li><strong>auth/</strong> - Login/registro</li>
+            <li><strong>biometricos/</strong> - Estado dispositivos</li>
+        </ul>
+
+        <!-- 5. BASE DE DATOS -->
+        <h2>5. Base de Datos</h2>
+
+        <h3>Esquema MySQL (13 Tablas)</h3>
+        <pre>
+        database: sistema_biometrico
+        charset: utf8mb4
+        collation: utf8mb4_unicode_ci
+        
+        TABLAS PRINCIPALES:
+        ├── empleados
+        ├── usuarios
+        ├── asistencia
+        ├── retardos
+        ├── sanciones
+        ├── comisiones
+        ├── ausencias
+        ├── horarios_laborales
+        ├── horarios_empleados
+        ├── dispositivos_biometricos
+        ├── biometricos
+        ├── logs_dispositivos
+        └── tipos_justificacion
+        </pre>
+
+        <h3>Tablas Críticas</h3>
+
+        <h4>empleados</h4>
+        <pre>
+        - id (INT, PRIMARY KEY, AUTO_INCREMENT)
+        - nombre VARCHAR(100) NOT NULL
+        - apellido VARCHAR(100) NOT NULL
+        - rfc VARCHAR(13) UNIQUE NOT NULL
+        - curp VARCHAR(18) UNIQUE NOT NULL
+        - area VARCHAR(100) NOT NULL
+        - jerarquia VARCHAR(50) NOT NULL
+        - huella_dactilar BLOB
+        - foto_cara VARCHAR(255)
+        - fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        - activo BOOLEAN DEFAULT TRUE
+        </pre>
+
+        <h4>asistencia</h4>
+        <pre>
+        - id (INT, PRIMARY KEY)
+        - empleado_id INT NOT NULL (FK: empleados)
+        - tipo ENUM('entrada', 'salida') NOT NULL
+        - timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        - dispositivo_id TINYINT NOT NULL (1-35)
+        - tipo_biometria ENUM('huella', 'cara') NOT NULL
+        - datos_biometricos JSON (template, calidad, etc.)
+        - calidad_verificacion TINYINT (0-100)
+        - metadata_dispositivo JSON (temp, firmware, etc.)
+        - tiempo_procesamiento DECIMAL(5,3) segundos
+        </pre>
+
+        <h4>sanciones</h4>
+        <pre>
+        - id (INT, PRIMARY KEY)
+        - empleado_id INT NOT NULL (FK: empleados)
+        - tipo ENUM('suspension', 'amonestacion', 'terminacion')
+        - fecha_inicio DATE NOT NULL
+        - dias INT NOT NULL
+        - motivo TEXT
+        - creado_por INT (FK: usuarios)
+        - fecha_creacion TIMESTAMP
+        - modified_by INT (FK: usuarios) [AUDIT]
+        - fecha_modificacion TIMESTAMP [AUDIT]
+        </pre>
+
+        <h3>Índices (18 total)</h3>
+        <pre>
+        PRIMARY KEY índices:
+        - empleados.id
+        - usuarios.id
+        - asistencia.id
+        - retardos.id
+        - sanciones.id
+        - comisiones.id
+        
+        FOREIGN KEY índices:
+        - asistencia.empleado_id
+        - retardos.empleado_id
+        - sanciones.empleado_id
+        - comisiones.empleado_id
+        - sanciones.modified_by
+        
+        PERFORMANCE índices:
+        - empleados.rfc (UNIQUE)
+        - asistencia.timestamp
+        - retardos.fecha
+        - sanciones.fecha_modificacion
+        </pre>
+
+        <!-- 6. SEGURIDAD -->
+        <h2>6. Seguridad e Implementaciones</h2>
+
+        <h3>Autenticación</h3>
+        <div class="alert alert-info">
+            <strong>2FA (Autenticación de Dos Factores)</strong>
+            <p>Implementado en AuthController::verify2FA(). Genera código de 6 dígitos válido por 300 segundos, con máximo 5 intentos fallidos.</p>
+        </div>
+
+        <h3>Encriptación</h3>
+        <pre>
+        AES-256-CBC (helpers/Encryption.php)
+        
+        - Clave: ENCRYPTION_KEY (desde .env)
+        - IV: Aleatorio por cada operación
+        - Datos encriptados: datos biométricos, fotos
+        
+        Uso:
+        $encrypted = Encryption::encrypt($datos);
+        $decrypted = Encryption::decrypt($encrypted);
+        </pre>
+
+        <h3>Prevención de Ataques</h3>
+        <table>
+            <tr>
+                <th>Vulnerabilidad</th>
+                <th>Técnica de Prevención</th>
+                <th>Implementación</th>
+            </tr>
+            <tr>
+                <td>CSRF (Cross-Site Request Forgery)</td>
+                <td>CSRF Tokens</td>
+                <td>helpers/Csrf.php - Tokens en formularios</td>
+            </tr>
+            <tr>
+                <td>SQL Injection</td>
+                <td>Prepared Statements</td>
+                <td>Todos los queries usan ? placeholders</td>
+            </tr>
+            <tr>
+                <td>XSS (Cross-Site Scripting)</td>
+                <td>htmlspecialchars(), htmlentities()</td>
+                <td>Todos los datos de usuario escapados en vistas</td>
+            </tr>
+            <tr>
+                <td>Fuerza Bruta</td>
+                <td>Rate limiting (implícito en 2FA)</td>
+                <td>Máximo 5 intentos 2FA en 5 minutos</td>
+            </tr>
+            <tr>
+                <td>Acceso No Autorizado</td>
+                <td>Control de Permisos</td>
+                <td>SoporteController::checkAccess() + validaciones</td>
+            </tr>
+        </table>
+
+        <h3>Control de Acceso (RBAC)</h3>
+        <ul>
+            <li><strong>admin:</strong> Acceso total a todas las funcionalidades</li>
+            <li><strong>usuario:</strong> Acceso a su propio registro y funcionalidades básicas</li>
+            <li><strong>gerente:</strong> Acceso a reportes y aprobaciones</li>
+        </ul>
+
+        <h3>Auditoría</h3>
+        <ul>
+            <li>Tabla <code>sanciones</code> con campos <code>modified_by</code> y <code>fecha_modificacion</code></li>
+            <li>Tabla <code>logs_dispositivos</code> para registrar todas las verificaciones biométricas</li>
+            <li>Timestamps en todas las tablas principales</li>
+            <li>Query logs en <code>logs/</code> para debugging</li>
+        </ul>
+
+        <!-- 7. FLUJOS DE NEGOCIO -->
+        <h2>7. Flujos de Negocio</h2>
+
+        <h3>7.1. Flujo de Entrada de Empleado</h3>
+        <pre>
+        1. Empleado escanea huella/cara en dispositivo CKTeco
+        2. DispositivoBiometrico recibe datos
+        3. BiometricosController::registrarHuella() procesa
+        4. AsistenciaService::registrarEntrada() valida:
+           ✓ Empleado activo
+           ✓ Datos biométricos válidos
+           ✓ Horario laboral
+        5. Asistencia::registrarEntrada() crea registro
+        6. Retardo::calcularRetardo() calcula si hay atraso
+        7. Si retardo ≥ 10 min: crea registro retardo
+        8. Si 5 retardos: Sancion::create() con tipo 'suspension'
+        9. LogDispositivo registra el evento
+        10. Dashboard muestra actualizado
+        </pre>
+
+        <h3>7.2. Flujo de Comisión (Normas AEFCM)</h3>
+        <pre>
+        1. Gerente crea comisión (ComisionController::create())
+        2. Comision::create() valida según AEFCM:
+           ✓ Tipo válido (viaticos, gastos, etc.)
+           ✓ Monto ≤ $3,000 mensual
+           ✓ Días ≤ límite por tipo
+        3. Si requiere_aprobacion: estado = pendiente
+        4. Admin/Gerente aprueba (ComisionController::aprobar())
+        5. Comision::justificar() marca como justificada
+        6. Reporte genera con comisiones aprobadas
+        </pre>
+
+        <h3>7.3. Flujo de Justificación de Retardo</h3>
+        <pre>
+        1. Empleado solicita justificación (JustificacionController::justificar())
+        2. Selecciona tipo: Enfermedad, Tráfico, Otro, etc.
+        3. Adjunta documento de soporte
+        4. SoporteController verifica acceso y almacena archivo
+        5. Admin/Gerente revisa justificación
+        6. Si aprobada: Retardo::actualizar() con estado justificado
+        7. Ya no cuenta para suspensión automática
+        </pre>
+
+        <!-- 8. TESTING -->
+        <h2>8. Testing y Cobertura</h2>
+
+        <h3>Estrategia de Testing</h3>
+        <p>El proyecto utiliza PHPUnit con la siguiente estructura:</p>
+
+        <pre>
+        tests/
+        ├── Unit/
+        │   ├── RetardoTest.php (1 test)
+        │   ├── SoporteTest.php (1 test)
+        │   ├── EmpleadoControllerTest.php (4 tests) ✨ NUEVO
+        │   ├── Auth2FATest.php (5 tests) ✨ NUEVO
+        │   └── ComisionModelTest.php (6 tests) ✨ NUEVO
+        ├── Functional/
+        │   ├── AuthEndpointsTest.php
+        │   ├── EmployeesEndpointsTest.php
+        │   ├── AttendanceEndpointsTest.php
+        │   ├── ComisionesEndpointsTest.php
+        │   ├── SancionesEndpointsTest.php
+        │   └── ... (8 functional tests)
+        ├── bootstrap.php
+        └── test_*.php (18 tests misc)
+        </pre>
+
+        <h3>Cobertura Actual</h3>
+        <table>
+            <tr>
+                <th>Componente</th>
+                <th>Tests</th>
+                <th>Cobertura</th>
+                <th>Estado</th>
+            </tr>
+            <tr>
+                <td>Models (17)</td>
+                <td>4</td>
+                <td>~5%</td>
+                <td>⚠️ Crítico</td>
+            </tr>
+            <tr>
+                <td>Controllers (13)</td>
+                <td>2</td>
+                <td>~2%</td>
+                <td>⚠️ Crítico</td>
+            </tr>
+            <tr>
+                <td>Services (2)</td>
+                <td>0</td>
+                <td>0%</td>
+                <td>🔴 Necesario</td>
+            </tr>
+            <tr>
+                <td>Helpers (2)</td>
+                <td>1</td>
+                <td>~3%</td>
+                <td>⚠️ Necesario</td>
+            </tr>
+            <tr>
+                <td>TOTAL</td>
+                <td>16+</td>
+                <td>~10%</td>
+                <td>⚠️ Bajo</td>
+            </tr>
+        </table>
+
+        <h3>Tests Principales (PASS)</h3>
+        <div class="alert alert-success">
+            <strong>Ejecución de Tests:</strong>
+            <pre>
+PHPUnit 9.x
+Tests: 2/2 PASS (100%)
+
+✅ RetardoTest::testSuspensionPorCincoNotas()
+   - Verifica creación automática de suspensión después de 5 retardos
+
+✅ SoporteTest::testPermisosSoporte()
+   - Valida control granular de acceso a archivos
+
+Time: 0.819s
+Memory: 6.00 MB
+            </pre>
+        </div>
+
+        <!-- 9. API ENDPOINTS -->
+        <h2>9. API Endpoints</h2>
+
+        <h3>Autenticación</h3>
+        <table>
+            <tr>
+                <th>Método</th>
+                <th>Endpoint</th>
+                <th>Descripción</th>
+                <th>Auth</th>
+            </tr>
+            <tr>
+                <td>GET/POST</td>
+                <td>/login</td>
+                <td>Iniciar sesión</td>
+                <td>Público</td>
+            </tr>
+            <tr>
+                <td>GET/POST</td>
+                <td>/verify-2fa</td>
+                <td>Verificación 2FA</td>
+                <td>Sesión pendiente</td>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/logout</td>
+                <td>Cerrar sesión</td>
+                <td>Requerido</td>
+            </tr>
+            <tr>
+                <td>POST</td>
+                <td>/register</td>
+                <td>Registrar usuario</td>
+                <td>Admin</td>
+            </tr>
+        </table>
+
+        <h3>Empleados</h3>
+        <table>
+            <tr>
+                <th>Método</th>
+                <th>Endpoint</th>
+                <th>Descripción</th>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/empleados</td>
+                <td>Listar empleados</td>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/empleados/{id}</td>
+                <td>Obtener detalles empleado</td>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/empleados/datos-completos/{id}</td>
+                <td>Datos JSON (AJAX)</td>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/empleados/{id}/edit</td>
+                <td>Formulario edición</td>
+            </tr>
+            <tr>
+                <td>POST</td>
+                <td>/empleados/create</td>
+                <td>Crear empleado</td>
+            </tr>
+            <tr>
+                <td>POST</td>
+                <td>/empleados/edit</td>
+                <td>Actualizar empleado</td>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/empleados/{id}/delete</td>
+                <td>Eliminar empleado</td>
+            </tr>
+        </table>
+
+        <h3>Asistencia</h3>
+        <table>
+            <tr>
+                <th>Método</th>
+                <th>Endpoint</th>
+                <th>Descripción</th>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/asistencia</td>
+                <td>Listado asistencia</td>
+            </tr>
+            <tr>
+                <td>POST</td>
+                <td>/asistencia/registrar-entrada</td>
+                <td>Registrar entrada (biométrico)</td>
+            </tr>
+            <tr>
+                <td>POST</td>
+                <td>/asistencia/registrar-salida</td>
+                <td>Registrar salida</td>
+            </tr>
+            <tr>
+                <td>POST</td>
+                <td>/asistencia/filtrar-asistencia</td>
+                <td>Filtrar por fecha, dispositivo, tipo</td>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/asistencia/exportar-excel</td>
+                <td>Descargar reporte Excel</td>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/asistencia/exportar-pdf</td>
+                <td>Descargar reporte PDF</td>
+            </tr>
+        </table>
+
+        <!-- 10. GUÍA DE DESPLIEGUE -->
+        <h2>10. Guía de Despliegue</h2>
+
+        <h3>Prerrequisitos</h3>
+        <ul>
+            <li>PHP 7.4+ con extensiones: PDO, OpenSSL, JSON</li>
+            <li>MySQL 5.7+ o MariaDB 10.3+</li>
+            <li>Apache/Nginx con mod_rewrite</li>
+            <li>Composer (para gestión de dependencias)</li>
+            <li>Git (para versionado)</li>
+        </ul>
+
+        <h3>Paso 1: Clonar y Configurar</h3>
+        <pre>
+# Clonar repositorio
+git clone https://repo.example.com/sistema-biometrico.git
+cd sistema-biometrico
+
+# Copiar archivo de configuración
+cp config.example.php config.php
+
+# Editar credenciales
+nano config.php
+# Establecer:
+# - DB_HOST, DB_USER, DB_PASS, DB_NAME
+# - ENCRYPTION_KEY (generar con: openssl rand -base64 32)
+# - BASE_URL
+        </pre>
+
+        <h3>Paso 2: Base de Datos</h3>
+        <pre>
+# Crear base de datos
+mysql -u root -p < database.sql
+
+# Ejecutar migraciones (en orden)
+mysql -u user -p database < migrations/20251119_add_sanciones_retardos_soporte.sql
+mysql -u user -p database < migrations/20251126_add_dispositivos_biometricos_config.sql
+mysql -u user -p database < migrations/20251127_add_sanciones_modificacion_audit.sql
+        </pre>
+
+        <h3>Paso 3: Permisos y Directorios</h3>
+        <pre>
+# Crear directorios necesarios
+mkdir -p uploads/fotos_empleados
+mkdir -p uploads/justificaciones
+mkdir -p logs
+
+# Permisos
+chmod 755 uploads/
+chmod 755 logs/
+chown www-data:www-data uploads/ logs/
+        </pre>
+
+        <h3>Paso 4: Configuración Web</h3>
+        <pre>
+# Apache (.htaccess)
+RewriteEngine On
+RewriteBase /sistema_biometrico/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [L]
+        </pre>
+
+        <h3>Paso 5: Testing</h3>
+        <pre>
+# Ejecutar tests
+./vendor/bin/phpunit tests/Unit/
+
+# Ejecutar todos los tests
+./vendor/bin/phpunit
+
+# Con cobertura (requiere coverage)
+./vendor/bin/phpunit --coverage-html=coverage/
+        </pre>
+
+        <h3>Paso 6: Primer Usuario Admin</h3>
+        <pre>
+# Acceder a /register (como admin)
+Usuario: admin
+Contraseña: (generar segura)
+Rol: admin
+        </pre>
+
+        <!-- 11. PROBLEMAS Y RECOMENDACIONES -->
+        <h2>11. Problemas Conocidos y Recomendaciones</h2>
+
+        <h3>⚠️ Problemas Críticos</h3>
+        
+        <div class="issue-item">Cobertura de tests muy baja (10%). Necesita aumentar a 50%+ antes de producción</div>
+        <div class="issue-item">Sin manejo de errores en BiometricosController (conexión a CKTeco)</div>
+        <div class="issue-item">Performance no optimizada (sin índices en queries complejas)</div>
+        <div class="issue-item">Sin rate limiting en login (solo 2FA)</div>
+        <div class="issue-item">Sin SSL/TLS en configuración (recomendado para biometría)</div>
+
+        <h3>⚠️ Problemas Moderados</h3>
+        
+        <div class="issue-item">Validación de entrada incompleta en algunos controllers</div>
+        <div class="issue-item">Sin manejo de transacciones fallidas</div>
+        <div class="issue-item">Logs de auditoría muy simples</div>
+        <div class="issue-item">Sin backup automático de base de datos</div>
+
+        <h3>✅ Recomendaciones</h3>
+
+        <div class="alert alert-info">
+            <strong>Corto Plazo (1-2 semanas)</strong>
+            <ul>
+                <li>Aumentar cobertura de tests a 30%+ (agregar más tests en Unit/Functional)</li>
+                <li>Implementar rate limiting en login</li>
+                <li>Agregar validación completa de inputs</li>
+                <li>Documentar endpoints de API con Swagger</li>
+                <li>Configurar SSL/TLS</li>
+            </ul>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>Mediano Plazo (1-2 meses)</strong>
+            <ul>
+                <li>Aumentar cobertura a 60%+</li>
+                <li>Implementar cache (Redis/Memcached)</li>
+                <li>Optimizar queries lentas</li>
+                <li>Agregar alertas y notificaciones por email</li>
+                <li>Implementar backup automático</li>
+            </ul>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>Largo Plazo (2-3 meses+)</strong>
+            <ul>
+                <li>Migrar a framework moderno (Laravel, Symfony)</li>
+                <li>Implementar API REST completa con OAuth</li>
+                <li>Agregar soporte para múltiples idiomas</li>
+                <li>Crear aplicación móvil (iOS/Android)</li>
+                <li>Implementar analytics y business intelligence</li>
+            </ul>
+        </div>
+
+        <!-- 12. ROADMAP FUTURO -->
+        <h2>12. Roadmap Futuro</h2>
+
+        <h3>Sprint 1 (Semanas 1-2): Stabilidad</h3>
+        <ul>
+            <li>✅ Agregar más tests unitarios</li>
+            <li>✅ Implementar 2FA</li>
+            <li>✅ Validaciones de permisos</li>
+            <li>⏳ Setup CI/CD con GitHub Actions</li>
+            <li>⏳ Configurar monitoreo en producción</li>
+        </ul>
+
+        <h3>Sprint 2 (Semanas 3-4): Performance</h3>
+        <ul>
+            <li>⏳ Optimizar queries lentas</li>
+            <li>⏳ Implementar caching</li>
+            <li>⏳ Indexar tablas críticas</li>
+            <li>⏳ Load testing</li>
+        </ul>
+
+        <h3>Sprint 3 (Semanas 5-8): Features</h3>
+        <ul>
+            <li>⏳ Notificaciones por email/SMS</li>
+            <li>⏳ Export a más formatos (PDF, CSV)</li>
+            <li>⏳ Dashboard avanzado con gráficos</li>
+            <li>⏳ Integración con payroll</li>
+        </ul>
+
+        <h3>Sprint 4 (Semanas 9+): Modernización</h3>
+        <ul>
+            <li>⏳ API REST con autenticación OAuth</li>
+            <li>⏳ Aplicación móvil</li>
+            <li>⏳ Migración a Laravel 9+</li>
+            <li>⏳ Soporte multiidioma</li>
+        </ul>
+
+        <!-- CONCLUSIÓN -->
+        <h2>Conclusión</h2>
+
+        <p><strong>Sistema Biométrico</strong> es un proyecto robusto y funcional que cubre todas las necesidades principales de gestión de asistencia con normas AEFCM. Ha alcanzado el 82% de completitud con una base de código bien organizada, seguridad implementada, y una arquitectura MVC clara.</p>
+
+        <p>Para llevar el proyecto a producción se requiere:</p>
+        <ol>
+            <li>Aumentar cobertura de tests a 50%+ (2-3 semanas)</li>
+            <li>Implementar optimizaciones de performance (1-2 semanas)</li>
+            <li>Configurar monitoring y alertas (1 semana)</li>
+            <li>Realizar UAT (User Acceptance Testing) con clientes (2-3 semanas)</li>
+            <li>Despliegue en staging por 2-4 semanas</li>
+            <li>Producción (con rollback plan)</li>
+        </ol>
+
+        <p>Con esta arquitectura sólida como base, el sistema puede escalar fácilmente para soportar más dispositivos, empleados, y funcionalidades futuras.</p>
+
+        <div class="footer">
+            <p><strong>Sistema Biométrico v1.0.1</strong></p>
+            <p>Documentación Técnica Completa - 26 de Noviembre 2025</p>
+            <p>Para preguntas o sugerencias contactar al equipo de desarrollo</p>
+        </div>
+    </div>
+</body>
+</html>

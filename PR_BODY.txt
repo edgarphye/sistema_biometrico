@@ -1,0 +1,50 @@
+Resumen:
+Este PR implementa las reglas de recursos humanos relacionadas con retardos y sanciones, introduce cifrado para plantillas biométricas, mejora la visualización de empleados (cards + modales), mueve configuraciones sensibles hacia variables de entorno y añade migraciones y tests automatizados.
+
+Cambios principales:
+- Seguridad / Config: `config.php` ahora recomienda/lee `ENCRYPTION_KEY` desde env vars; advertencia en tests si no está definida.
+- Cifrado biométrico: añadido `helpers/Encryption.php` y adaptación de modelos biométricos en `models/biometric/` para almacenar datos cifrados.
+- Reglas RH: implementación y tests para:
+  - Registro de retardos: `models/Retardo.php` (`registrarRetardo`, `contarNotasMes`, `crearSuspensionSiCorresponde`, `aplicarNormaAEFCM`) — ahora aceptan un PDO opcional.
+  - Gestión de sanciones: `models/Sancion.php` — métodos actualizados para aceptar PDO opcional.
+  - Integración en flujo de asistencia: `models/Asistencia.php` llama a `registrarRetardo`, aplica AEFCM y crea sanción automática cuando corresponde.
+- Transaccionalidad en tests: `models/Database.php` reutiliza la misma conexión PDO en la sesión para que tests que usan transacciones vean filas no confirmadas (mejor visibilidad en pruebas).
+- Tests: agregados/convertidos a PHPUnit en `tests/Unit/` (`RetardoTest`, `SoporteTest`) y `phpunit.xml`.
+- Migraciones: SQL añadidas en `migrations/` para `sanciones` y campos relacionados con soportes/retardos.
+- UI: mejoras en `views/empleados/*` (cards + modales) y vistas para justificaciones/sanciones.
+- Soporte seguro: `controllers/SoporteController.php` con comprobación de permisos y registro de acceso.
+
+Pruebas realizadas:
+- Ejecuté la suite PHPUnit localmente:
+  - Comando: `vendor\\bin\\phpunit -c phpunit.xml`
+  - Resultado: OK (2 tests, 4 assertions) — incluye flujo de retardos/sanciones y permisos de soporte.
+- Tests automatizados usan transacciones; cambios en `Database` y los modelos permiten visibilidad transaccional en tests.
+
+Notas de migración / despliegue:
+- Ejecutar las migraciones SQL en `migrations/` (o usar `migrations/run_migration.php`) para añadir la tabla `sanciones` y columnas nuevas.
+- Establecer variable de entorno `ENCRYPTION_KEY` (recomendada, necesaria para cifrar/descifrar datos biométricos). Ejemplo (Windows `cmd`):
+  ```
+  set ENCRYPTION_KEY=tu_llave_32_bytes_aqui
+  ```
+- Considerar mover la carpeta de `uploads/` fuera del webroot y revisar `SoporteController` para servir archivos de forma segura.
+
+Puntos a revisar / riesgos:
+- `models/Database.php` ahora reutiliza una conexión compartida para tests. Esto facilita las pruebas pero introduce un singleton compartido — si prefieres evitarlo en producción, podemos refactorizar los tests para pasar el `PDO` explícitamente a los modelos en lugar de compartir la conexión global.
+- Asegúrate de rotar o generar la llave `ENCRYPTION_KEY` en el entorno de producción de forma segura.
+
+Checklist antes de merge:
+- [ ] Revisar migraciones en `migrations/` y aplicarlas en staging.
+- [ ] Establecer `ENCRYPTION_KEY` en CI / staging / producción.
+- [ ] Revisar y aprobar cambios en las vistas (`views/empleados/*`) — ver UI en staging.
+- [ ] Ejecutar pruebas completas en CI.
+- [ ] (Opcional) Refactorizar acceso a `Database` para pasar `PDO` explícito si se prefiere evitar la conexión compartida.
+
+Archivos modificados / añadidos (resumen):
+- Añadidos: `helpers/Encryption.php`, `helpers/Csrf.php`, `tests/Unit/*`, `phpunit.xml`, `migrations/*.sql`, vistas parciales `views/empleados/partials/*`.
+- Modificados: `models/Retardo.php`, `models/Sancion.php`, `models/Database.php`, `models/Asistencia.php`, `controllers/SoporteController.php`, `config.php`, `composer.json`.
+
+Comandos útiles (opcionales):
+- Crear PR desde CLI con `gh` (requiere `gh` autenticado):
+  ```
+  gh pr create --base main --head fix/rh-cifrado-ui-migraciones --title "fix(rh): reglas RH, cifrado biométrico, UI empleados, migraciones y tests" --body-file PR_BODY.txt
+  ```

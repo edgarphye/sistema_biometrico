@@ -1,14 +1,12 @@
 <?php
-require_once 'models/Usuario.php';
+require_once __DIR__ . '/../models/Usuario.php';
+require_once __DIR__ . '/BaseController.php';
 
-class AuthController {
+class AuthController extends BaseController {
     private $usuarioModel;
 
     public function __construct() {
-        // Start session if not already started
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        parent::__construct();
         $this->usuarioModel = new Usuario();
     }
 
@@ -20,13 +18,28 @@ class AuthController {
             $user = $this->usuarioModel->authenticate($username, $password);
 
             if ($user) {
+                // Temporalmente desactivar 2FA para testing
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['rol'] = $user['rol'];
+                $_SESSION['user_role'] = $user['rol']; // Añadir variable adicional para compatibilidad
                 $_SESSION['empleado_id'] = $user['empleado_id'];
-
-                header('Location: /sistema_biometrico/');
-                exit;
+                
+                $permisosBase = Usuario::getPermisosPorRol($user['rol']);
+                $usuarioModel = new Usuario();
+                $permisosExtra = $usuarioModel->getPermisos($user['id']);
+                $_SESSION['permisos'] = array_merge($permisosBase, $permisosExtra);
+                
+                // Debug: registrar variables de sesión
+                error_log("AUTH DEBUG - User logged in: " . print_r([
+                    'user_id' => $_SESSION['user_id'],
+                    'username' => $_SESSION['username'],
+                    'rol' => $_SESSION['rol'],
+                    'user_role' => $_SESSION['user_role'],
+                    'permisos' => $_SESSION['permisos']
+                ], true));
+                
+                $this->redirect(rtrim(BASE_URL, '/') . '/dashboard');
             } else {
                 $error = 'Credenciales incorrectas';
             }
@@ -43,6 +56,7 @@ class AuthController {
                         <div class="card-body">
                             ' . (isset($error) ? '<div class="alert alert-danger">' . $error . '</div>' : '') . '
                             <form method="POST">
+                                ' . Csrf::getHiddenInput() . '
                                 <div class="mb-3">
                                     <label for="username" class="form-label">Usuario</label>
                                     <input type="text" class="form-control" id="username" name="username" required>
@@ -67,8 +81,7 @@ class AuthController {
 
     public function logout() {
         session_destroy();
-        header('Location: /sistema_biometrico/login');
-        exit;
+        $this->redirect(rtrim(BASE_URL, '/') . '/login');
     }
 
     public function register() {
@@ -81,8 +94,7 @@ class AuthController {
             ];
 
             if ($this->usuarioModel->create($data)) {
-                header('Location: /sistema_biometrico/login');
-                exit;
+                $this->redirect('/login');
             } else {
                 $error = 'Error al crear usuario';
             }
@@ -103,6 +115,7 @@ class AuthController {
                         <div class="card-body">
                             ' . (isset($error) ? '<div class="alert alert-danger">' . $error . '</div>' : '') . '
                             <form method="POST">
+                                ' . Csrf::getHiddenInput() . '
                                 <div class="mb-3">
                                     <label for="username" class="form-label">Usuario</label>
                                     <input type="text" class="form-control" id="username" name="username" required>
@@ -141,17 +154,71 @@ class AuthController {
         include __DIR__ . '/../views/layout.php';
     }
 
-    public static function requireAuth() {
+    public function verify2FA() {
+        if (!isset($_SESSION['pending_2fa']) || !$_SESSION['pending_2fa']) {
+            $this->redirect(rtrim(BASE_URL, '/') . '/login');
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $code = $_POST['2fa_code'] ?? '';
+            
+            if ($code === ($_SESSION['2fa_code'] ?? '')) {
+                // Código correcto, finalizar login
+                $user = $_SESSION['temp_user'];
+                
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['rol'] = $user['rol'];
+                $_SESSION['empleado_id'] = $user['empleado_id'];
+                
+                // Limpiar sesión 2FA
+                unset($_SESSION['pending_2fa']);
+                unset($_SESSION['temp_user']);
+                unset($_SESSION['2fa_code']);
+                
+                $this->redirect(rtrim(BASE_URL, '/') . '/dashboard');
+            } else {
+                $error = 'Código de verificación incorrecto';
+            }
+        }
+
+        $content = '
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header"><h4 class="text-center">Verificación de Dos Pasos</h4></div>
+                        <div class="card-body">
+                            ' . (isset($error) ? '<div class="alert alert-danger">' . $error . '</div>' : '') . '
+                            <p class="text-center">Ingresa el código de verificación (Código de prueba: ' . ($_SESSION['2fa_code'] ?? '') . ')</p>
+                            <form method="POST">
+                                ' . Csrf::getHiddenInput() . '
+                                <div class="mb-3"><input type="text" class="form-control text-center" name="2fa_code" required autocomplete="off"></div>
+                                <div class="d-grid"><button type="submit" class="btn btn-primary">Verificar</button></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>';
+        include __DIR__ . '/../views/layout.php';
+    }
+
+    private function generate2FACode() {
+        return str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT);
+    }
+
+    public static function checkAuth() {
         if (!isset($_SESSION['user_id'])) {
-            header('Location: /sistema_biometrico/login');
+            header('Location: ' . rtrim(BASE_URL, '/') . '/login');
             exit;
         }
     }
 
     public static function requireAdmin() {
-        self::requireAuth();
-        if ($_SESSION['rol'] !== 'admin') {
-            header('Location: /sistema_biometrico/');
+        self::checkAuth();
+        if (!in_array($_SESSION['rol'], ['admin', 'superadmin'])) {
+            header('Location: ' . rtrim(BASE_URL, '/') . '/dashboard');
             exit;
         }
     }

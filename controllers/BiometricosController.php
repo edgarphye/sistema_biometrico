@@ -3,16 +3,20 @@ require_once 'models/Biometrico.php';
 require_once 'models/Asistencia.php';
 require_once 'models/LogDispositivo.php';
 require_once 'models/DispositivoBiometrico.php';
+require_once __DIR__ . '/BaseController.php';
 
 /**
  * Controlador para gestión de dispositivos biométricos y logs
  */
-class BiometricosController {
+class BiometricosController extends BaseController {
     private $biometricoModel;
     private $asistenciaModel;
     private $logDispositivoModel;
 
     public function __construct() {
+        parent::__construct();
+        $this->requireAuth();
+        
         $this->biometricoModel = new Biometrico();
         $this->asistenciaModel = new Asistencia();
         $this->logDispositivoModel = new LogDispositivo();
@@ -38,7 +42,13 @@ class BiometricosController {
         $dispositivoModel = new DispositivoBiometrico();
         $dispositivosConfigurados = $dispositivoModel->getAll();
 
-        include 'views/biometricos/index.php';
+        $this->render('biometricos/index', [
+            'dispositivos' => $dispositivos,
+            'estadisticasBiometricas' => $estadisticasBiometricas,
+            'logsRecientes' => $logsRecientes,
+            'estadisticasAsistencia' => $estadisticasAsistencia,
+            'dispositivosConfigurados' => $dispositivosConfigurados
+        ]);
     }
 
     /**
@@ -47,8 +57,7 @@ class BiometricosController {
     public function show($dispositivoId) {
         // Validar ID del dispositivo
         if (!is_numeric($dispositivoId) || $dispositivoId < 1 || $dispositivoId > 10) {
-            header('Location: /sistema_biometrico/biometricos');
-            exit;
+            $this->redirect('/sistema_biometrico/biometricos');
         }
 
         // Obtener información del dispositivo
@@ -67,30 +76,34 @@ class BiometricosController {
         });
         $estadisticasDispositivo = reset($estadisticasDispositivo) ?: null;
 
-        include 'views/biometricos/show.php';
+        $this->render('biometricos/show', [
+            'dispositivo' => $dispositivo,
+            'asistencia' => $asistencia,
+            'logs' => $logs,
+            'estadisticasDispositivo' => $estadisticasDispositivo
+        ]);
     }
 
     /**
      * API para obtener estado de dispositivos en tiempo real
      */
     public function getEstadoDispositivos() {
-        header('Content-Type: application/json');
-
         try {
             $dispositivos = $this->biometricoModel->getEstadoDispositivos();
             $estadisticas = $this->biometricoModel->getBiometricStats();
 
-            echo json_encode([
+            $this->jsonResponse([
                 'success' => true,
                 'dispositivos' => $dispositivos,
                 'estadisticas' => $estadisticas,
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
         } catch (Exception $e) {
-            echo json_encode([
+            $this->logException($e, ['action' => 'obtenerEstadisticas']);
+            $this->jsonResponse([
                 'success' => false,
                 'error' => $e->getMessage()
-            ]);
+            ], 500);
         }
     }
 
@@ -98,20 +111,19 @@ class BiometricosController {
      * API para obtener logs de un dispositivo
      */
     public function getLogsDispositivo($dispositivoId) {
-        header('Content-Type: application/json');
-
         try {
             $logs = $this->logDispositivoModel->getByDispositivo($dispositivoId, 100);
 
-            echo json_encode([
+            $this->jsonResponse([
                 'success' => true,
                 'logs' => $logs
             ]);
         } catch (Exception $e) {
-            echo json_encode([
+            $this->logException($e, ['action' => 'getLogsDispositivo', 'dispositivo_id' => $dispositivoId ?? null]);
+            $this->jsonResponse([
                 'success' => false,
                 'error' => $e->getMessage()
-            ]);
+            ], 500);
         }
     }
 
@@ -119,8 +131,6 @@ class BiometricosController {
      * API para obtener estadísticas biométricas filtradas
      */
     public function getEstadisticasFiltradas() {
-        header('Content-Type: application/json');
-
         try {
             $fechaInicio = $_GET['fecha_inicio'] ?? null;
             $fechaFin = $_GET['fecha_fin'] ?? null;
@@ -184,16 +194,17 @@ class BiometricosController {
                 $estadisticas['tiempo_promedio_procesamiento'] = round($totalTiempo / $countTiempo, 3);
             }
 
-            echo json_encode([
+            $this->jsonResponse([
                 'success' => true,
                 'estadisticas' => $estadisticas,
                 'registros' => array_slice($asistencia, 0, 100) // Limitar resultados
             ]);
         } catch (Exception $e) {
-            echo json_encode([
+            $this->logException($e, ['action' => 'obtenerEstadisticasFiltradas']);
+            $this->jsonResponse([
                 'success' => false,
                 'error' => $e->getMessage()
-            ]);
+            ], 500);
         }
     }
 
@@ -201,8 +212,6 @@ class BiometricosController {
      * Test de conectividad con dispositivo
      */
     public function testDispositivo($dispositivoId) {
-        header('Content-Type: application/json');
-
         try {
             $resultado = $this->biometricoModel->conectarDispositivo($dispositivoId);
 
@@ -215,11 +224,12 @@ class BiometricosController {
                 ['test_type' => 'connectivity']
             );
 
-            echo json_encode([
+            $this->jsonResponse([
                 'success' => true,
                 'dispositivo' => $resultado
             ]);
         } catch (Exception $e) {
+            $this->logException($e, ['action' => 'testConectividad', 'dispositivo_id' => $dispositivoId ?? null]);
             // Log del error
             $this->logDispositivoModel->logEvent(
                 $dispositivoId,
@@ -229,10 +239,10 @@ class BiometricosController {
                 ['test_type' => 'connectivity', 'error' => $e->getMessage()]
             );
 
-            echo json_encode([
+            $this->jsonResponse([
                 'success' => false,
                 'error' => $e->getMessage()
-            ]);
+            ], 500);
         }
     }
 
@@ -261,49 +271,49 @@ class BiometricosController {
                 ]
             ];
 
-            if ($dispositivoModel->exists($data['dispositivo_id'])) {
-                $dispositivoModel->update($data['dispositivo_id'], $data);
+            // Verificar si el dispositivo ya existe
+            $existingDevice = $dispositivoModel->getByDispositivoId($data['dispositivo_id']);
+            if ($existingDevice) {
+                $dispositivoModel->update($existingDevice['id'], $data);
                 $mensaje = 'Dispositivo actualizado exitosamente';
             } else {
                 $dispositivoModel->create($data);
                 $mensaje = 'Dispositivo creado exitosamente';
             }
 
-            header('Location: /sistema_biometrico/biometricos/configurar?mensaje=' . urlencode($mensaje));
-            exit;
+            $this->redirect('/sistema_biometrico/biometricos/configurar?mensaje=' . urlencode($mensaje));
         }
 
         $dispositivos = $dispositivoModel->getAll();
-        include 'views/biometricos/configurar.php';
+        $this->render('biometricos/configurar', ['dispositivos' => $dispositivos]);
     }
 
     /**
      * Captura de huella para registro de empleado
      */
     public function capturarHuella($dispositivoId) {
-        header('Content-Type: application/json');
-
         try {
             require_once 'models/biometric/BiometricSimulation.php';
             $biometricoModel = new BiometricSimulation();
             $fingerprintData = $biometricoModel->captureFingerprint($dispositivoId);
 
             if ($fingerprintData) {
-                echo json_encode([
+                $this->jsonResponse([
                     'success' => true,
                     'fingerprint_data' => $fingerprintData
                 ]);
             } else {
-                echo json_encode([
+                $this->jsonResponse([
                     'success' => false,
                     'error' => 'No se pudo capturar la huella'
-                ]);
+                ], 500);
             }
         } catch (Exception $e) {
-            echo json_encode([
+            $this->logException($e, ['action' => 'capturarHuella']);
+            $this->jsonResponse([
                 'success' => false,
                 'error' => $e->getMessage()
-            ]);
+            ], 500);
         }
     }
 
@@ -311,8 +321,6 @@ class BiometricosController {
      * Registra huella de empleado en dispositivo
      */
     public function registrarHuella() {
-        header('Content-Type: application/json');
-
         try {
             $dispositivoId = (int)$_POST['dispositivo_id'];
             $empleadoId = (int)$_POST['empleado_id'];
@@ -324,14 +332,15 @@ class BiometricosController {
                 $fingerprintData
             );
 
-            echo json_encode([
+            $this->jsonResponse([
                 'success' => $resultado
             ]);
         } catch (Exception $e) {
-            echo json_encode([
+            $this->logException($e, ['action' => 'registrarHuella', 'empleado_id' => $empleadoId ?? null]);
+            $this->jsonResponse([
                 'success' => false,
                 'error' => $e->getMessage()
-            ]);
+            ], 500);
         }
     }
 
@@ -339,43 +348,45 @@ class BiometricosController {
      * Sincroniza empleados con dispositivo
      */
     public function sincronizarEmpleados($dispositivoId) {
-        header('Content-Type: application/json');
-
         try {
             $empleados = $this->biometricoModel->getEmpleadosActivos();
             $resultado = $this->biometricoModel->syncEmployees($dispositivoId, $empleados);
 
-            echo json_encode([
+            $this->jsonResponse([
                 'success' => $resultado
             ]);
         } catch (Exception $e) {
-            echo json_encode([
+            $this->logException($e, ['action' => 'sincronizarEmpleados', 'dispositivo_id' => $dispositivoId ?? null]);
+            $this->jsonResponse([
                 'success' => false,
                 'error' => $e->getMessage()
-            ]);
+            ], 500);
         }
     }
 
     /**
      * Conecta con un dispositivo biométrico
      */
-    public function conectar($dispositivoId) {
-        if (!headers_sent()) {
-            header('Content-Type: application/json');
-        }
-
+public function conectar($dispositivoId) {
+        // Depuración
+        error_log("Método conectar llamado con ID: " . $dispositivoId);
+        
         try {
             $resultado = $this->biometricoModel->conectarDispositivo($dispositivoId);
+            error_log("Resultado de conexión: " . print_r($resultado, true));
 
-            echo json_encode([
+$this->jsonResponse([
                 'success' => true,
                 'dispositivo' => $resultado
             ]);
         } catch (Exception $e) {
-            echo json_encode([
+            $this->logException($e, ['action' => 'conectar', 'dispositivo_id' => $dispositivoId ?? null]);
+            error_log("Error en conectar: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            $this->jsonResponse([
                 'success' => false,
                 'error' => $e->getMessage()
-            ]);
+            ], 500);
         }
     }
 
@@ -383,22 +394,19 @@ class BiometricosController {
      * Recibe datos biométricos de un dispositivo
      */
     public function recibirDatos($dispositivoId) {
-        if (!headers_sent()) {
-            header('Content-Type: application/json');
-        }
-
         try {
             $datos = $this->biometricoModel->recibirDatosBiometricos($dispositivoId);
 
-            echo json_encode([
+            $this->jsonResponse([
                 'success' => true,
                 'datos' => $datos
             ]);
         } catch (Exception $e) {
-            echo json_encode([
+            $this->logException($e, ['action' => 'recibirDatos', 'dispositivo_id' => $dispositivoId ?? null]);
+            $this->jsonResponse([
                 'success' => false,
                 'error' => $e->getMessage()
-            ]);
+            ], 500);
         }
     }
 
@@ -406,10 +414,6 @@ class BiometricosController {
      * Verifica identidad biométrica de un empleado
      */
     public function verificar($dispositivoId) {
-        if (!headers_sent()) {
-            header('Content-Type: application/json');
-        }
-
         try {
             // Recibir datos biométricos del dispositivo
             $datosBiometricos = $this->biometricoModel->recibirDatosBiometricos($dispositivoId);
@@ -434,7 +438,7 @@ class BiometricosController {
                     ]
                 );
 
-                echo json_encode([
+                $this->jsonResponse([
                     'success' => true,
                     'empleado' => $empleado,
                     'tipo_verificacion' => $datosBiometricos['type'],
@@ -454,13 +458,14 @@ class BiometricosController {
                     ]
                 );
 
-                echo json_encode([
+                $this->jsonResponse([
                     'success' => false,
                     'error' => 'Empleado no identificado',
                     'tipo_verificacion' => $datosBiometricos['type']
                 ]);
             }
         } catch (Exception $e) {
+            $this->logException($e, ['action' => 'verificarHuella', 'dispositivo_id' => $dispositivoId ?? null]);
             // Log de error
             $this->logDispositivoModel->logEvent(
                 $dispositivoId,
@@ -470,11 +475,18 @@ class BiometricosController {
                 ['error' => $e->getMessage()]
             );
 
-            echo json_encode([
+            $this->jsonResponse([
                 'success' => false,
                 'error' => $e->getMessage()
-            ]);
+            ], 500);
         }
+    }
+
+    public function sync() {
+        $this->jsonResponse([
+            'success' => false,
+            'message' => 'Sincronización general no implementada'
+        ]);
     }
 }
 ?>

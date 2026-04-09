@@ -1,0 +1,67 @@
+<?php
+// Configuración de la base de datos
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') ?: 'root'); // Por defecto sin contraseña
+define('DB_NAME', getenv('DB_NAME') ?: 'sistema_biometrico');
+
+// Opciones PDO para compatibilidad con MySQL 8.0+
+define('DB_OPTIONS', [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES => false,
+]);
+
+// Configuración de la aplicación
+define('APP_NAME', getenv('APP_NAME') ?: 'Sistema Biométrico');
+define('APP_VERSION', getenv('APP_VERSION') ?: '2.0');
+
+// Autodetectar BASE_URL para múltiples ambientes
+if (getenv('BASE_URL') !== false) {
+    define('BASE_URL', getenv('BASE_URL'));
+} else {
+    // Detectar automáticamente la URL base desde el script actual.
+    // Esto funciona correctamente tanto si la aplicación está en la raíz del servidor
+    // como si está en un subdirectorio (ej: /sistema_biometrico).
+    $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
+    $scriptDir = dirname($scriptName);
+    $scriptDir = str_replace('\\', '/', $scriptDir);
+    $baseUrl = ($scriptDir === '/') ? '' : $scriptDir;
+
+    define('BASE_URL', $baseUrl);
+    
+    // Para debugging
+    error_log("BASE_URL autodetectado: '$baseUrl'");
+}
+
+// Configuración de biometría (CKTeco)
+define('BIOMETRIC_API_URL', getenv('BIOMETRIC_API_URL') ?: 'http://localhost:8080/api'); // URL local para desarrollo
+define('BIOMETRIC_API_KEY', getenv('BIOMETRIC_API_KEY') ?: 'dev_key_12345'); // Clave de desarrollo
+define('BIOMETRIC_SIMULATION', getenv('BIOMETRIC_SIMULATION') ?: 'true'); // Modo simulación activado
+
+// Configuración de tolerancia
+define('TOLERANCE_MINUTES', intval(getenv('TOLERANCE_MINUTES') ?: 10));
+
+// Configuración de seguridad
+// Se recomienda establecer ENCRYPTION_KEY en las variables de entorno del servidor.
+$envKey = getenv('ENCRYPTION_KEY');
+if ($envKey !== false && $envKey !== '') {
+    define('ENCRYPTION_KEY', $envKey);
+} else {
+    // Clave de cifrado por defecto para desarrollo
+    define('ENCRYPTION_KEY', 'sistema_biometrico_zkteco_2025_key_secure_32bytes');
+    // En producción, configure: ENCRYPTION_KEY=tu_clave_segura_32_caracteres
+}
+
+// Configuración de logging
+define('LOG_LEVEL', 'INFO'); // DEBUG, INFO, WARNING, ERROR
+define('LOG_FILE', __DIR__ . '/logs/biometric_system.log');
+define('LOG_MAX_SIZE', 10 * 1024 * 1024); // 10MB
+define('LOG_ROTATE_COUNT', 5);
+
+// Configuración biométrica avanzada
+define('BIOMETRIC_TIMEOUT', 30); // Timeout en segundos para operaciones biométricas
+define('BIOMETRIC_QUALITY_THRESHOLD', 75); // Umbral mínimo de calidad para verificación
+define('BIOMETRIC_MAX_ATTEMPTS', 3); // Máximo número de intentos por verificación
+define('BIOMETRIC_CACHE_TTL', 3600); // TTL para cache de templates biométricos (1 hora)
+?>

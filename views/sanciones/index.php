@@ -1,4 +1,5 @@
 <?php include 'views/layout.php'; ?>
+<?php require_once 'helpers/Csrf.php'; ?>
 
 <div class="container mt-4">
     <div class="row">
@@ -33,16 +34,17 @@
                                     <?php foreach ($sanciones as $s): ?>
                                         <tr>
                                             <td><?php echo $s['id']; ?></td>
-                                            <td><?php echo htmlspecialchars($s['nombre'] . ' ' . $s['apellido']); ?></td>
-                                            <td><?php echo ucfirst($s['tipo']); ?></td>
-                                            <td><?php echo $s['fecha_inicio']; ?></td>
-                                            <td><?php echo intval($s['dias']); ?></td>
-                                            <td><?php echo htmlspecialchars(substr($s['motivo'],0,80)); ?></td>
+                                            <td><?php echo htmlspecialchars(($s['nombre'] ?? '') . ' ' . ($s['apellido'] ?? '')); ?></td>
+                                            <td><?php echo ucfirst(str_replace('_', ' ', $s['tipo_sancion'] ?? $s['tipo'] ?? 'N/A')); ?></td>
+                                            <td><?php echo $s['fecha_inicio'] ?? 'N/A'; ?></td>
+                                            <td><?php echo intval($s['dias'] ?? 0); ?></td>
+                                            <td><?php echo htmlspecialchars(substr($s['motivo'] ?? '', 0, 80)); ?></td>
                                             <td><?php echo $s['creado_por'] ?? '-'; ?></td>
                                             <td>
                                                 <a href="<?php echo BASE_URL . '/sanciones/' . $s['id']; ?>" class="btn btn-sm btn-primary">Ver</a>
                                                 <a href="<?php echo BASE_URL . '/sanciones/' . $s['id'] . '/edit'; ?>" class="btn btn-sm btn-info">Editar</a>
                                                 <form method="POST" action="<?php echo BASE_URL . '/sanciones/' . $s['id'] . '/delete'; ?>" style="display:inline-block; margin:0;">
+                                                    <input type="hidden" name="_token" value="<?php echo htmlspecialchars(Csrf::token()); ?>">
                                                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Eliminar sanción #<?php echo $s['id']; ?>?');">Eliminar</button>
                                                 </form>
                                             </td>

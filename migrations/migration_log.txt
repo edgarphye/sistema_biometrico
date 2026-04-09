@@ -1,3 +1,8 @@
 2025-11-20T05:59:30+00:00 - Migration failed: There is no active transaction
 2025-11-20T06:00:13+00:00 - Migration succeeded: migrations\20251119_add_sanciones_retardos_soporte.sql
 2025-11-20T06:02:45+00:00 - Migration succeeded: migrations\20251119_add_sanciones_modificados.sql
+2025-11-27T01:38:38+00:00 - Statement failed: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'sede' in 'field list' -- Statement: -- Insertar datos de ejemplo para 35 sedes
+-- Ajustar según las sedes reales
+INSERT INTO dispositivos_biometricos (dispositivo_id, nombre, sede, ip_address, puerto, capacidades, activo, fecha_insta
+2025-11-27T01:38:38+00:00 - Migration failed: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'sede' in 'field list'
+2026-03-18T12:17:21-06:00 - Migration succeeded: migrations/20260318_add_area_fisica_to_empleados.sql

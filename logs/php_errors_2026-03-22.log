@@ -1,0 +1,6 @@
+[2026-03-22 20:21:26] [FATAL_ERROR] Uncaught Error: Class "Database" not found in Command line code:3
+Stack trace:
+#0 {main}
+  thrown en Command line code línea 3
+URI: N/A
+--------------------------------------------------------------------------------

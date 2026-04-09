@@ -401,11 +401,38 @@ class BiometricSimulation implements BiometricInterface
      */
     public function getDeviceConfig(int $deviceId): array
     {
+        // Intentar cargar configuración desde base de datos
+        try {
+            require_once __DIR__ . '/../DispositivoBiometrico.php';
+            $dispositivoModel = new DispositivoBiometrico();
+            $config = $dispositivoModel->getConnectionConfig($deviceId);
+            
+            if ($config) {
+                return [
+                    'device_id' => $config['dispositivo_id'],
+                    'nombre' => $config['nombre'],
+                    'sede' => $config['sede'],
+                    'type' => $config['tipo_dispositivo'],
+                    'ip_address' => $config['ip_address'],
+                    'port' => $config['puerto'],
+                    'modelo' => $config['modelo'],
+                    'firmware_version' => 'v1.0.' . rand(1, 9),
+                    'max_users' => 1000,
+                    'biometric_types' => $config['capacidades'] ?? ['huella' => true, 'cara' => false],
+                    'auto_sync' => true,
+                    'log_level' => 'INFO'
+                ];
+            }
+        } catch (Exception $e) {
+            error_log('Error cargando config de dispositivo: ' . $e->getMessage());
+        }
+        
+        // Fallback a configuración simulada
         return [
             'device_id' => $deviceId,
             'type' => 'CKTeco',
             'firmware_version' => 'v1.0.' . rand(1, 9),
-            'ip_address' => '192.168.1.' . (100 + $deviceId),
+            'ip_address' => '192.168.' . $deviceId . '.100',
             'port' => 4370,
             'timeout' => 30,
             'max_users' => 1000,

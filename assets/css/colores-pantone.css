@@ -1,0 +1,526 @@
+/* Colores Pantone Institucionales - Sistema Biométrico */
+/* Colores exactos proporcionados */
+
+:root {
+    --pantone-vino: #9F2241;
+    --pantone-vino-oscuro: #691C32;
+    --pantone-verde: #235B4E;
+    --pantone-verde-oscuro: #10312B;
+    --pantone-dorado: #DDC9A3;
+    --pantone-dorado-oscuro: #BC955C;
+    --pantone-gris: #98989A;
+    --pantone-gris-oscuro: #6F7271;
+}
+
+/* ============================================
+   TEMA CLARO - Colores Pantone Institucionales
+   ============================================ */
+
+/* Primary - Vino Pantone 7420 C */
+.bg-primary, .btn-primary {
+    background-color: var(--pantone-vino) !important;
+}
+.text-primary {
+    color: var(--pantone-vino) !important;
+}
+.border-primary {
+    border-color: var(--pantone-vino) !important;
+}
+.btn-primary {
+    border-color: var(--pantone-vino) !important;
+}
+.btn-primary:hover {
+    background-color: var(--pantone-vino-oscuro) !important;
+    border-color: var(--pantone-vino-oscuro) !important;
+}
+
+/* Secondary - Verde Pantone 626 C */
+.bg-secondary, .btn-secondary {
+    background-color: var(--pantone-verde) !important;
+}
+.text-secondary {
+    color: var(--pantone-verde) !important;
+}
+.border-secondary {
+    border-color: var(--pantone-verde) !important;
+}
+.btn-secondary {
+    border-color: var(--pantone-verde) !important;
+}
+.btn-secondary:hover {
+    background-color: var(--pantone-verde-oscuro) !important;
+    border-color: var(--pantone-verde-oscuro) !important;
+}
+
+/* Success - Verde estándar */
+.bg-success, .btn-success {
+    background-color: var(--pantone-verde) !important;
+}
+.text-success {
+    color: var(--pantone-verde) !important;
+}
+.border-success {
+    border-color: var(--pantone-verde) !important;
+}
+.btn-success {
+    border-color: var(--pantone-verde) !important;
+}
+.btn-success:hover {
+    background-color: var(--pantone-verde-oscuro) !important;
+    border-color: var(--pantone-verde-oscuro) !important;
+}
+
+/* Danger - Vino oscuro Pantone 7421 C */
+.bg-danger, .btn-danger {
+    background-color: var(--pantone-vino-oscuro) !important;
+}
+.text-danger {
+    color: var(--pantone-vino-oscuro) !important;
+}
+.border-danger {
+    border-color: var(--pantone-vino-oscuro) !important;
+}
+.btn-danger {
+    border-color: var(--pantone-vino-oscuro) !important;
+}
+.btn-danger:hover {
+    background-color: #4a1322 !important;
+    border-color: #4a1322 !important;
+}
+
+/* Warning - Dorado Pantone 465 C */
+.bg-warning, .btn-warning {
+    background-color: var(--pantone-dorado-oscuro) !important;
+    color: var(--pantone-vino-oscuro) !important;
+}
+.text-warning {
+    color: var(--pantone-dorado-oscuro) !important;
+}
+.border-warning {
+    border-color: var(--pantone-dorado-oscuro) !important;
+}
+.btn-warning {
+    border-color: var(--pantone-dorado-oscuro) !important;
+    color: var(--pantone-vino-oscuro) !important;
+}
+.btn-warning:hover {
+    background-color: var(--pantone-dorado) !important;
+    border-color: var(--pantone-dorado) !important;
+    color: var(--pantone-vino-oscuro) !important;
+}
+
+/* Info - Gris Pantone Cool Gray 7 C */
+.bg-info, .btn-info {
+    background-color: var(--pantone-gris) !important;
+}
+.text-info {
+    color: var(--pantone-gris) !important;
+}
+.border-info {
+    border-color: var(--pantone-gris) !important;
+}
+.btn-info {
+    border-color: var(--pantone-gris) !important;
+}
+.btn-info:hover {
+    background-color: var(--pantone-gris-oscuro) !important;
+    border-color: var(--pantone-gris-oscuro) !important;
+}
+
+/* Light */
+.bg-light {
+    background-color: #F5F7FA !important;
+}
+.text-muted {
+    color: var(--pantone-gris-oscuro) !important;
+}
+
+/* Dark */
+.bg-dark {
+    background-color: var(--pantone-gris-oscuro) !important;
+}
+.text-dark {
+    color: var(--pantone-vino) !important;
+}
+
+/* Links */
+a {
+    color: var(--pantone-vino);
+}
+a:hover {
+    color: var(--pantone-vino-oscuro);
+}
+
+/* ============================================
+   COMPONENTES ESPECÍFICOS
+   ============================================ */
+
+/* Badges */
+.badge {
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.badge-primary {
+    background: linear-gradient(135deg, var(--pantone-vino), var(--pantone-vino-oscuro)) !important;
+}
+
+.badge-success {
+    background: linear-gradient(135deg, var(--pantone-verde), var(--pantone-verde-oscuro)) !important;
+}
+
+.badge-warning {
+    background: linear-gradient(135deg, var(--pantone-dorado), var(--pantone-dorado-oscuro)) !important;
+    color: var(--pantone-vino-oscuro) !important;
+}
+
+.badge-danger {
+    background: linear-gradient(135deg, var(--pantone-vino-oscuro), #4a1322) !important;
+}
+
+.badge-secondary {
+    background: linear-gradient(135deg, var(--pantone-gris), var(--pantone-gris-oscuro)) !important;
+}
+
+/* Formularios */
+.form-control:focus {
+    border-color: var(--pantone-vino) !important;
+    box-shadow: 0 0 0 0.2rem rgba(159, 34, 65, 0.25) !important;
+}
+
+.form-select:focus {
+    border-color: var(--pantone-vino) !important;
+    box-shadow: 0 0 0 0.2rem rgba(159, 34, 65, 0.25) !important;
+}
+
+/* Checkbox y Radio */
+.form-check-input:checked {
+    background-color: var(--pantone-vino) !important;
+    border-color: var(--pantone-vino) !important;
+}
+
+.form-check-input:focus {
+    border-color: var(--pantone-vino) !important;
+    box-shadow: 0 0 0 0.2rem rgba(159, 34, 65, 0.25) !important;
+}
+
+/* Switch */
+.form-switch .form-check-input:checked {
+    background-color: var(--pantone-vino) !important;
+    border-color: var(--pantone-vino) !important;
+}
+
+/* Dropdown */
+.dropdown-menu {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-item:hover {
+    background: linear-gradient(135deg, var(--pantone-vino), var(--pantone-vino-oscuro)) !important;
+    color: white !important;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+    background: var(--pantone-vino) !important;
+    color: white !important;
+}
+
+/* Pagination */
+.page-link {
+    color: var(--pantone-vino);
+}
+
+.page-link:hover {
+    background: var(--pantone-vino);
+    color: white;
+}
+
+.page-item.active .page-link {
+    background: linear-gradient(135deg, var(--pantone-vino), var(--pantone-vino-oscuro)) !important;
+    border-color: var(--pantone-vino) !important;
+}
+
+/* Tabs */
+.nav-tabs .nav-link.active {
+    background: linear-gradient(135deg, var(--pantone-vino), var(--pantone-vino-oscuro)) !important;
+    color: white !important;
+    border-color: var(--pantone-vino) !important;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--pantone-vino);
+    border-color: transparent;
+}
+
+/* Alerts */
+.alert-success {
+    border-left: 5px solid var(--pantone-verde);
+    background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+    color: var(--pantone-verde-oscuro);
+}
+
+.alert-danger {
+    border-left: 5px solid var(--pantone-vino-oscuro);
+    background: linear-gradient(135deg, #FFEBEE, #FFCDD2);
+    color: var(--pantone-vino-oscuro);
+}
+
+.alert-warning {
+    border-left: 5px solid var(--pantone-dorado-oscuro);
+    background: linear-gradient(135deg, #FFF8E1, #FFECB3);
+    color: #6a5210;
+}
+
+.alert-info {
+    border-left: 5px solid var(--pantone-vino);
+    background: linear-gradient(135deg, #FCE4EC, #F8BBD9);
+    color: var(--pantone-vino-oscuro);
+}
+
+/* ============================================
+   TEMA OSCURO
+   ============================================ */
+
+body.dark-theme {
+    background-color: #1a1a1a;
+    color: #E0E0E0;
+}
+
+body.dark-theme .bg-primary, 
+body.dark-theme .btn-primary {
+    background-color: var(--pantone-vino-oscuro) !important;
+}
+
+body.dark-theme .bg-secondary, 
+body.dark-theme .btn-secondary {
+    background-color: var(--pantone-verde-oscuro) !important;
+}
+
+body.dark-theme .bg-success, 
+body.dark-theme .btn-success {
+    background-color: var(--pantone-verde-oscuro) !important;
+}
+
+body.dark-theme .bg-danger, 
+body.dark-theme .btn-danger {
+    background-color: #4a1322 !important;
+}
+
+body.dark-theme .bg-warning, 
+body.dark-theme .btn-warning {
+    background-color: var(--pantone-dorado) !important;
+    color: var(--pantone-vino-oscuro) !important;
+}
+
+body.dark-theme .text-primary {
+    color: var(--pantone-dorado) !important;
+}
+
+body.dark-theme .text-secondary {
+    color: var(--pantone-dorado) !important;
+}
+
+body.dark-theme a {
+    color: var(--pantone-dorado);
+}
+
+body.dark-theme a:hover {
+    color: var(--pantone-dorado-oscuro);
+}
+
+body.dark-theme .form-control,
+body.dark-theme .form-select {
+    background-color: #1a1a1a;
+    border-color: #3d3d3d;
+    color: #E0E0E0;
+}
+
+body.dark-theme .form-control:focus,
+body.dark-theme .form-select:focus {
+    border-color: var(--pantone-dorado) !important;
+    box-shadow: 0 0 0 0.2rem rgba(221, 201, 163, 0.25) !important;
+}
+
+body.dark-theme .dropdown-menu {
+    background-color: #2d2d2d;
+    border-color: #3d3d3d;
+}
+
+body.dark-theme .dropdown-item {
+    color: #E0E0E0;
+}
+
+body.dark-theme .dropdown-item:hover {
+    background: linear-gradient(135deg, var(--pantone-vino-oscuro), #4a1424) !important;
+    color: white !important;
+}
+
+body.dark-theme .page-link {
+    background-color: #2d2d2d;
+    border-color: #3d3d3d;
+    color: #E0E0E0;
+}
+
+body.dark-theme .page-link:hover {
+    background-color: var(--pantone-verde-oscuro);
+    color: white;
+}
+
+body.dark-theme .page-item.active .page-link {
+    background: linear-gradient(135deg, var(--pantone-dorado), var(--pantone-dorado-oscuro)) !important;
+    color: var(--pantone-vino-oscuro) !important;
+}
+
+body.dark-theme .nav-tabs .nav-link {
+    color: #B0B0B0;
+}
+
+body.dark-theme .nav-tabs .nav-link.active {
+    background: linear-gradient(135deg, var(--pantone-vino-oscuro), #4a1424) !important;
+    color: var(--pantone-dorado) !important;
+    border-color: var(--pantone-dorado) !important;
+}
+
+body.dark-theme .alert-success {
+    background: linear-gradient(135deg, #1a2e28, #122220);
+    border-left-color: var(--pantone-verde);
+    color: #A5D6A7;
+}
+
+body.dark-theme .alert-danger {
+    background: linear-gradient(135deg, #3d1f1f, #2a1515);
+    border-left-color: var(--pantone-vino-oscuro);
+    color: #EF9A9A;
+}
+
+body.dark-theme .alert-warning {
+    background: linear-gradient(135deg, #3d2e1f, #2a2115);
+    border-left-color: var(--pantone-dorado);
+    color: var(--pantone-dorado);
+}
+
+body.dark-theme .badge-primary {
+    background: linear-gradient(135deg, var(--pantone-vino-oscuro), #4a1424) !important;
+}
+
+body.dark-theme .badge-success {
+    background: linear-gradient(135deg, var(--pantone-verde-oscuro), #0a1f1c) !important;
+}
+
+body.dark-theme .badge-warning {
+    background: linear-gradient(135deg, var(--pantone-dorado), var(--pantone-dorado-oscuro)) !important;
+    color: var(--pantone-vino-oscuro) !important;
+}
+
+body.dark-theme .text-muted {
+    color: var(--pantone-gris) !important;
+}
+
+/* ============================================
+   EFECTOS Y TRANSICIONES
+   ============================================ */
+
+.btn {
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card {
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--pantone-vino), var(--pantone-verde), var(--pantone-dorado));
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--pantone-vino), var(--pantone-vino-oscuro)) !important;
+    border-radius: 16px 16px 0 0 !important;
+}
+
+.modal-content {
+    border-radius: 20px;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--pantone-vino), var(--pantone-vino-oscuro)) !important;
+    border-radius: 20px 20px 0 0 !important;
+}
+
+.modal-header.verde {
+    background: linear-gradient(135deg, var(--pantone-verde), var(--pantone-verde-oscuro)) !important;
+}
+
+.modal-header.dorado {
+    background: linear-gradient(135deg, var(--pantone-dorado), var(--pantone-dorado-oscuro)) !important;
+    color: var(--pantone-vino-oscuro) !important;
+}
+
+/* Avatares */
+.user-avatar,
+.user-mini-avatar {
+    background: linear-gradient(135deg, var(--pantone-dorado), var(--pantone-dorado-oscuro)) !important;
+    color: var(--pantone-vino-oscuro) !important;
+    box-shadow: 0 4px 15px rgba(221, 201, 163, 0.4);
+}
+
+/* Sidebar */
+.sidebar {
+    background: linear-gradient(180deg, var(--pantone-vino), var(--pantone-vino-oscuro)) !important;
+    box-shadow: 4px 0 25px rgba(159, 34, 65, 0.25);
+}
+
+.sidebar .nav-link:hover {
+    background: linear-gradient(90deg, var(--pantone-dorado), var(--pantone-dorado-oscuro)) !important;
+}
+
+.sidebar .nav-link.active {
+    border-left: 4px solid var(--pantone-dorado);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Tablas */
+.table thead th {
+    background: linear-gradient(135deg, var(--pantone-vino), var(--pantone-vino-oscuro)) !important;
+}
+
+.table-hover tbody tr:hover {
+    background: linear-gradient(135deg, rgba(159, 34, 65, 0.05), rgba(35, 91, 78, 0.05)) !important;
+}
+
+/* Sidebar toggle */
+.sidebar-toggle {
+    background: linear-gradient(135deg, var(--pantone-vino), var(--pantone-vino-oscuro)) !important;
+    box-shadow: 0 4px 15px rgba(159, 34, 65, 0.25);
+}
+
+/* Theme toggle */
+.theme-toggle {
+    background: linear-gradient(135deg, var(--pantone-verde), var(--pantone-verde-oscuro)) !important;
+    box-shadow: 0 4px 15px rgba(35, 91, 78, 0.25);
+}
+
+body.dark-theme .theme-toggle {
+    background: linear-gradient(135deg, var(--pantone-dorado), var(--pantone-dorado-oscuro)) !important;
+    color: var(--pantone-vino-oscuro);
+}

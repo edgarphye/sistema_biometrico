@@ -1,0 +1,47 @@
+name: PHP Unit Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php: [ '8.1' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, json, pdo_mysql
+          ini-values: post_max_size=256M, upload_max_filesize=256M
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --no-suggest --prefer-dist
+
+      - name: Export minimal env for tests
+        run: |
+          echo "ENCRYPTION_KEY=tests_local_dummy_key_32chars____" >> $GITHUB_ENV
+          echo "DB_HOST=127.0.0.1" >> $GITHUB_ENV
+          echo "DB_NAME=phpunit_db" >> $GITHUB_ENV
+          echo "DB_USER=root" >> $GITHUB_ENV
+          echo "DB_PASS=" >> $GITHUB_ENV
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit -c phpunit.xml --coverage-text
+
+      - name: Upload PHPUnit XML report (if generated)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phpunit-report
+          path: ./build/logs || ./phpunit.xml || ./coverage.xml

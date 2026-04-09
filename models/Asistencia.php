@@ -1,14 +1,11 @@
 <?php
-require_once 'Database.php';
-require_once 'LogDispositivo.php';
+require_once __DIR__ . '/Database.php';
 
 class Asistencia {
     private $db;
-    private $logDispositivo;
 
     public function __construct() {
         $this->db = new Database();
-        $this->logDispositivo = new LogDispositivo();
     }
 
     public function getConnection() {
@@ -22,7 +19,7 @@ class Asistencia {
             VALUES (?, 'entrada', ?, ?, ?, ?, ?, ?)
         ");
 
-        $result = $stmt->execute([
+        return $stmt->execute([
             $empleado_id,
             $dispositivo_id,
             $tipo_biometria,
@@ -31,59 +28,6 @@ class Asistencia {
             $metadata_dispositivo ? json_encode($metadata_dispositivo) : null,
             $tiempo_procesamiento
         ]);
-
-        // Log del evento
-        if ($result) {
-            $this->logDispositivo->logEvent(
-                $dispositivo_id,
-                'verificacion',
-                'exitoso',
-                'Entrada registrada exitosamente',
-                [
-                    'tipo_asistencia' => 'entrada',
-                    'calidad_verificacion' => $calidad_verificacion,
-                    'tiempo_procesamiento' => $tiempo_procesamiento
-                ],
-                $empleado_id,
-                $tipo_biometria
-            );
-
-            // Evaluar retardo/ausencia basados en horario
-            $hora_actual = date('H:i:s');
-            $fecha_actual = date('Y-m-d');
-
-            $retardoInfo = $this->calcularRetardo($hora_actual, $empleado_id, $fecha_actual);
-
-            // Si la diferencia excede tolerancia + 20 minutos -> marcar ausencia (falta)
-            $diferencia_minutos = $retardoInfo['minutos'];
-            $tolerancia = $retardoInfo['tolerancia'];
-
-            if ($diferencia_minutos > ($tolerancia + 20)) {
-                // Marcar ausencia en ausencias (tipo 'otro') si no existe licencia
-                require_once __DIR__ . '/Ausencia.php';
-                $ausenciaModel = new Ausencia();
-                $ausenciaModel->create([
-                    'empleado_id' => $empleado_id,
-                    'fecha_inicio' => $fecha_actual,
-                    'fecha_fin' => $fecha_actual,
-                    'tipo' => 'otro'
-                ]);
-            } else {
-                // Si hay retardo menor o mayor, registrar en tabla retardos
-                if ($retardoInfo['tipo'] !== 'sin_retardo' && $retardoInfo['minutos'] > 0) {
-                    require_once __DIR__ . '/Retardo.php';
-                    $retModel = new Retardo();
-                    $retModel->registrarRetardo($empleado_id, $fecha_actual, $retardoInfo['minutos'], $retardoInfo['tipo'], $retardoInfo['horario_id']);
-
-                    // Aplicar regla AEFCM y luego verificar sanción por acumulación
-                    $this->aplicarReglasAEFCM($empleado_id, date('n'), date('Y'));
-                    // Intentar crear suspensión si corresponde
-                    $retModel->crearSuspensionSiCorresponde($empleado_id, date('n'), date('Y'), $_SESSION['user_id'] ?? null);
-                }
-            }
-        }
-
-        return $result;
     }
 
     public function registrarSalida($empleado_id, $dispositivo_id, $tipo_biometria = null, $datos_biometricos = null, $calidad_verificacion = null, $metadata_dispositivo = null, $tiempo_procesamiento = null) {
@@ -93,7 +37,7 @@ class Asistencia {
             VALUES (?, 'salida', ?, ?, ?, ?, ?, ?)
         ");
 
-        $result = $stmt->execute([
+        return $stmt->execute([
             $empleado_id,
             $dispositivo_id,
             $tipo_biometria,
@@ -102,31 +46,44 @@ class Asistencia {
             $metadata_dispositivo ? json_encode($metadata_dispositivo) : null,
             $tiempo_procesamiento
         ]);
-
-        // Log del evento
-        if ($result) {
-            $this->logDispositivo->logEvent(
-                $dispositivo_id,
-                'verificacion',
-                'exitoso',
-                'Salida registrada exitosamente',
-                [
-                    'tipo_asistencia' => 'salida',
-                    'calidad_verificacion' => $calidad_verificacion,
-                    'tiempo_procesamiento' => $tiempo_procesamiento
-                ],
-                $empleado_id,
-                $tipo_biometria
-            );
-        }
-
-        return $result;
+    }
+    
+    public function getById($id) {
+        $stmt = $this->db->getConnection()->prepare("
+            SELECT a.*, e.nombre, e.apellido, e.rfc, e.area, e.puesto
+            FROM asistencia a
+            LEFT JOIN empleados e ON a.empleado_id = e.id
+            WHERE a.id = ?
+            LIMIT 1
+        ");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function getByEmpleado($empleado_id, $fecha_inicio = null, $fecha_fin = null) {
         $query = "
-            SELECT a.*, e.nombre, e.apellido, e.rfc
+            SELECT 
+                MIN(a.id) as id,
+                a.empleado_id,
+                a.fecha,
+                MIN(a.hora_entrada) as hora_entrada,
+                MAX(a.hora_salida) as hora_salida,
+                MAX(a.tipo_asistencia) as tipo_asistencia,
+                MAX(a.dispositivo_id) as dispositivo_id,
+                MAX(a.tipo_biometria) as tipo_biometria,
+                MAX(a.created_at) as created_at,
+                MAX(a.requiere_validacion_jefe) as requiere_validacion_jefe,
+                MAX(a.requerio_validacion) as requerio_validacion,
+                MAX(a.validado_por_jefe) as validado_por_jefe,
+                MAX(a.fecha_aprobacion) as fecha_aprobacion,
+                MAX(a.estado_validacion) as estado_validacion,
+                MAX(a.tipo_justificacion_id) as tipo_justificacion_id,
+                tj.nombre as tipo_justificacion_nombre,
+                e.nombre, 
+                e.apellido, 
+                e.rfc
             FROM asistencia a
+            LEFT JOIN tipos_justificacion tj ON a.tipo_justificacion_id = tj.id
             JOIN empleados e ON a.empleado_id = e.id
         ";
         $params = [];
@@ -137,16 +94,165 @@ class Asistencia {
         }
 
         if ($fecha_inicio && $fecha_fin) {
-            $query .= ($params ? " AND" : " WHERE") . " DATE(a.timestamp) BETWEEN ? AND ?";
+            $query .= ($params ? " AND" : " WHERE") . " a.fecha BETWEEN ? AND ?";
             $params[] = $fecha_inicio;
             $params[] = $fecha_fin;
         }
 
-        $query .= " ORDER BY a.timestamp DESC";
-
+        $query .= " GROUP BY a.empleado_id, a.fecha, e.nombre, e.apellido, e.rfc, a.requiere_validacion_jefe, a.requerio_validacion, a.validado_por_jefe, a.fecha_aprobacion, a.estado_validacion, a.tipo_justificacion_id, tj.nombre";
+    
         $stmt = $this->db->getConnection()->prepare($query);
         $stmt->execute($params);
         return $stmt->fetchAll();
+    }
+    
+    /**
+     * Obtiene las asistencias con tipo "por_definir" para justificar
+     * Incluye estado de validación si existe
+     */
+    public function getByEmpleadoPorDefinir($empleado_id) {
+        $query = "
+            SELECT 
+                a.*, 
+                e.nombre, 
+                e.apellido, 
+                e.rfc, 
+                e.plaza_confianza, 
+                e.fecha_ingreso,
+                vj.estado AS estado_validacion_jefe,
+                vj.motivo_validacion AS motivo_validacion_jefe,
+                vj.comentarios_adicionales AS comentarios_validacion_jefe,
+                vj.fecha_validacion AS fecha_validacion_jefe,
+                uj.nombre_completo AS jefe_validador_nombre
+            FROM asistencia a
+            JOIN empleados e ON a.empleado_id = e.id
+            LEFT JOIN (
+                SELECT v.*
+                FROM validaciones_jefe v
+                INNER JOIN (
+                    SELECT incidencia_id, tipo_incidencia, MAX(id) AS max_id
+                    FROM validaciones_jefe
+                    GROUP BY incidencia_id, tipo_incidencia
+                ) x ON x.max_id = v.id
+            ) vj ON vj.incidencia_id = a.id AND vj.tipo_incidencia = 'asistencia'
+            LEFT JOIN usuarios uj ON uj.id = vj.jefe_id
+            WHERE a.empleado_id = ? 
+            AND a.tipo_asistencia = 'por_definir'
+            ORDER BY a.fecha DESC
+        ";
+        $stmt = $this->db->getConnection()->prepare($query);
+        $stmt->execute([$empleado_id]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Obtiene TODOS los registros combinados de asistencia Y retardos
+     * Muestra toda la información de incidencias en una sola vista
+     */
+    public function getAllIncidenciasComplete($empleado_id) {
+        $pdo = $this->db->getConnection();
+        $resultados = [];
+
+        // 1. OBTENER TODOS LOS REGISTROS DE ASISTENCIA
+        $stmtAsistencia = $pdo->prepare("
+            SELECT 
+                a.id,
+                a.empleado_id,
+                a.fecha,
+                a.hora_entrada,
+                a.hora_salida,
+                a.tipo_asistencia,
+                a.estado_validacion,
+                a.validado_por_jefe,
+                a.fecha_aprobacion,
+                a.requiere_validacion_jefe,
+                'asistencia' AS fuente,
+                a.id AS asistencia_id,
+                NULL AS retardo_id,
+                NULL AS minutos_retardo,
+                NULL AS tipo_retraso,
+                NULL AS motivo_justificacion,
+                vj.estado AS estado_validacion_jefe,
+                vj.motivo_validacion AS motivo_validacion_jefe,
+                vj.comentarios_adicionales AS comentarios_validacion_jefe,
+                vj.fecha_validacion AS fecha_validacion_jefe,
+                uj.nombre_completo AS jefe_validador_nombre
+            FROM asistencia a
+            LEFT JOIN (
+                SELECT v.*
+                FROM validaciones_jefe v
+                INNER JOIN (
+                    SELECT incidencia_id, tipo_incidencia, MAX(id) AS max_id
+                    FROM validaciones_jefe
+                    GROUP BY incidencia_id, tipo_incidencia
+                ) x ON x.max_id = v.id
+            ) vj ON vj.incidencia_id = a.id AND vj.tipo_incidencia = 'asistencia'
+            LEFT JOIN usuarios uj ON uj.id = vj.jefe_id
+            WHERE a.empleado_id = ?
+            ORDER BY a.fecha DESC
+        ");
+        $stmtAsistencia->execute([$empleado_id]);
+        $resultados = array_merge($resultados, $stmtAsistencia->fetchAll());
+
+        // 2. OBTENER TODOS LOS RETARDOS
+        $stmtRetardos = $pdo->prepare("
+            SELECT 
+                r.id,
+                r.empleado_id,
+                r.fecha,
+                r.hora_entrada,
+                r.hora_salida,
+                r.minutos_retardo,
+                r.tipo_retraso,
+                r.justificado,
+                r.motivo_justificacion,
+                r.tipo_justificacion_id,
+                tj.nombre AS tipo_justificacion_nombre,
+                'retardos' AS fuente,
+                r.asistencia_id,
+                r.id AS retardo_id,
+                r.tipo_asistencia,
+                vj.estado AS estado_validacion_jefe,
+                vj.motivo_validacion AS motivo_validacion_jefe,
+                vj.comentarios_adicionales AS comentarios_validacion_jefe,
+                vj.fecha_validacion AS fecha_validacion_jefe,
+                uj.nombre_completo AS jefe_validador_nombre
+            FROM retardos r
+            LEFT JOIN tipos_justificacion tj ON r.tipo_justificacion_id = tj.id
+            LEFT JOIN (
+                SELECT v.*
+                FROM validaciones_jefe v
+                INNER JOIN (
+                    SELECT incidencia_id, tipo_incidencia, MAX(id) AS max_id
+                    FROM validaciones_jefe
+                    GROUP BY incidencia_id, tipo_incidencia
+                ) x ON x.max_id = v.id
+            ) vj ON vj.incidencia_id = r.id AND vj.tipo_incidencia = 'retardo'
+            LEFT JOIN usuarios uj ON uj.id = vj.jefe_id
+            WHERE r.empleado_id = ?
+            ORDER BY r.fecha DESC
+        ");
+        $stmtRetardos->execute([$empleado_id]);
+        $resultados = array_merge($resultados, $stmtRetardos->fetchAll());
+
+        // Ordenar por fecha descendente
+        usort($resultados, function($a, $b) {
+            $fa = strtotime($a['fecha'] ?? '1970-01-01');
+            $fb = strtotime($b['fecha'] ?? '1970-01-01');
+            if ($fa === $fb) {
+                return (int)($b['id'] ?? 0) <=> (int)($a['id'] ?? 0);
+            }
+            return $fb <=> $fa;
+        });
+
+        return $resultados;
+    }
+
+    /**
+     * Alias para compatibilidad hacia atrás
+     */
+    public function getAllByEmpleadoWithJustificaciones($empleado_id) {
+        return $this->getAllIncidenciasComplete($empleado_id);
     }
 
     public function getByDispositivo($dispositivo_id, $fecha_inicio = null, $fecha_fin = null) {
@@ -159,12 +265,12 @@ class Asistencia {
         $params = [$dispositivo_id];
 
         if ($fecha_inicio && $fecha_fin) {
-            $query .= " AND DATE(a.timestamp) BETWEEN ? AND ?";
+            $query .= " AND DATE(a.created_at) BETWEEN ? AND ?";
             $params[] = $fecha_inicio;
             $params[] = $fecha_fin;
         }
 
-        $query .= " ORDER BY a.timestamp DESC";
+        $query .= " ORDER BY a.created_at DESC";
 
         $stmt = $this->db->getConnection()->prepare($query);
         $stmt->execute($params);
@@ -176,99 +282,28 @@ class Asistencia {
             SELECT a.*, e.nombre, e.apellido, e.rfc
             FROM asistencia a
             JOIN empleados e ON a.empleado_id = e.id
-            ORDER BY a.timestamp DESC
+            ORDER BY a.created_at DESC
         ");
         $stmt->execute();
         return $stmt->fetchAll();
     }
-
+    
     /**
-     * Calcula el retardo basado en el horario del empleado
-     * Aplica normas AEFCM: dos retardos menores = uno mayor
+     * Actualizar un registro de asistencia
      */
-    public function calcularRetardo($hora_entrada, $empleado_id, $fecha) {
-        require_once 'Horario.php';
-        $horarioModel = new Horario();
-
-        // Obtener horario aplicable para el empleado en esta fecha
-        $horario = $horarioModel->getHorarioEmpleadoFecha($empleado_id, $fecha);
-
-        if (!$horario) {
-            // Si no hay horario asignado, usar horario por defecto
-            $hora_oficial = '09:00:00';
-            $tolerancia = TOLERANCE_MINUTES;
-        } else {
-            $hora_oficial = $horario['hora_entrada'];
-            $tolerancia = $horario['tolerancia_minutos'];
+    public function update($id, $data) {
+        $fields = [];
+        $values = [];
+        
+        foreach ($data as $field => $value) {
+            $fields[] = "$field = ?";
+            $values[] = $value;
         }
-
-        $hora_oficial_timestamp = strtotime($hora_oficial);
-        $hora_entrada_timestamp = strtotime($hora_entrada);
-
-        $diferencia_minutos = ($hora_entrada_timestamp - $hora_oficial_timestamp) / 60;
-
-        // Determinar tipo de retardo
-        $tipo = 'sin_retardo';
-        $minutos_retardo = 0;
-
-        if ($diferencia_minutos > 0) {
-            $minutos_retardo = (int)$diferencia_minutos;
-
-            if ($diferencia_minutos <= $tolerancia) {
-                $tipo = 'menor';
-            } else {
-                $tipo = 'mayor';
-            }
-        }
-
-        return [
-            'tipo' => $tipo,
-            'minutos' => $minutos_retardo,
-            'hora_oficial' => $hora_oficial,
-            'tolerancia' => $tolerancia,
-            'horario_id' => $horario ? $horario['id'] : null
-        ];
-    }
-
-    /**
-     * Aplica reglas AEFCM para acumulación de retardos
-     * Dos retardos menores en el mes = uno mayor
-     */
-    public function aplicarReglasAEFCM($empleado_id, $mes, $anio) {
-        require_once 'Retardo.php';
-        $retardoModel = new Retardo();
-
-        // Obtener retardos menores del mes
-        $stmt = $this->db->getConnection()->prepare("
-            SELECT COUNT(*) as cantidad_menores
-            FROM retardos
-            WHERE empleado_id = ? AND MONTH(fecha) = ? AND YEAR(fecha) = ? AND tipo = 'menor' AND justificado = 0
-        ");
-        $stmt->execute([$empleado_id, $mes, $anio]);
-        $result = $stmt->fetch();
-
-        $cantidad_menores = $result['cantidad_menores'];
-
-        // Si hay 2 o más retardos menores, convertir el exceso en mayores
-        if ($cantidad_menores >= 2) {
-            $pares_completos = floor($cantidad_menores / 2);
-            $retardos_a_convertir = $pares_completos;
-
-            // Marcar retardos menores como justificados (según norma AEFCM)
-            $stmt = $this->db->getConnection()->prepare("
-                UPDATE retardos SET justificado = 1, motivo_justificacion = 'Aplicación automática de norma AEFCM (2 menores = 1 mayor)'
-                WHERE empleado_id = ? AND MONTH(fecha) = ? AND YEAR(fecha) = ? AND tipo = 'menor' AND justificado = 0
-                ORDER BY fecha ASC
-                LIMIT ?
-            ");
-            $stmt->execute([$empleado_id, $mes, $anio, $retardos_a_convertir * 2]);
-
-            // Crear retardo mayor equivalente
-            for ($i = 0; $i < $retardos_a_convertir; $i++) {
-                $fecha_retardo = date('Y-m-d', strtotime("$anio-$mes-01 + $i days"));
-                $retardoModel->registrarRetardo($empleado_id, $fecha_retardo, 30, 'mayor'); // 30 min = mayor
-            }
-        }
+        $values[] = $id;
+        
+        $sql = "UPDATE asistencia SET " . implode(', ', $fields) . " WHERE id = ?";
+        $stmt = $this->db->getConnection()->prepare($sql);
+        return $stmt->execute($values);
     }
 
     /**
@@ -279,19 +314,17 @@ class Asistencia {
             SELECT
                 dispositivo_id,
                 COUNT(*) as total_registros,
-                SUM(CASE WHEN tipo = 'entrada' THEN 1 ELSE 0 END) as entradas,
-                SUM(CASE WHEN tipo = 'salida' THEN 1 ELSE 0 END) as salidas,
+                SUM(CASE WHEN hora_entrada IS NOT NULL AND hora_salida IS NULL THEN 1 ELSE 0 END) as solo_entrada,
+                SUM(CASE WHEN hora_entrada IS NOT NULL AND hora_salida IS NOT NULL THEN 1 ELSE 0 END) as registros_completos,
                 SUM(CASE WHEN tipo_biometria = 'huella' THEN 1 ELSE 0 END) as verificaciones_huella,
-                SUM(CASE WHEN tipo_biometria = 'cara' THEN 1 ELSE 0 END) as verificaciones_cara,
-                AVG(calidad_verificacion) as calidad_promedio,
-                AVG(tiempo_procesamiento) as tiempo_promedio_procesamiento
+                SUM(CASE WHEN tipo_biometria = 'cara' THEN 1 ELSE 0 END) as verificaciones_cara
             FROM asistencia
             WHERE 1=1
         ";
         $params = [];
 
         if ($fecha_inicio && $fecha_fin) {
-            $query .= " AND DATE(timestamp) BETWEEN ? AND ?";
+            $query .= " AND fecha BETWEEN ? AND ?";
             $params = [$fecha_inicio, $fecha_fin];
         }
 
@@ -325,12 +358,16 @@ class Asistencia {
         }
 
         if (!empty($filtros['tipo_asistencia'])) {
-            $query .= " AND a.tipo = ?";
-            $params[] = $filtros['tipo_asistencia'];
+            // Adaptar filtro para el esquema sin columna 'tipo'
+            if ($filtros['tipo_asistencia'] === 'entrada') {
+                $query .= " AND a.hora_entrada IS NOT NULL";
+            } elseif ($filtros['tipo_asistencia'] === 'salida') {
+                $query .= " AND a.hora_salida IS NOT NULL";
+            }
         }
 
         if (!empty($filtros['fecha_inicio']) && !empty($filtros['fecha_fin'])) {
-            $query .= " AND DATE(a.timestamp) BETWEEN ? AND ?";
+            $query .= " AND DATE(a.created_at) BETWEEN ? AND ?";
             $params[] = $filtros['fecha_inicio'];
             $params[] = $filtros['fecha_fin'];
         }
@@ -340,7 +377,7 @@ class Asistencia {
             $params[] = $filtros['empleado_id'];
         }
 
-        $query .= " ORDER BY a.timestamp DESC";
+        $query .= " ORDER BY a.created_at DESC";
 
         if (!empty($filtros['limit'])) {
             $query .= " LIMIT ?";
@@ -362,12 +399,12 @@ class Asistencia {
                 e.nombre,
                 e.apellido,
                 e.area,
-                DATE(a.timestamp) as fecha,
-                MIN(CASE WHEN a.tipo = 'entrada' THEN TIME(a.timestamp) END) as hora_entrada,
-                MAX(CASE WHEN a.tipo = 'salida' THEN TIME(a.timestamp) END) as hora_salida
+                a.fecha as fecha,
+                a.hora_entrada as hora_entrada,
+                a.hora_salida as hora_salida
             FROM empleados e
             JOIN asistencia a ON e.id = a.empleado_id
-            WHERE DATE(a.timestamp) BETWEEN ? AND ?
+            WHERE DATE(a.created_at) BETWEEN ? AND ?
         ";
         $params = [$fecha_inicio, $fecha_fin];
 
@@ -376,12 +413,99 @@ class Asistencia {
             $params[] = $area;
         }
 
-        $query .= " GROUP BY e.id, e.nombre, e.apellido, e.area, DATE(a.timestamp)
-                   ORDER BY DATE(a.timestamp) DESC, e.nombre ASC";
+        $query .= " GROUP BY e.id, e.nombre, e.apellido, e.area, DATE(a.created_at)
+                   ORDER BY DATE(a.created_at) DESC, e.nombre ASC";
 
         $stmt = $this->db->getConnection()->prepare($query);
         $stmt->execute($params);
         return $stmt->fetchAll();
+    }
+    
+    /**
+     * Calcula si hay retardo basado en la hora de entrada
+     * @param string $hora_entrada Hora de entrada (formato H:i:s)
+     * @param int $empleado_id ID del empleado
+     * @param string $fecha Fecha (formato Y-m-d)
+     * @return array Información del retardo calculado
+     * @deprecated Usar AsistenciaService::calcularRetardo para aplicar reglas de negocio completas
+     */
+    public function calcularRetardo($hora_entrada, $empleado_id, $fecha) {
+        require_once __DIR__ . '/HorarioLaboral.php';
+        
+        // Obtener información del empleado para determinar sede
+        $stmt = $this->db->getConnection()->prepare("
+            SELECT * FROM empleados WHERE id = ? AND activo = 1
+        ");
+        $stmt->execute([$empleado_id]);
+        $empleado = $stmt->fetch();
+        
+        if (!$empleado) {
+            return [
+                'tiene_retardo' => false,
+                'minutos' => 0,
+                'tipo' => 'sin_registro',
+                'motivo' => 'Empleado no encontrado o inactivo'
+            ];
+        }
+        
+        // Obtener horario aplicable para esta fecha
+        $horarioModel = new HorarioLaboral();
+        $horario = $horarioModel->getHorarioPorFecha($empleado_id, $fecha, $empleado['sede'] ?? null);
+        
+        if (!$horario) {
+            // Si no hay horario definido, usar horario por defecto
+            $hora_oficial = '09:00:00';
+            $tolerancia = 10; // 10 minutos por defecto
+        } else {
+            $hora_oficial = $horario['hora_entrada'];
+            $tolerancia = $horario['tolerancia_minutos'] ?? 10;
+        }
+        
+        // Convertir tiempos a timestamps para cálculo
+        $fecha_entrada = $fecha . ' ' . $hora_entrada;
+        $timestamp_entrada = strtotime($fecha_entrada);
+        $timestamp_oficial = strtotime($fecha . ' ' . $hora_oficial);
+        $timestamp_limite = $timestamp_oficial + ($tolerancia * 60); // Límite con tolerancia
+        
+        // Calcular minutos de retardo desde hora oficial (sin tolerancia en el conteo)
+        $diferencia_segundos = $timestamp_entrada - $timestamp_oficial;
+        $minutos_retardo = max(0, floor($diferencia_segundos / 60));
+        
+        // Determinar tipo de retardo según reglas SEP
+        // Tolerancia: 0-10 min (no se registra)
+        // Retardo Menor: 11-20 min
+        // Retardo Mayor: 21-30 min
+        // Falta: 31+ min
+        if ($minutos_retardo >= 0 && $minutos_retardo <= 10) {
+            $tipo_retardo = 'tolerancia';
+            $motivo = 'Tolerancia (0-10 min)';
+        } elseif ($minutos_retardo >= 11 && $minutos_retardo <= 20) {
+            $tipo_retardo = 'retardo_menor';
+            $motivo = 'Retardo Menor (11-20 min)';
+        } elseif ($minutos_retardo >= 21 && $minutos_retardo <= 30) {
+            $tipo_retardo = 'retardo_mayor';
+            $motivo = 'Retardo Mayor (21-30 min)';
+        } elseif ($minutos_retardo >= 31) {
+            $tipo_retardo = 'falta';
+            $motivo = 'Falta (31+ min)';
+        } else {
+            $tipo_retardo = 'sin_retardo';
+            $motivo = 'Puntual';
+        }
+        
+        return [
+            'tiene_retardo' => $minutos_retardo > 10,
+            'minutos' => $minutos_retardo,
+            'tipo' => $tipo_retardo,
+            'motivo' => $motivo,
+            'hora_entrada' => $hora_entrada,
+            'hora_oficial' => $hora_oficial,
+            'tolerancia' => $tolerancia,
+            'horario_id' => $horario['id'] ?? null,
+            'timestamp_entrada' => $timestamp_entrada,
+            'timestamp_oficial' => $timestamp_oficial,
+            'timestamp_limite' => $timestamp_limite
+        ];
     }
 }
 ?>

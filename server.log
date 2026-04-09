@@ -1,4 +1,324 @@
-[Sat Nov 15 23:00:59 2025] PHP 8.4.7 Development Server (http://localhost:8000) started
-[Sat Nov 15 23:08:00 2025] [::1]:51777 Accepted
-[Sat Nov 15 23:08:00 2025] [::1]:51777 [200]: POST /asistencia/calcular-horas-laborables
-[Sat Nov 15 23:08:00 2025] [::1]:51777 Closing
+[Tue Jan 27 15:42:02 2026] PHP 8.4.7 Development Server (http://localhost:8000) started
+[Tue Jan 27 15:42:10 2026] [::1]:51591 Accepted
+[Tue Jan 27 15:42:10 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:42:10 2026] [::1]:51591 [302]: GET /
+[Tue Jan 27 15:42:10 2026] [::1]:51591 Closing
+[Tue Jan 27 15:46:29 2026] [::1]:59590 Accepted
+[Tue Jan 27 15:46:29 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:46:29 2026] [::1]:59590 [200]: GET /test_validaciones_simple.php
+[Tue Jan 27 15:46:29 2026] [::1]:59590 Closing
+[Tue Jan 27 15:46:29 2026] [::1]:59591 Accepted
+[Tue Jan 27 15:46:29 2026] [::1]:59591 [200]: GET /views/validaciones/validaciones.js
+[Tue Jan 27 15:46:29 2026] [::1]:59591 Closing
+[Tue Jan 27 15:46:29 2026] [::1]:65370 Accepted
+[Tue Jan 27 15:46:29 2026] [::1]:65371 Accepted
+[Tue Jan 27 15:46:29 2026] [::1]:65372 Accepted
+[Tue Jan 27 15:46:29 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:46:34 2026] [::1]:65370 [403]: POST /validaciones/buscar-pendientes
+[Tue Jan 27 15:46:34 2026] [::1]:65370 Closing
+[Tue Jan 27 15:46:34 2026] [::1]:65373 Accepted
+[Tue Jan 27 15:46:34 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:46:34 2026] [::1]:65371 [405]: POST /validaciones/estadisticas
+[Tue Jan 27 15:46:34 2026] [::1]:65371 Closing
+[Tue Jan 27 15:46:34 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:46:34 2026] [::1]:65372 [404]: POST /validaciones/obtener-areas
+[Tue Jan 27 15:46:34 2026] [::1]:65372 Closing
+[Tue Jan 27 15:46:34 2026] [::1]:65374 Accepted
+[Tue Jan 27 15:46:34 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:46:34 2026] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 21
+[Tue Jan 27 15:46:34 2026] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 22
+[Tue Jan 27 15:46:34 2026] [::1]:65373 [200]: GET /validaciones/buscar-empleados
+[Tue Jan 27 15:46:34 2026] [::1]:65373 Closing
+[Tue Jan 27 15:46:34 2026] [::1]:65382 Accepted
+[Tue Jan 27 15:46:34 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:46:34 2026] [::1]:65374 [404]: GET /favicon.ico
+[Tue Jan 27 15:46:34 2026] [::1]:65374 Closing
+[Tue Jan 27 15:46:34 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:46:34 2026] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 21
+[Tue Jan 27 15:46:34 2026] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 22
+[Tue Jan 27 15:46:34 2026] [::1]:65382 [200]: GET /validaciones/buscar-empleados
+[Tue Jan 27 15:46:34 2026] [::1]:65382 Closing
+[Tue Jan 27 15:46:34 2026] [::1]:65386 Accepted
+[Tue Jan 27 15:46:34 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:46:34 2026] [::1]:65386 [403]: POST /validaciones/buscar-pendientes
+[Tue Jan 27 15:46:34 2026] [::1]:65386 Closing
+[Tue Jan 27 15:46:59 2026] [::1]:65402 Accepted
+[Tue Jan 27 15:46:59 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:46:59 2026] [::1]:65402 [405]: POST /validaciones/estadisticas
+[Tue Jan 27 15:46:59 2026] [::1]:65402 Closing
+[Tue Jan 27 15:47:29 2026] [::1]:65413 Accepted
+[Tue Jan 27 15:47:29 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:47:29 2026] [::1]:65413 [405]: POST /validaciones/estadisticas
+[Tue Jan 27 15:47:29 2026] [::1]:65413 Closing
+[Tue Jan 27 15:47:35 2026] [::1]:65418 Accepted
+[Tue Jan 27 15:47:35 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:47:35 2026] [::1]:65418 [200]: GET /test_validaciones_simple.php
+[Tue Jan 27 15:47:35 2026] [::1]:65418 Closing
+[Tue Jan 27 15:47:35 2026] [::1]:65419 Accepted
+[Tue Jan 27 15:47:35 2026] [::1]:65419 [200]: GET /views/validaciones/test_validaciones.js
+[Tue Jan 27 15:47:35 2026] [::1]:65419 Closing
+[Tue Jan 27 15:47:36 2026] [::1]:65450 Accepted
+[Tue Jan 27 15:47:36 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:47:37 2026] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 21
+[Tue Jan 27 15:47:37 2026] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 22
+[Tue Jan 27 15:47:37 2026] [::1]:65450 [200]: GET /validaciones/buscar-empleados
+[Tue Jan 27 15:47:37 2026] [::1]:65450 Closing
+[Tue Jan 27 15:47:37 2026] [::1]:65452 Accepted
+[Tue Jan 27 15:47:37 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:47:37 2026] [::1]:65452 [403]: POST /validaciones/buscar-pendientes
+[Tue Jan 27 15:47:37 2026] [::1]:65452 Closing
+[Tue Jan 27 15:48:00 2026] [::1]:65494 Accepted
+[Tue Jan 27 15:48:00 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:48:00 2026] [::1]:65494 [405]: POST /validaciones/estadisticas
+[Tue Jan 27 15:48:00 2026] [::1]:65494 Closing
+[Tue Jan 27 15:48:30 2026] [::1]:65503 Accepted
+[Tue Jan 27 15:48:30 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:48:30 2026] [::1]:65503 [405]: POST /validaciones/estadisticas
+[Tue Jan 27 15:48:30 2026] [::1]:65503 Closing
+[Tue Jan 27 15:48:47 2026] [::1]:65520 Accepted
+[Tue Jan 27 15:48:47 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:48:47 2026] [::1]:65520 [200]: GET /test_validaciones_simple.php
+[Tue Jan 27 15:48:47 2026] [::1]:65520 Closing
+[Tue Jan 27 15:48:47 2026] [::1]:65521 Accepted
+[Tue Jan 27 15:48:47 2026] [::1]:65522 Accepted
+[Tue Jan 27 15:48:47 2026] [::1]:65521 [200]: GET /views/validaciones/test_validaciones.js
+[Tue Jan 27 15:48:47 2026] [::1]:65521 Closing
+[Tue Jan 27 15:48:48 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:48:48 2026] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 21
+[Tue Jan 27 15:48:48 2026] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 22
+[Tue Jan 27 15:48:48 2026] [::1]:65522 [200]: GET /validaciones/buscar-empleados
+[Tue Jan 27 15:48:48 2026] [::1]:65522 Closing
+[Tue Jan 27 15:48:48 2026] [::1]:65524 Accepted
+[Tue Jan 27 15:48:48 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:48:48 2026] [::1]:65524 [403]: POST /validaciones/buscar-pendientes
+[Tue Jan 27 15:48:48 2026] [::1]:65524 Closing
+[Tue Jan 27 15:48:52 2026] [::1]:65527 Accepted
+[Tue Jan 27 15:48:52 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:48:52 2026] [::1]:65527 [200]: GET /test_validaciones_simple.php
+[Tue Jan 27 15:48:52 2026] [::1]:65527 Closing
+[Tue Jan 27 15:48:52 2026] [::1]:65528 Accepted
+[Tue Jan 27 15:48:52 2026] [::1]:65529 Accepted
+[Tue Jan 27 15:48:52 2026] [::1]:65528 [200]: GET /views/validaciones/test_validaciones.js
+[Tue Jan 27 15:48:52 2026] [::1]:65528 Closing
+[Tue Jan 27 15:48:53 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:48:53 2026] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 21
+[Tue Jan 27 15:48:53 2026] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 22
+[Tue Jan 27 15:48:53 2026] [::1]:65529 [200]: GET /validaciones/buscar-empleados
+[Tue Jan 27 15:48:53 2026] [::1]:65529 Closing
+[Tue Jan 27 15:48:53 2026] [::1]:65531 Accepted
+[Tue Jan 27 15:48:53 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:48:53 2026] [::1]:65531 [403]: POST /validaciones/buscar-pendientes
+[Tue Jan 27 15:48:53 2026] [::1]:65531 Closing
+[Tue Jan 27 15:49:00 2026] [::1]:65533 Accepted
+[Tue Jan 27 15:49:00 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:49:00 2026] [::1]:65533 [405]: POST /validaciones/estadisticas
+[Tue Jan 27 15:49:00 2026] [::1]:65533 Closing
+[Tue Jan 27 15:50:01 2026] [::1]:49172 Accepted
+[Tue Jan 27 15:50:01 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:05 2026] [::1]:49172 [302]: GET /validaciones
+[Tue Jan 27 15:50:05 2026] [::1]:49172 Closing
+[Tue Jan 27 15:50:05 2026] [::1]:49173 Accepted
+[Tue Jan 27 15:50:05 2026] [::1]:49173 Closed without sending a request; it was probably just an unused speculative preconnection
+[Tue Jan 27 15:50:05 2026] [::1]:49173 Closing
+[Tue Jan 27 15:50:05 2026] [::1]:49177 Accepted
+[Tue Jan 27 15:50:05 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:06 2026] [::1]:49177 [200]: GET /login
+[Tue Jan 27 15:50:06 2026] [::1]:49177 Closing
+[Tue Jan 27 15:50:06 2026] [::1]:49179 Accepted
+[Tue Jan 27 15:50:06 2026] [::1]:49179 [200]: GET /public/css/modals.css
+[Tue Jan 27 15:50:06 2026] [::1]:49180 Accepted
+[Tue Jan 27 15:50:06 2026] [::1]:49181 Accepted
+[Tue Jan 27 15:50:06 2026] [::1]:49180 [200]: GET /public/css/empleados.css
+[Tue Jan 27 15:50:06 2026] [::1]:49181 [200]: GET /css/empleados-mejorado.css
+[Tue Jan 27 15:50:06 2026] [::1]:49179 Closing
+[Tue Jan 27 15:50:06 2026] [::1]:49180 Closing
+[Tue Jan 27 15:50:06 2026] [::1]:49181 Closing
+[Tue Jan 27 15:50:06 2026] [::1]:49182 Accepted
+[Tue Jan 27 15:50:06 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:06 2026] [::1]:49182 [302]: GET /favicon.ico
+[Tue Jan 27 15:50:06 2026] [::1]:49182 Closing
+[Tue Jan 27 15:50:06 2026] [::1]:49185 Accepted
+[Tue Jan 27 15:50:06 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:06 2026] [::1]:49185 [200]: GET /login
+[Tue Jan 27 15:50:06 2026] [::1]:49185 Closing
+[Tue Jan 27 15:50:24 2026] [::1]:49197 Accepted
+[Tue Jan 27 15:50:24 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:24 2026] [::1]:49197 [200]: POST /login
+[Tue Jan 27 15:50:24 2026] [::1]:49197 Closing
+[Tue Jan 27 15:50:24 2026] [::1]:49198 Accepted
+[Tue Jan 27 15:50:24 2026] [::1]:49198 Closed without sending a request; it was probably just an unused speculative preconnection
+[Tue Jan 27 15:50:24 2026] [::1]:49198 Closing
+[Tue Jan 27 15:50:24 2026] [::1]:49201 Accepted
+[Tue Jan 27 15:50:24 2026] [::1]:49201 [200]: GET /public/css/modals.css
+[Tue Jan 27 15:50:24 2026] [::1]:49201 Closing
+[Tue Jan 27 15:50:24 2026] [::1]:49202 Accepted
+[Tue Jan 27 15:50:24 2026] [::1]:49203 Accepted
+[Tue Jan 27 15:50:24 2026] [::1]:49202 [200]: GET /public/css/empleados.css
+[Tue Jan 27 15:50:24 2026] [::1]:49203 [200]: GET /css/empleados-mejorado.css
+[Tue Jan 27 15:50:24 2026] [::1]:49202 Closing
+[Tue Jan 27 15:50:24 2026] [::1]:49203 Closing
+[Tue Jan 27 15:50:24 2026] [::1]:49207 Accepted
+[Tue Jan 27 15:50:24 2026] [::1]:49207 [200]: GET /views/validaciones/contador_menu.js
+[Tue Jan 27 15:50:24 2026] [::1]:49207 Closing
+[Tue Jan 27 15:50:25 2026] [::1]:49214 Accepted
+[Tue Jan 27 15:50:25 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:25 2026] [::1]:49214 [302]: GET /favicon.ico
+[Tue Jan 27 15:50:25 2026] [::1]:49214 Closing
+[Tue Jan 27 15:50:25 2026] [::1]:49215 Accepted
+[Tue Jan 27 15:50:25 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:25 2026] [::1]:49215 [200]: GET /login
+[Tue Jan 27 15:50:25 2026] [::1]:49215 Closing
+[Tue Jan 27 15:50:39 2026] [::1]:49234 Accepted
+[Tue Jan 27 15:50:39 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:39 2026] [::1]:49234 [302]: POST /login
+[Tue Jan 27 15:50:39 2026] [::1]:49234 Closing
+[Tue Jan 27 15:50:39 2026] [::1]:49235 Accepted
+[Tue Jan 27 15:50:39 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:39 2026] [::1]:49235 [200]: GET /verify-2fa
+[Tue Jan 27 15:50:39 2026] [::1]:49235 Closing
+[Tue Jan 27 15:50:39 2026] [::1]:49239 Accepted
+[Tue Jan 27 15:50:39 2026] [::1]:49239 [200]: GET /public/css/modals.css
+[Tue Jan 27 15:50:39 2026] [::1]:49239 Closing
+[Tue Jan 27 15:50:39 2026] [::1]:49240 Accepted
+[Tue Jan 27 15:50:39 2026] [::1]:49241 Accepted
+[Tue Jan 27 15:50:39 2026] [::1]:49240 [200]: GET /public/css/empleados.css
+[Tue Jan 27 15:50:39 2026] [::1]:49241 [200]: GET /css/empleados-mejorado.css
+[Tue Jan 27 15:50:39 2026] [::1]:49240 Closing
+[Tue Jan 27 15:50:39 2026] [::1]:49241 Closing
+[Tue Jan 27 15:50:39 2026] [::1]:49242 Accepted
+[Tue Jan 27 15:50:39 2026] [::1]:49242 [200]: GET /views/validaciones/contador_menu.js
+[Tue Jan 27 15:50:39 2026] [::1]:49242 Closing
+[Tue Jan 27 15:50:39 2026] [::1]:49246 Accepted
+[Tue Jan 27 15:50:39 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:39 2026] [::1]:49246 [302]: GET /favicon.ico
+[Tue Jan 27 15:50:39 2026] [::1]:49246 Closing
+[Tue Jan 27 15:50:39 2026] [::1]:49247 Accepted
+[Tue Jan 27 15:50:39 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:39 2026] [::1]:49247 [200]: GET /login
+[Tue Jan 27 15:50:39 2026] [::1]:49247 Closing
+[Tue Jan 27 15:50:46 2026] [::1]:49252 Accepted
+[Tue Jan 27 15:50:46 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:46 2026] [::1]:49252 [302]: POST /verify-2fa
+[Tue Jan 27 15:50:46 2026] [::1]:49252 Closing
+[Tue Jan 27 15:50:46 2026] [::1]:49253 Accepted
+[Tue Jan 27 15:50:46 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:50 2026] Dashboard Error (Comisiones): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+[Tue Jan 27 15:50:50 2026] [::1]:49253 [200]: GET /dashboard
+[Tue Jan 27 15:50:50 2026] [::1]:49253 Closing
+[Tue Jan 27 15:50:50 2026] [::1]:49257 Accepted
+[Tue Jan 27 15:50:50 2026] [::1]:49257 [200]: GET /public/css/modals.css
+[Tue Jan 27 15:50:50 2026] [::1]:49257 Closing
+[Tue Jan 27 15:50:50 2026] [::1]:49258 Accepted
+[Tue Jan 27 15:50:50 2026] [::1]:49259 Accepted
+[Tue Jan 27 15:50:50 2026] [::1]:49258 [200]: GET /public/css/empleados.css
+[Tue Jan 27 15:50:50 2026] [::1]:49259 [200]: GET /css/empleados-mejorado.css
+[Tue Jan 27 15:50:50 2026] [::1]:49258 Closing
+[Tue Jan 27 15:50:50 2026] [::1]:49259 Closing
+[Tue Jan 27 15:50:50 2026] [::1]:49260 Accepted
+[Tue Jan 27 15:50:50 2026] [::1]:49260 [200]: GET /views/validaciones/contador_menu.js
+[Tue Jan 27 15:50:50 2026] [::1]:49260 Closing
+[Tue Jan 27 15:50:50 2026] [::1]:49261 Accepted
+[Tue Jan 27 15:50:50 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:50 2026] [::1]:49261 [404]: GET /favicon.ico
+[Tue Jan 27 15:50:50 2026] [::1]:49261 Closing
+[Tue Jan 27 15:50:52 2026] [::1]:49265 Accepted
+[Tue Jan 27 15:50:52 2026] [::1]:49266 Accepted
+[Tue Jan 27 15:50:52 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:52 2026] [::1]:49265 [200]: GET /validaciones
+[Tue Jan 27 15:50:52 2026] [::1]:49265 Closing
+[Tue Jan 27 15:50:52 2026] [::1]:49266 [200]: GET /public/css/modals.css
+[Tue Jan 27 15:50:52 2026] [::1]:49266 Closing
+[Tue Jan 27 15:50:52 2026] [::1]:49268 Accepted
+[Tue Jan 27 15:50:52 2026] [::1]:49269 Accepted
+[Tue Jan 27 15:50:52 2026] [::1]:49268 [200]: GET /public/css/empleados.css
+[Tue Jan 27 15:50:52 2026] [::1]:49269 [200]: GET /css/empleados-mejorado.css
+[Tue Jan 27 15:50:52 2026] [::1]:49268 Closing
+[Tue Jan 27 15:50:52 2026] [::1]:49269 Closing
+[Tue Jan 27 15:50:52 2026] [::1]:49270 Accepted
+[Tue Jan 27 15:50:52 2026] [::1]:49270 [200]: GET /views/validaciones/validaciones.js
+[Tue Jan 27 15:50:52 2026] [::1]:49270 Closing
+[Tue Jan 27 15:50:52 2026] [::1]:49271 Accepted
+[Tue Jan 27 15:50:52 2026] [::1]:49271 [200]: GET /views/validaciones/contador_menu.js
+[Tue Jan 27 15:50:52 2026] [::1]:49271 Closing
+[Tue Jan 27 15:50:52 2026] [::1]:49272 Accepted
+[Tue Jan 27 15:50:52 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:52 2026] [::1]:49272 [403]: POST /validaciones/buscar-pendientes
+[Tue Jan 27 15:50:52 2026] [::1]:49272 Closing
+[Tue Jan 27 15:50:52 2026] [::1]:49273 Accepted
+[Tue Jan 27 15:50:52 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:52 2026] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 21
+[Tue Jan 27 15:50:52 2026] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 22
+[Tue Jan 27 15:50:52 2026] [::1]:49273 [200]: GET /validaciones/buscar-empleados
+[Tue Jan 27 15:50:52 2026] [::1]:49273 Closing
+[Tue Jan 27 15:50:52 2026] [::1]:49276 Accepted
+[Tue Jan 27 15:50:52 2026] [::1]:49277 Accepted
+[Tue Jan 27 15:50:52 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:52 2026] [::1]:49276 [405]: POST /validaciones/estadisticas
+[Tue Jan 27 15:50:52 2026] [::1]:49276 Closing
+[Tue Jan 27 15:50:52 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:50:52 2026] [::1]:49277 [404]: POST /validaciones/obtener-areas
+[Tue Jan 27 15:50:52 2026] [::1]:49277 Closing
+[Tue Jan 27 15:51:23 2026] [::1]:49374 Accepted
+[Tue Jan 27 15:51:23 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:51:23 2026] [::1]:49374 [405]: POST /validaciones/estadisticas
+[Tue Jan 27 15:51:23 2026] [::1]:49374 Closing
+[Tue Jan 27 15:51:52 2026] [::1]:49400 Accepted
+[Tue Jan 27 15:51:52 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:51:52 2026] [::1]:49400 [405]: POST /validaciones/estadisticas
+[Tue Jan 27 15:51:52 2026] [::1]:49400 Closing
+[Tue Jan 27 15:52:19 2026] [::1]:49409 Accepted
+[Tue Jan 27 15:52:19 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:54:19 2026] [::1]:49409 [302]: GET /validaciones/buscar-empleados
+[Tue Jan 27 15:54:19 2026] [::1]:49409 Closing
+[Tue Jan 27 15:54:19 2026] [::1]:49416 Accepted
+[Tue Jan 27 15:54:19 2026] [::1]:49429 Accepted
+[Tue Jan 27 15:54:19 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:54:19 2026] [::1]:49416 [405]: POST /validaciones/estadisticas
+[Tue Jan 27 15:54:19 2026] [::1]:49416 Closing
+[Tue Jan 27 15:54:19 2026] [::1]:49444 Accepted
+[Tue Jan 27 15:54:19 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:54:19 2026] [::1]:49429 [405]: POST /validaciones/estadisticas
+[Tue Jan 27 15:54:19 2026] [::1]:49429 Closing
+[Tue Jan 27 15:54:19 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:54:19 2026] [::1]:49444 [302]: GET /logout
+[Tue Jan 27 15:54:19 2026] [::1]:49444 Closing
+[Tue Jan 27 15:55:20 2026] [::1]:53225 Accepted
+[Tue Jan 27 15:55:20 2026] [::1]:53226 Accepted
+[Tue Jan 27 15:55:20 2026] [::1]:53225 Closed without sending a request; it was probably just an unused speculative preconnection
+[Tue Jan 27 15:55:20 2026] [::1]:53225 Closing
+[Tue Jan 27 15:55:20 2026] [::1]:53226 Closed without sending a request; it was probably just an unused speculative preconnection
+[Tue Jan 27 15:55:20 2026] [::1]:53226 Closing
+[Tue Jan 27 15:55:20 2026] [::1]:53228 Accepted
+[Tue Jan 27 15:55:20 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:55:20 2026] [::1]:53228 [302]: GET /favicon.ico
+[Tue Jan 27 15:55:20 2026] [::1]:53228 Closing
+[Tue Jan 27 15:55:20 2026] [::1]:53229 Accepted
+[Tue Jan 27 15:55:20 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:55:20 2026] [::1]:53229 [200]: GET /login
+[Tue Jan 27 15:55:20 2026] [::1]:53229 Closing
+[Tue Jan 27 15:55:28 2026] [::1]:53233 Accepted
+[Tue Jan 27 15:55:29 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:55:29 2026] [::1]:53233 [302]: GET /favicon.ico
+[Tue Jan 27 15:55:29 2026] [::1]:53233 Closing
+[Tue Jan 27 15:55:29 2026] [::1]:53234 Accepted
+[Tue Jan 27 15:55:29 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:55:29 2026] [::1]:53234 [200]: GET /login
+[Tue Jan 27 15:55:29 2026] [::1]:53234 Closing
+[Tue Jan 27 15:55:37 2026] [::1]:53238 Accepted
+[Tue Jan 27 15:55:37 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:55:37 2026] [::1]:53238 [302]: GET /favicon.ico
+[Tue Jan 27 15:55:37 2026] [::1]:53238 Closing
+[Tue Jan 27 15:55:37 2026] [::1]:53239 Accepted
+[Tue Jan 27 15:55:37 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:55:37 2026] [::1]:53239 [200]: GET /login
+[Tue Jan 27 15:55:37 2026] [::1]:53239 Closing
+[Tue Jan 27 15:56:00 2026] [::1]:53245 Accepted
+[Tue Jan 27 15:56:00 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:56:00 2026] [::1]:53245 [302]: GET /favicon.ico
+[Tue Jan 27 15:56:00 2026] [::1]:53245 Closing
+[Tue Jan 27 15:56:00 2026] [::1]:53246 Accepted
+[Tue Jan 27 15:56:00 2026] BASE_URL autodetectado: '' desde localhost:8000
+[Tue Jan 27 15:56:00 2026] [::1]:53246 [200]: GET /login
+[Tue Jan 27 15:56:00 2026] [::1]:53246 Closing
+[Tue Jan 27 15:57:10 2026] [::1]:53264 Accepted
+[Tue Jan 27 15:57:10 2026] BASE_URL autodetectado: '' desde localhost:8000

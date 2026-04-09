@@ -1,0 +1,307 @@
+/**
+ * Estilos adicionales para el módulo de empleados mejorado
+ */
+
+/* Estilos para estadísticas en el modal */
+.stat-item {
+    padding: 15px;
+    border-radius: 10px;
+    background: #f8f9fa;
+    margin-bottom: 15px;
+    transition: transform 0.2s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.stat-item h5 {
+    margin: 10px 0 5px 0;
+    font-weight: bold;
+}
+
+/* Mejoras para cards de información */
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    border-bottom: 2px solid #e9ecef;
+    font-weight: 600;
+}
+
+/* Badges mejorados */
+.badge {
+    font-size: 0.75em;
+    padding: 0.375em 0.75em;
+    border-radius: 0.375rem;
+}
+
+/* Tables mejoradas */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Animaciones para los botones */
+.btn {
+    transition: all 0.2s ease;
+    border-radius: 0.375rem;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:focus {
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+}
+
+/* Estilos para las pestañas - Colores Pantone - Tema Claro */
+.nav-tabs {
+    border-bottom: 3px solid #9F2241;
+    background-color: #f8f9fa;
+    padding: 0.5rem 0.5rem 0;
+    border-radius: 8px 8px 0 0;
+}
+
+.nav-tabs .nav-link {
+    color: #691C32;
+    border-bottom: 3px solid #ddd;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-radius: 8px 8px 0 0;
+    background-color: transparent;
+    margin-bottom: -2px;
+    opacity: 0.7;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #9F2241;
+    background-color: rgba(151, 34, 65, 0.1);
+    border-bottom-color: #9F2241;
+    opacity: 1;
+}
+
+.nav-tabs .nav-link.active {
+    color: #ffffff;
+    background-color: #9F2241;
+    border-bottom: 3px solid #691C32;
+    font-weight: 600;
+    box-shadow: 0 -2px 10px rgba(151, 34, 65, 0.4);
+    opacity: 1;
+}
+
+/* Para el formulario de creación mejorado */
+.modal-xl .modal-body {
+    padding: 2rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+}
+
+.form-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+/* Estados biométricos */
+.biometric-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.biometric-status.registered {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.biometric-status.pending {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+/* Indicadores de calidad para captura biométrica */
+.quality-indicator {
+    height: 8px;
+    border-radius: 4px;
+    background: #e9ecef;
+    overflow: hidden;
+    position: relative;
+}
+
+.quality-indicator .progress-bar {
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Animaciones para cards de empleados */
+.employee-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.employee-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+}
+
+.employee-avatar {
+    transition: transform 0.3s ease;
+}
+
+.employee-card:hover .employee-avatar {
+    transform: scale(1.1);
+}
+
+/* Botones de acción en cards */
+.employee-actions .btn {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+    margin: 0.25rem;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .stat-item {
+        margin-bottom: 10px;
+        text-align: center;
+    }
+    
+    .stat-item i {
+        font-size: 1.5rem;
+    }
+    
+    .nav-tabs .nav-link {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .modal-xl .modal-body {
+        padding: 1rem;
+    }
+}
+
+/* Dark mode support (opcional) */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background-color: #1a1a1a;
+        color: #DDC9A3;
+    }
+    
+    .table {
+        color: #DDC9A3;
+    }
+    
+    .modal-content {
+        background-color: #1a1a1a;
+        color: #DDC9A3;
+    }
+    
+    .nav-tabs {
+        background-color: #235B4E;
+    }
+    
+    .nav-tabs .nav-link {
+        color: #DDC9A3;
+        border-bottom-color: #DDC9A3;
+    }
+    
+    .nav-tabs .nav-link.active {
+        background-color: #9F2241;
+        color: #ffffff;
+    }
+}
+
+/* Animación para Fade In */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Estilos para tooltips personalizados */
+.tooltip-custom {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip-custom .tooltip-text {
+    visibility: hidden;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 10px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.875rem;
+}
+
+.tooltip-custom:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}

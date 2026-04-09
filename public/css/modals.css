@@ -1,0 +1,391 @@
+/* -----------------------------------------------------
+   MODAL - ESTILOS GENERALES (MODO CLARO)
+----------------------------------------------------- */
+.modal-content {
+  background-color: #ffffff;
+  border-radius: 14px;
+  border: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  animation: modalShow 0.3s ease forwards;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.modal-header {
+  border-bottom: 1px solid #e5e5e5;
+  padding: 1rem 1.5rem;
+  border-radius: 14px 14px 0 0;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #ffffff;
+}
+
+.modal-title {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-size: 1.25rem;
+}
+
+.modal-body {
+  padding: 1.75rem 1.5rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1rem;
+  color: #333333;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e5e5;
+  background-color: #f5f5f5;
+  border-radius: 0 0 14px 14px;
+}
+
+/* -----------------------------------------------------
+   MODO OSCURO
+----------------------------------------------------- */
+body.dark-theme .modal-content {
+  background-color: #1e272e;
+  color: #f1f2f6;
+}
+
+body.dark-theme .modal-header {
+  border-bottom-color: #3d3d3d;
+  background: linear-gradient(135deg, #4c5bd4, #5f2c80);
+}
+
+body.dark-theme .modal-body {
+  background-color: #1e272e;
+  color: #f1f2f6;
+}
+
+body.dark-theme .modal-footer {
+  background-color: #2f3640;
+  border-top-color: #444;
+}
+
+/* Texto general en cuerpo (p, labels, spans, títulos, strong) */
+body.dark-theme .modal-body,
+body.dark-theme .modal-body * {
+  color: #f1f2f6 !important;
+}
+
+/* -----------------------------------------------------
+   MODAL EMPLEADO
+----------------------------------------------------- */
+.modal-empleado .modal-body {
+  padding: 2rem;
+}
+
+.modal-empleado .card {
+  border: none;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+body.dark-theme .modal-empleado .card {
+  background-color: #121212;
+  border-color: #636e72;
+}
+
+.modal-empleado .card-header {
+  font-weight: 600;
+  border-bottom: 2px solid #e9ecef;
+}
+
+body.dark-theme .modal-empleado .card-header {
+  border-bottom-color: #636e72;
+}
+
+.modal-empleado .table {
+  margin-bottom: 0;
+}
+
+.modal-empleado .table th {
+  background-color: #f0f0f0;
+  border-top: none;
+  font-weight: 600;
+}
+
+body.dark-theme .modal-empleado .table th {
+  background-color: #2d3436;
+  color: #f1f2f6;
+}
+
+.modal-empleado .badge {
+  font-size: 0.85em;
+}
+
+.modal-empleado .foto-empleado {
+  border-radius: 50%;
+  border: 3px solid #e9ecef;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+body.dark-theme .modal-empleado .foto-empleado {
+  border-color: #636e72;
+}
+
+/* -----------------------------------------------------
+   BOTONES
+----------------------------------------------------- */
+.modal-footer .btn-primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none;
+  box-shadow: 0 4px 10px rgba(102, 126, 234, 0.5);
+  transition: background 0.3s ease;
+}
+
+.modal-footer .btn-primary:hover {
+  background: linear-gradient(135deg, #764ba2, #667eea);
+}
+
+.modal-footer .btn-secondary {
+  background-color: #dcdcdc;
+  color: #333333;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.modal-footer .btn-secondary:hover {
+  background-color: #bcbcbc;
+}
+
+body.dark-theme .modal-footer .btn-secondary {
+  background-color: #555;
+  color: #f1f2f6;
+}
+
+body.dark-theme .modal-footer .btn-secondary:hover {
+  background-color: #777;
+}
+
+/* -----------------------------------------------------
+   MODAL DE VALIDACIÓN - TEMA OSCURO
+----------------------------------------------------- */
+body.dark-theme #modalValidacion .modal-dialog {
+  color: #f1f2f6;
+}
+
+body.dark-theme #modalValidacion .modal-content {
+  background-color: #1e272e;
+  color: #f1f2f6;
+  border-color: #636e72;
+}
+
+body.dark-theme #modalValidacion .modal-header {
+  background: linear-gradient(135deg, #4c5bd4, #5f2c80) !important;
+  border-bottom-color: #636e72;
+  color: #ffffff;
+}
+
+body.dark-theme #modalValidacion .modal-header.bg-primary {
+  background: linear-gradient(135deg, #4c5bd4, #5f2c80) !important;
+}
+
+body.dark-theme #modalValidacion .modal-title {
+  color: #ffffff;
+}
+
+body.dark-theme #modalValidacion .modal-body {
+  background-color: #1e272e;
+  color: #f1f2f6;
+}
+
+body.dark-theme #modalValidacion .card {
+  background-color: #2d3436;
+  border: 2px solid #636e72;
+  border-radius: 8px;
+}
+
+body.dark-theme #modalValidacion .card-header {
+  background: linear-gradient(135deg, #3d3d3d, #4d4d4d) !important;
+  border-bottom: 2px solid #636e72;
+  color: #ffffff;
+  padding: 0.75rem 1rem;
+}
+
+body.dark-theme #modalValidacion .card-header.bg-primary {
+  background: linear-gradient(135deg, #4c5bd4, #5f2c80) !important;
+}
+
+body.dark-theme #modalValidacion .card-header.bg-info {
+  background: linear-gradient(135deg, #0dcaf0, #09b9d6) !important;
+  color: #000000;
+}
+
+body.dark-theme #modalValidacion .card-header.bg-warning {
+  background: linear-gradient(135deg, #ffc107, #e0a800) !important;
+  color: #000000;
+}
+
+body.dark-theme #modalValidacion .card-body {
+  background-color: #2d3436;
+  color: #f1f2f6;
+  padding: 1rem;
+}
+
+body.dark-theme #modalValidacion .form-label {
+  color: #dfe6e9 !important;
+  font-weight: 600;
+}
+
+body.dark-theme #modalValidacion .form-label.text-muted {
+  color: #b2bec3 !important;
+}
+
+body.dark-theme #modalValidacion .form-control-plaintext {
+  color: #74b9ff !important;
+  background-color: #3d3d3d !important;
+  border: 2px solid #636e72 !important;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+body.dark-theme #modalValidacion .text-muted {
+  color: #b2bec3 !important;
+}
+
+body.dark-theme #modalValidacion .form-control,
+body.dark-theme #modalValidacion .form-select,
+body.dark-theme #modalValidacion textarea {
+  background-color: #2d3436;
+  border: 2px solid #636e72;
+  color: #f1f2f6;
+}
+
+body.dark-theme #modalValidacion .form-control:focus,
+body.dark-theme #modalValidacion .form-select:focus,
+body.dark-theme #modalValidacion textarea:focus {
+  background-color: #2d3436;
+  border-color: #667eea;
+  color: #f1f2f6;
+}
+
+body.dark-theme #modalValidacion .btn-check:checked + .btn-outline-success {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: #ffffff;
+}
+
+body.dark-theme #modalValidacion .btn-check:checked + .btn-outline-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: #ffffff;
+}
+
+body.dark-theme #modalValidacion .btn-check:checked + .btn-outline-warning {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #1e272e;
+}
+
+body.dark-theme #modalValidacion .bg-light {
+  background-color: #3d3d3d !important;
+  color: #ffffff !important;
+}
+
+body.dark-theme #modalValidacion .modal-footer {
+  background-color: #2d3436;
+  border-top-color: #636e72;
+}
+
+body.dark-theme #modalValidacion .btn-secondary {
+  background-color: #636e72;
+  border-color: #636e72;
+  color: #ffffff;
+}
+
+body.dark-theme #modalValidacion .btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+/* -----------------------------------------------------
+   MODAL DE VALIDACIÓN - TEMA CLARO (MEJORADO)
+----------------------------------------------------- */
+#modalValidacion .modal-body {
+  padding: 1.5rem;
+}
+
+#modalValidacion .card {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+#modalValidacion .card-header {
+  font-weight: 600;
+  border-bottom: 2px solid #e0e0e0;
+  padding: 0.75rem 1rem;
+}
+
+#modalValidacion .card-header.bg-primary {
+  background: linear-gradient(135deg, #0d6efd, #0a58ca) !important;
+}
+
+#modalValidacion .card-header.bg-info {
+  background: linear-gradient(135deg, #0dcaf0, #09b9d6) !important;
+}
+
+#modalValidacion .card-header.bg-warning {
+  background: linear-gradient(135deg, #ffc107, #e0a800) !important;
+}
+
+#modalValidacion .card-body {
+  padding: 1rem;
+}
+
+#modalValidacion .form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.25rem;
+}
+
+#modalValidacion .form-label.text-muted {
+  color: #6c757d !important;
+}
+
+#modalValidacion .form-control-plaintext {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  color: #212529;
+  font-weight: 600;
+}
+
+#modalValidacion .btn-group .btn {
+  font-weight: 600;
+}
+
+#modalValidacion textarea {
+  border: 2px solid #dee2e6;
+}
+
+#modalValidacion textarea:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+#modalValidacion select {
+  border: 2px solid #dee2e6;
+}
+
+#modalValidacion select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* -----------------------------------------------------
+   ANIMACIÓN
+----------------------------------------------------- */
+@keyframes modalShow {
+  from {
+    opacity: 1;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

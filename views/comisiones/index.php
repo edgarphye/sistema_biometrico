@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/../../helpers/Csrf.php'; ?>
 <div class="container mt-4">
     <h2>Gestión de Comisiones AEFCM</h2>
 
@@ -31,7 +32,7 @@
             </a>
         </div>
         <div class="col-md-6 text-end">
-            <button class="btn btn-info" onclick="mostrarLimites()">
+            <button class="btn btn-secondary" onclick="mostrarLimites()">
                 <i class="fas fa-question-circle"></i> Ver Límites por Tipo
             </button>
         </div>
@@ -111,9 +112,9 @@
 <div class="modal fade" id="aprobarModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Aprobar Comisión</h5>
-                <button type="button" class="close" data-dismiss="modal">
+            <div class="modal-header" style="background: linear-gradient(135deg, #235B4E 0%, #10312B 100%); color: #ffffff;">
+                <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Aprobar Comisión</h5>
+                <button type="button" class="close" data-dismiss="modal" style="color: #ffffff;">
                     <span>&times;</span>
                 </button>
             </div>
@@ -125,9 +126,9 @@
                         <input type="number" class="form-control" id="aprobado_por" name="aprobado_por" required>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Aprobar</button>
+                <div class="modal-footer" style="background-color: #f8f7f5; border-top: 1px solid #d0d0d2;">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" style="border-color: #6F7271; color: #6F7271;">Cancelar</button>
+                    <button type="submit" class="btn btn-success" style="background-color: #235B4E; border-color: #235B4E;"><i class="fas fa-check me-1"></i> Aprobar</button>
                 </div>
             </form>
         </div>
@@ -195,6 +196,7 @@ document.getElementById('aprobarForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
     const formData = new FormData(this);
+    formData.append('_token', '<?php echo htmlspecialchars(Csrf::token()); ?>');
 
     fetch('<?php echo BASE_URL; ?>/comisiones/aprobar', {
         method: 'POST',

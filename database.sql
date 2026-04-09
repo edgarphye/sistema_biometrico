@@ -3,63 +3,97 @@
 CREATE DATABASE IF NOT EXISTS sistema_biometrico CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE sistema_biometrico;
 
--- Tabla de empleados
-CREATE TABLE empleados (
+-- Tabla de Empleados
+CREATE TABLE IF NOT EXISTS empleados (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     apellido VARCHAR(100) NOT NULL,
-    rfc VARCHAR(13) UNIQUE NOT NULL,
-    curp VARCHAR(18) UNIQUE NOT NULL,
-    area VARCHAR(100) NOT NULL,
-    jerarquia VARCHAR(50) NOT NULL,
-    huella_dactilar BLOB, -- Almacenar datos de huella
-    foto_cara VARCHAR(255), -- Ruta del archivo de foto
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    activo BOOLEAN DEFAULT TRUE
+    rfc VARCHAR(13) UNIQUE,
+    curp VARCHAR(18) UNIQUE,
+    email VARCHAR(100),
+    telefono VARCHAR(20),
+    area VARCHAR(50),
+    puesto VARCHAR(50),
+    jerarquia VARCHAR(50),
+    sexo CHAR(1),
+    fecha_nacimiento DATE,
+    entidad_federativa VARCHAR(2),
+    huella_dactilar TEXT,
+    foto_cara VARCHAR(255),
+    activo TINYINT(1) DEFAULT 1,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabla de asistencia
-CREATE TABLE asistencia (
+-- Tabla de Usuarios
+CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    empleado_id INT NOT NULL,
-    tipo ENUM('entrada', 'salida') NOT NULL,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    dispositivo_id TINYINT NOT NULL, -- ID del dispositivo biométrico (1-10)
-    tipo_biometria ENUM('huella', 'cara') NOT NULL, -- Tipo de verificación usada
-    datos_biometricos JSON, -- Datos biométricos capturados (template, calidad, etc.)
-    calidad_verificacion TINYINT, -- Calidad de la verificación (0-100)
-    metadata_dispositivo JSON, -- Información del dispositivo (temperatura, firmware, etc.)
-    tiempo_procesamiento DECIMAL(5,3), -- Tiempo en segundos para procesar verificación
-    FOREIGN KEY (empleado_id) REFERENCES empleados(id)
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    nombre_completo VARCHAR(100),
+    rol ENUM('admin', 'user', 'viewer', 'rh', 'supervisor') DEFAULT 'user',
+    empleado_id INT NULL,
+    activo TINYINT(1) DEFAULT 1,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (empleado_id) REFERENCES empleados(id) ON DELETE SET NULL
 );
 
--- Tabla de horarios laborales (catálogo)
-CREATE TABLE horarios_laborales (
+-- Tabla de Horarios Laborales (Con soporte multi-sede)
+CREATE TABLE IF NOT EXISTS horarios_laborales (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     hora_entrada TIME NOT NULL,
     hora_salida TIME NOT NULL,
-    tolerancia_minutos INT DEFAULT 9,
+    tolerancia_minutos INT DEFAULT 10,
     descripcion TEXT,
     activo BOOLEAN DEFAULT TRUE,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    sede VARCHAR(100) NULL,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_horario_sede (sede)
 );
 
--- Tabla de horarios por empleado (1-2 horarios por empleado)
-CREATE TABLE horarios_empleados (
+-- Tabla de Horarios por Empleado (Con soporte multi-sede)
+CREATE TABLE IF NOT EXISTS horarios_empleados (
     id INT AUTO_INCREMENT PRIMARY KEY,
     empleado_id INT NOT NULL,
     horario_id INT NOT NULL,
     dia_semana ENUM('lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo') NOT NULL,
     activo BOOLEAN DEFAULT TRUE,
+    sede VARCHAR(100) NULL,
     fecha_asignacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (empleado_id) REFERENCES empleados(id),
     FOREIGN KEY (horario_id) REFERENCES horarios_laborales(id),
-    UNIQUE KEY unique_empleado_dia (empleado_id, dia_semana)
+    UNIQUE KEY unique_empleado_dia_sede (empleado_id, dia_semana, sede)
 );
 
--- Tabla de tipos de justificación
-CREATE TABLE tipos_justificacion (
+-- Tabla de Dispositivos Biométricos
+CREATE TABLE IF NOT EXISTS dispositivos_biometricos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    dispositivo_id TINYINT NOT NULL UNIQUE,
+    nombre VARCHAR(100) NOT NULL,
+    tipo ENUM('huella', 'cara', 'dual') NOT NULL DEFAULT 'dual',
+    ip_address VARCHAR(15) NULL,
+    puerto SMALLINT DEFAULT 4370,
+    activo BOOLEAN DEFAULT TRUE,
+    sede VARCHAR(100) NULL,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla de Asistencia
+CREATE TABLE IF NOT EXISTS asistencia (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    empleado_id INT NOT NULL,
+    fecha DATE NOT NULL,
+    hora_entrada TIME,
+    hora_salida TIME,
+    dispositivo_id TINYINT NULL,
+    tipo_biometria ENUM('huella', 'cara') NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (empleado_id) REFERENCES empleados(id)
+);
+
+-- Tabla de Tipos de Justificación
+CREATE TABLE IF NOT EXISTS tipos_justificacion (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     descripcion TEXT,
@@ -67,123 +101,118 @@ CREATE TABLE tipos_justificacion (
     activo BOOLEAN DEFAULT TRUE
 );
 
--- Tabla de retardos
-CREATE TABLE retardos (
+-- Tabla de Retardos
+CREATE TABLE IF NOT EXISTS retardos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     empleado_id INT NOT NULL,
     fecha DATE NOT NULL,
-    minutos_retardo INT NOT NULL,
-    tipo ENUM('menor', 'mayor') NOT NULL,
-    horario_id INT NULL, -- Horario específico que se aplicó
-    justificado BOOLEAN DEFAULT FALSE,
+    minutos_retraso INT NOT NULL,
+    tipo_retraso ENUM('menor', 'mayor') NOT NULL,
+    justificado TINYINT(1) DEFAULT 0,
+    horario_id INT NULL,
     tipo_justificacion_id INT NULL,
-    motivo_justificacion TEXT,
-    aprobado_por INT NULL, -- ID del usuario que aprobó
+    motivo_justificacion TEXT NULL,
+    aprobado_por INT NULL,
     fecha_aprobacion TIMESTAMP NULL,
-    soporte VARCHAR(255) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (empleado_id) REFERENCES empleados(id),
     FOREIGN KEY (horario_id) REFERENCES horarios_laborales(id),
     FOREIGN KEY (tipo_justificacion_id) REFERENCES tipos_justificacion(id),
     FOREIGN KEY (aprobado_por) REFERENCES usuarios(id)
 );
 
--- Tabla de sanciones (suspensiones, amonestaciones, propuestas de terminación)
-CREATE TABLE sanciones (
+-- Tabla de Sanciones
+CREATE TABLE IF NOT EXISTS sanciones (
     id INT AUTO_INCREMENT PRIMARY KEY,
     empleado_id INT NOT NULL,
-    tipo ENUM('suspension','amonestacion','terminacion_propuesta') NOT NULL,
-    fecha_inicio DATE NOT NULL,
-    dias INT DEFAULT 0,
-    motivo TEXT,
-    creado_por INT NULL,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (empleado_id) REFERENCES empleados(id),
-    FOREIGN KEY (creado_por) REFERENCES usuarios(id)
+    tipo_sancion ENUM('amonestacion', 'suspension', 'acta_administrativa', 'otro') NOT NULL,
+    motivo TEXT NOT NULL,
+    fecha_sancion DATE NOT NULL,
+    estatus ENUM('activa', 'cumplida', 'cancelada') DEFAULT 'activa',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (empleado_id) REFERENCES empleados(id)
 );
 
--- Tabla de comisiones
-CREATE TABLE comisiones (
+-- Tabla de Justificaciones (General)
+CREATE TABLE IF NOT EXISTS justificaciones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    empleado_id INT NOT NULL,
+    tipo_justificacion VARCHAR(50) NOT NULL,
+    motivo TEXT,
+    fecha_inicio DATE NOT NULL,
+    fecha_fin DATE NOT NULL,
+    estatus ENUM('pendiente', 'aprobada', 'rechazada') DEFAULT 'pendiente',
+    aprobado_por INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (empleado_id) REFERENCES empleados(id),
+    FOREIGN KEY (aprobado_por) REFERENCES usuarios(id)
+);
+
+-- Tabla de Comisiones
+CREATE TABLE IF NOT EXISTS comisiones (
     id INT AUTO_INCREMENT PRIMARY KEY,
     empleado_id INT NOT NULL,
     descripcion TEXT NOT NULL,
-    monto DECIMAL(10,2) NOT NULL,
-    fecha_asignacion DATE NOT NULL,
-    fecha_vencimiento DATE,
-    justificada BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (empleado_id) REFERENCES empleados(id)
-);
-
--- Tabla de ausencias
-CREATE TABLE ausencias (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    empleado_id INT NOT NULL,
     fecha_inicio DATE NOT NULL,
     fecha_fin DATE NOT NULL,
-    tipo ENUM('enfermedad', 'vacaciones', 'permiso', 'otro') NOT NULL,
-    justificada BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (empleado_id) REFERENCES empleados(id)
+    estatus ENUM('pendiente', 'aprobada', 'rechazada') DEFAULT 'pendiente',
+    tipo_comision VARCHAR(50) DEFAULT 'otros',
+    requiere_aprobacion BOOLEAN DEFAULT TRUE,
+    aprobado_por INT NULL,
+    fecha_aprobacion TIMESTAMP NULL,
+    motivo_aprobacion TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (empleado_id) REFERENCES empleados(id),
+    FOREIGN KEY (aprobado_por) REFERENCES usuarios(id)
 );
 
--- Tabla de usuarios (para acceso al sistema)
-CREATE TABLE usuarios (
+-- Tabla de Ausencias (Licencias medicas, etc)
+CREATE TABLE IF NOT EXISTS ausencias (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL, -- Hash de contraseña
-    rol ENUM('admin', 'usuario') DEFAULT 'usuario',
-    empleado_id INT,
-    FOREIGN KEY (empleado_id) REFERENCES empleados(id)
-);
-
--- Tabla de configuración de dispositivos biométricos
-CREATE TABLE dispositivos_biometricos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    dispositivo_id TINYINT NOT NULL UNIQUE, -- ID único del dispositivo (1-10)
-    nombre VARCHAR(100) NOT NULL,
-    tipo ENUM('huella', 'cara', 'dual') DEFAULT 'dual',
-    marca VARCHAR(50),
-    modelo VARCHAR(50),
-    ip_address VARCHAR(15),
-    puerto INT DEFAULT 4370,
-    usuario VARCHAR(50),
-    password VARCHAR(255), -- Hash de contraseña
+    empleado_id INT NOT NULL,
+    tipo ENUM('medica', 'personal', 'vacaciones', 'otro') NOT NULL,
+    fecha_inicio DATE NOT NULL,
+    fecha_fin DATE NOT NULL,
+    fecha_limite_justificacion DATE NULL,
+    motivo TEXT,
     activo BOOLEAN DEFAULT TRUE,
-    configuracion JSON, -- Configuración específica del dispositivo
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ultima_conexion TIMESTAMP NULL,
-    estado ENUM('conectado', 'desconectado', 'error') DEFAULT 'desconectado'
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (empleado_id) REFERENCES empleados(id)
 );
 
--- Tabla de logs de dispositivos biométricos
-CREATE TABLE logs_dispositivos (
+-- Tabla de Notificaciones de Licencias
+CREATE TABLE IF NOT EXISTS notificaciones_licencias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    empleado_id INT NOT NULL,
+    tipo VARCHAR(50) NOT NULL,
+    mensaje TEXT NOT NULL,
+    fecha_envio DATETIME NOT NULL,
+    estado ENUM('pendiente', 'enviada', 'fallida') DEFAULT 'pendiente',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (empleado_id) REFERENCES empleados(id)
+);
+
+-- Tabla de Días Económicos
+CREATE TABLE IF NOT EXISTS dias_economicos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    empleado_id INT NOT NULL,
+    fecha DATE NOT NULL,
+    motivo TEXT,
+    estatus ENUM('pendiente', 'aprobado', 'rechazado') DEFAULT 'pendiente',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (empleado_id) REFERENCES empleados(id)
+);
+
+-- Tabla de Logs de Dispositivos
+CREATE TABLE IF NOT EXISTS logs_dispositivos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     dispositivo_id TINYINT NOT NULL,
-    tipo_evento ENUM('conexion', 'desconexion', 'error', 'mantenimiento', 'verificacion', 'registro') NOT NULL,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    empleado_id INT NULL, -- NULL si no hay empleado asociado
-    tipo_biometria ENUM('huella', 'cara') NULL,
-    resultado ENUM('exitoso', 'fallido', 'error') NOT NULL,
-    mensaje TEXT, -- Detalles del evento
-    metadata JSON, -- Información adicional del evento
-    FOREIGN KEY (empleado_id) REFERENCES empleados(id),
-    FOREIGN KEY (dispositivo_id) REFERENCES dispositivos_biometricos(dispositivo_id)
+    tipo_evento VARCHAR(50),
+    mensaje TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Índices para mejorar rendimiento
-CREATE INDEX idx_asistencia_empleado ON asistencia(empleado_id);
-CREATE INDEX idx_asistencia_fecha ON asistencia(timestamp);
-CREATE INDEX idx_asistencia_dispositivo ON asistencia(dispositivo_id);
-CREATE INDEX idx_asistencia_tipo_biometria ON asistencia(tipo_biometria);
-CREATE INDEX idx_logs_dispositivo ON logs_dispositivos(dispositivo_id);
-CREATE INDEX idx_logs_fecha ON logs_dispositivos(timestamp);
-CREATE INDEX idx_logs_empleado ON logs_dispositivos(empleado_id);
-CREATE INDEX idx_retardos_empleado ON retardos(empleado_id);
-CREATE INDEX idx_retardos_fecha ON retardos(fecha);
-CREATE INDEX idx_retardos_tipo ON retardos(tipo);
-CREATE INDEX idx_horarios_empleados_empleado ON horarios_empleados(empleado_id);
-CREATE INDEX idx_horarios_empleados_dia ON horarios_empleados(dia_semana);
-CREATE INDEX idx_horarios_laborales_activo ON horarios_laborales(activo);
-CREATE INDEX idx_comisiones_empleado ON comisiones(empleado_id);
-CREATE INDEX idx_ausencias_empleado ON ausencias(empleado_id);
-CREATE INDEX idx_dispositivos_id ON dispositivos_biometricos(dispositivo_id);
-CREATE INDEX idx_dispositivos_activo ON dispositivos_biometricos(activo);
-CREATE INDEX idx_dispositivos_estado ON dispositivos_biometricos(estado);
+-- Insertar usuario admin por defecto (Password: admin123)
+INSERT IGNORE INTO usuarios (username, password, email, rol, nombre_completo) 
+VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@sistema.local', 'admin', 'Administrador');

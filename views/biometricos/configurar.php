@@ -6,12 +6,13 @@
     <title>Configuración de Dispositivos - Sistema Biométrico</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="<?php echo BASE_URL; ?>/public/css/colores-pantone.css" rel="stylesheet">
     <style>
         .device-config-card { transition: transform 0.2s; }
         .device-config-card:hover { transform: translateY(-2px); }
         .status-indicator { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
-        .status-active { background-color: #28a745; }
-        .status-inactive { background-color: #6c757d; }
+        .status-active { background-color: var(--color-secondary); }
+        .status-inactive { background-color: var(--color-gray-dark); }
     </style>
 </head>
 <body>
@@ -50,7 +51,9 @@
                         <h5><i class="fas fa-plus-circle"></i> Configurar Nuevo Dispositivo</h5>
                     </div>
                     <div class="card-body">
+<?php require_once 'helpers/Csrf.php'; ?>
                         <form method="POST" action="/sistema_biometrico/biometricos/configurar">
+                            <input type="hidden" name="_token" value="<?php echo htmlspecialchars(Csrf::token()); ?>">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -226,8 +229,10 @@
             }
         }
 
-        function testConexion(dispositivoId) {
-            fetch(`/sistema_biometrico/biometricos/test/${dispositivoId}`)
+function testConexion(dispositivoId) {
+            fetch(`/sistema_biometrico/biometricos/test-dispositivo/${dispositivoId}`, {
+                method: 'POST'
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -244,8 +249,12 @@
 
         function sincronizarEmpleados(dispositivoId) {
             if (confirm(`¿Desea sincronizar todos los empleados con el dispositivo ${dispositivoId}?`)) {
+                const body = new URLSearchParams();
+                body.append('_token', '<?php echo htmlspecialchars(Csrf::token()); ?>');
                 fetch(`/sistema_biometrico/biometricos/sincronizar/${dispositivoId}`, {
-                    method: 'POST'
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: body.toString()
                 })
                 .then(response => response.json())
                 .then(data => {

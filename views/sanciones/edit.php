@@ -14,7 +14,7 @@
 
                     <?php require_once 'helpers/Csrf.php'; ?>
                     <form method="POST">
-                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(Csrf::token()); ?>">
+                        <input type="hidden" name="_token" value="<?php echo htmlspecialchars(Csrf::token()); ?>">
                         <div class="form-group">
                             <label for="empleado_id">Empleado</label>
                             <select name="empleado_id" id="empleado_id" class="form-control" required>
@@ -49,12 +49,13 @@
                             <textarea name="motivo" id="motivo" class="form-control" rows="4"><?php echo htmlspecialchars($sancion['motivo']); ?></textarea>
                         </div>
 
-                        <button class="btn btn-primary" type="submit">Guardar</button>
-                        <a href="<?php echo BASE_URL; ?>/sanciones" class="btn btn-secondary">Cancelar</a>
+                        <button class="btn btn-primary" type="submit" style="background-color: #9F2241; border-color: #9F2241;">Guardar</button>
+                        <a href="<?php echo BASE_URL; ?>/sanciones" class="btn btn-secondary" style="border-color: #6F7271; color: #6F7271;">Cancelar</a>
                     </form>
 
                     <form method="POST" action="<?php echo BASE_URL . '/sanciones/' . $sancion['id'] . '/delete'; ?>" class="mt-3">
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Eliminar sanción?');">Eliminar</button>
+                        <input type="hidden" name="_token" value="<?php echo htmlspecialchars(Csrf::token()); ?>">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Eliminar sanción?');" style="background-color: #691C32; border-color: #691C32;">Eliminar</button>
                     </form>
                 </div>
             </div>

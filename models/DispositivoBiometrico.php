@@ -1,231 +1,297 @@
 <?php
 require_once 'Database.php';
 
-/**
- * Modelo para gestión de dispositivos biométricos
- */
-class DispositivoBiometrico {
+class DispositivoBiometrico
+{
     private $db;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = new Database();
     }
 
     /**
-     * Obtiene todos los dispositivos configurados
+     * Obtiene todos los dispositivos biométricos
      */
-    public function getAll() {
+    public function getAll()
+    {
         $stmt = $this->db->getConnection()->prepare("
-            SELECT * FROM dispositivos_biometricos
-            ORDER BY dispositivo_id
+            SELECT * FROM dispositivos_biometricos 
+            ORDER BY sede, dispositivo_id
         ");
         $stmt->execute();
         return $stmt->fetchAll();
     }
 
     /**
-     * Obtiene un dispositivo por ID
+     * Obtiene solo dispositivos activos
      */
-    public function getById($dispositivoId) {
+    public function getActivos()
+    {
         $stmt = $this->db->getConnection()->prepare("
-            SELECT * FROM dispositivos_biometricos
-            WHERE dispositivo_id = ?
+            SELECT * FROM dispositivos_biometricos 
+            WHERE activo = 1 
+            ORDER BY sede, dispositivo_id
         ");
-        $stmt->execute([$dispositivoId]);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Obtiene un dispositivo por su ID
+     */
+    public function getById($id)
+    {
+        $stmt = $this->db->getConnection()->prepare("
+            SELECT * FROM dispositivos_biometricos WHERE id = ?
+        ");
+        $stmt->execute([$id]);
         return $stmt->fetch();
     }
 
     /**
-     * Crea un nuevo dispositivo
+     * Obtiene un dispositivo por dispositivo_id
      */
-    public function create($data) {
+    public function getByDispositivoId($dispositivo_id)
+    {
         $stmt = $this->db->getConnection()->prepare("
-            INSERT INTO dispositivos_biometricos
-            (dispositivo_id, nombre, tipo, marca, modelo, ip_address, puerto, usuario, password, configuracion)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            SELECT * FROM dispositivos_biometricos WHERE dispositivo_id = ?
         ");
+        $stmt->execute([$dispositivo_id]);
+        return $stmt->fetch();
+    }
 
-        $passwordHash = password_hash($data['password'], PASSWORD_DEFAULT);
-        $configuracion = isset($data['configuracion']) ? json_encode($data['configuracion']) : null;
+    /**
+     * Obtiene dispositivos por sede
+     */
+    public function getBySede($sede)
+    {
+        $stmt = $this->db->getConnection()->prepare("
+            SELECT * FROM dispositivos_biometricos 
+            WHERE sede = ? AND activo = 1 
+            ORDER BY dispositivo_id
+        ");
+        $stmt->execute([$sede]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Crea un nuevo dispositivo biométrico
+     */
+    public function create($data)
+    {
+        $stmt = $this->db->getConnection()->prepare("
+            INSERT INTO dispositivos_biometricos (
+                dispositivo_id, nombre, sede, ip_address, puerto, 
+                tipo_dispositivo, modelo, firmware_version, capacidades, 
+                activo, fecha_instalacion, configuracion_adicional, notas
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
 
         return $stmt->execute([
             $data['dispositivo_id'],
             $data['nombre'],
-            $data['tipo'] ?? 'dual',
-            $data['marca'] ?? null,
-            $data['modelo'] ?? null,
-            $data['ip_address'] ?? null,
+            $data['sede'],
+            $data['ip_address'],
             $data['puerto'] ?? 4370,
-            $data['usuario'] ?? null,
-            $passwordHash,
-            $configuracion
+            $data['tipo_dispositivo'] ?? 'ZKTeco',
+            $data['modelo'] ?? null,
+            $data['firmware_version'] ?? null,
+            isset($data['capacidades']) ? json_encode($data['capacidades']) : '{"huella":true,"cara":false}',
+            $data['activo'] ?? 1,
+            $data['fecha_instalacion'] ?? date('Y-m-d'),
+            isset($data['configuracion_adicional']) ? json_encode($data['configuracion_adicional']) : null,
+            $data['notas'] ?? null
         ]);
     }
 
     /**
-     * Actualiza un dispositivo
+     * Actualiza un dispositivo biométrico
      */
-    public function update($dispositivoId, $data) {
-        $fields = [];
-        $params = [];
+    public function update($id, $data)
+    {
+        $stmt = $this->db->getConnection()->prepare("
+            UPDATE dispositivos_biometricos SET 
+                nombre = ?, 
+                sede = ?, 
+                ip_address = ?, 
+                puerto = ?, 
+                tipo_dispositivo = ?, 
+                modelo = ?, 
+                firmware_version = ?, 
+                capacidades = ?, 
+                activo = ?, 
+                fecha_instalacion = ?, 
+                configuracion_adicional = ?, 
+                notas = ?
+            WHERE id = ?
+        ");
 
-        if (isset($data['nombre'])) {
-            $fields[] = "nombre = ?";
-            $params[] = $data['nombre'];
-        }
-        if (isset($data['tipo'])) {
-            $fields[] = "tipo = ?";
-            $params[] = $data['tipo'];
-        }
-        if (isset($data['marca'])) {
-            $fields[] = "marca = ?";
-            $params[] = $data['marca'];
-        }
-        if (isset($data['modelo'])) {
-            $fields[] = "modelo = ?";
-            $params[] = $data['modelo'];
-        }
-        if (isset($data['ip_address'])) {
-            $fields[] = "ip_address = ?";
-            $params[] = $data['ip_address'];
-        }
-        if (isset($data['puerto'])) {
-            $fields[] = "puerto = ?";
-            $params[] = $data['puerto'];
-        }
-        if (isset($data['usuario'])) {
-            $fields[] = "usuario = ?";
-            $params[] = $data['usuario'];
-        }
-        if (isset($data['password'])) {
-            $fields[] = "password = ?";
-            $params[] = password_hash($data['password'], PASSWORD_DEFAULT);
-        }
-        if (isset($data['activo'])) {
-            $fields[] = "activo = ?";
-            $params[] = $data['activo'];
-        }
-        if (isset($data['configuracion'])) {
-            $fields[] = "configuracion = ?";
-            $params[] = json_encode($data['configuracion']);
-        }
+        return $stmt->execute([
+            $data['nombre'],
+            $data['sede'],
+            $data['ip_address'],
+            $data['puerto'] ?? 4370,
+            $data['tipo_dispositivo'] ?? 'ZKTeco',
+            $data['modelo'] ?? null,
+            $data['firmware_version'] ?? null,
+            isset($data['capacidades']) ? json_encode($data['capacidades']) : null,
+            $data['activo'] ?? 1,
+            $data['fecha_instalacion'] ?? null,
+            isset($data['configuracion_adicional']) ? json_encode($data['configuracion_adicional']) : null,
+            $data['notas'] ?? null,
+            $id
+        ]);
+    }
 
-        if (empty($fields)) {
-            return false;
-        }
+    /**
+     * Desactiva un dispositivo (soft delete)
+     */
+    public function delete($id)
+    {
+        $stmt = $this->db->getConnection()->prepare("
+            UPDATE dispositivos_biometricos SET activo = 0 WHERE id = ?
+        ");
+        return $stmt->execute([$id]);
+    }
 
-        $params[] = $dispositivoId;
-        $query = "UPDATE dispositivos_biometricos SET " . implode(', ', $fields) . " WHERE dispositivo_id = ?";
-
-        $stmt = $this->db->getConnection()->prepare($query);
-        return $stmt->execute($params);
+    /**
+     * Reactiva un dispositivo
+     */
+    public function reactivate($id)
+    {
+        $stmt = $this->db->getConnection()->prepare("
+            UPDATE dispositivos_biometricos SET activo = 1 WHERE id = ?
+        ");
+        return $stmt->execute([$id]);
     }
 
     /**
      * Actualiza el estado de un dispositivo
      */
-    public function updateEstado($dispositivoId, $estado) {
+    public function updateStatus($id, $status)
+    {
         $stmt = $this->db->getConnection()->prepare("
-            UPDATE dispositivos_biometricos
-            SET estado = ?, ultima_conexion = CURRENT_TIMESTAMP
-            WHERE dispositivo_id = ?
+            UPDATE dispositivos_biometricos SET activo = ? WHERE id = ?
         ");
-        return $stmt->execute([$estado, $dispositivoId]);
+        return $stmt->execute([$status, $id]);
     }
 
     /**
-     * Elimina un dispositivo
+     * Actualiza la última sincronización
      */
-    public function delete($dispositivoId) {
+    public function updateLastSync($id)
+    {
         $stmt = $this->db->getConnection()->prepare("
-            DELETE FROM dispositivos_biometricos WHERE dispositivo_id = ?
+            UPDATE dispositivos_biometricos 
+            SET ultima_sincronizacion = NOW() 
+            WHERE id = ?
         ");
-        return $stmt->execute([$dispositivoId]);
+        return $stmt->execute([$id]);
     }
 
     /**
-     * Verifica si un dispositivo existe
+     * Obtiene la configuración de un dispositivo para conexión
      */
-    public function exists($dispositivoId) {
-        $stmt = $this->db->getConnection()->prepare("
-            SELECT COUNT(*) as count FROM dispositivos_biometricos WHERE dispositivo_id = ?
-        ");
-        $stmt->execute([$dispositivoId]);
-        $result = $stmt->fetch();
-        return $result['count'] > 0;
+    public function getConnectionConfig($dispositivo_id)
+    {
+        $dispositivo = $this->getByDispositivoId($dispositivo_id);
+
+        if (!$dispositivo) {
+            return null;
+        }
+
+        return [
+            'dispositivo_id' => $dispositivo['dispositivo_id'],
+            'nombre' => $dispositivo['nombre'],
+            'sede' => $dispositivo['sede'],
+            'ip_address' => $dispositivo['ip_address'],
+            'puerto' => $dispositivo['puerto'],
+            'tipo_dispositivo' => $dispositivo['tipo_dispositivo'],
+            'modelo' => $dispositivo['modelo'],
+            'capacidades' => json_decode($dispositivo['capacidades'], true),
+            'configuracion_adicional' => json_decode($dispositivo['configuracion_adicional'], true)
+        ];
     }
 
     /**
-     * Obtiene dispositivos activos
+     * Obtiene todas las sedes únicas
      */
-    public function getActivos() {
+    public function getAllSedes()
+    {
         $stmt = $this->db->getConnection()->prepare("
-            SELECT * FROM dispositivos_biometricos
-            WHERE activo = 1
-            ORDER BY dispositivo_id
+            SELECT DISTINCT sede FROM dispositivos_biometricos 
+            WHERE activo = 1 
+            ORDER BY sede
+        ");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    /**
+     * Cuenta dispositivos por sede
+     */
+    public function countBySede()
+    {
+        $stmt = $this->db->getConnection()->prepare("
+            SELECT sede, COUNT(*) as total, 
+                   SUM(CASE WHEN activo = 1 THEN 1 ELSE 0 END) as activos
+            FROM dispositivos_biometricos 
+            GROUP BY sede 
+            ORDER BY sede
         ");
         $stmt->execute();
         return $stmt->fetchAll();
     }
 
     /**
-     * Registra un empleado en un dispositivo
+     * Verifica si una IP ya está en uso
      */
-    public function registrarEmpleadoEnDispositivo($dispositivoId, $empleadoId, $tipoBiometria = null) {
-        // Obtener datos del empleado
-        $stmt = $this->db->getConnection()->prepare("
-            SELECT nombre, apellido, huella_dactilar, foto_cara
-            FROM empleados WHERE id = ?
-        ");
-        $stmt->execute([$empleadoId]);
-        $empleado = $stmt->fetch();
-
-        if (!$empleado) {
-            return false;
+    public function ipExists($ip_address, $exclude_id = null)
+    {
+        if ($exclude_id) {
+            $stmt = $this->db->getConnection()->prepare("
+                SELECT COUNT(*) as count 
+                FROM dispositivos_biometricos 
+                WHERE ip_address = ? AND id != ?
+            ");
+            $stmt->execute([$ip_address, $exclude_id]);
+        } else {
+            $stmt = $this->db->getConnection()->prepare("
+                SELECT COUNT(*) as count 
+                FROM dispositivos_biometricos 
+                WHERE ip_address = ?
+            ");
+            $stmt->execute([$ip_address]);
         }
 
-        // Descifrar huella si está presente
-        if (!empty($empleado['huella_dactilar'])) {
-            require_once __DIR__ . '/../helpers/Encryption.php';
-            $empleado['huella_dactilar'] = Encryption::decrypt($empleado['huella_dactilar']);
-        }
-
-        // Aquí iría la lógica para registrar en el dispositivo físico
-        // Por ahora, solo registramos en logs
-        $logModel = new LogDispositivo();
-        $logModel->logEvent(
-            $dispositivoId,
-            'registro',
-            'exitoso',
-            'Empleado registrado en dispositivo',
-            [
-                'empleado_id' => $empleadoId,
-                'tipo_biometria' => $tipoBiometria,
-                'nombre_completo' => $empleado['nombre'] . ' ' . $empleado['apellido']
-            ],
-            $empleadoId,
-            $tipoBiometria
-        );
-
-        return true;
+        $result = $stmt->fetch();
+        return $result['count'] > 0;
     }
 
     /**
-     * Verifica credenciales de dispositivo
+     * Verifica si un dispositivo_id ya está en uso
      */
-    public function verificarCredenciales($dispositivoId, $usuario, $password) {
-        $stmt = $this->db->getConnection()->prepare("
-            SELECT password FROM dispositivos_biometricos
-            WHERE dispositivo_id = ? AND usuario = ? AND activo = 1
-        ");
-        $stmt->execute([$dispositivoId, $usuario]);
-        $result = $stmt->fetch();
-
-        if ($result && password_verify($password, $result['password'])) {
-            return true;
+    public function dispositivoIdExists($dispositivo_id, $exclude_id = null)
+    {
+        if ($exclude_id) {
+            $stmt = $this->db->getConnection()->prepare("
+                SELECT COUNT(*) as count 
+                FROM dispositivos_biometricos 
+                WHERE dispositivo_id = ? AND id != ?
+            ");
+            $stmt->execute([$dispositivo_id, $exclude_id]);
+        } else {
+            $stmt = $this->db->getConnection()->prepare("
+                SELECT COUNT(*) as count 
+                FROM dispositivos_biometricos 
+                WHERE dispositivo_id = ?
+            ");
+            $stmt->execute([$dispositivo_id]);
         }
 
-        return false;
+        $result = $stmt->fetch();
+        return $result['count'] > 0;
     }
 }
 ?>

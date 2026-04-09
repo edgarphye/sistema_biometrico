@@ -1,0 +1,7 @@
+Conexion BD OK
+Registros en asistencia: 2683 (0s)
+Consultando empleados activos...
+Empleados activos: 290
+Consultando mapeos...
+ERROR mapeos: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'sistema_biometrico.zkteco_empleado_mapeo' doesn't exist
+IDs únicos en archivo DAT: 140

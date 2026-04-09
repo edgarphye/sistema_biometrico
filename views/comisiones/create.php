@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/../../helpers/Csrf.php'; ?>
 <div class="container mt-4">
     <h2>Crear Nueva Comisión</h2>
 
@@ -5,6 +6,18 @@
         <div class="alert alert-danger">
             <i class="fas fa-exclamation-triangle"></i> <?php echo htmlspecialchars($error); ?>
         </div>
+    <?php endif; ?>
+    
+    <?php if (isset($_SESSION['form_errors'])): ?>
+        <div class="alert alert-danger">
+            <h6><i class="fas fa-exclamation-triangle"></i> Errores de validación:</h6>
+            <ul class="mb-0">
+                <?php foreach ($_SESSION['form_errors'] as $field => $error): ?>
+                    <li><?php echo htmlspecialchars($error); ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+        <?php unset($_SESSION['form_errors']); ?>
     <?php endif; ?>
 
     <div class="row">
@@ -15,6 +28,7 @@
                 </div>
                 <div class="card-body">
                     <form method="POST" action="<?php echo BASE_URL; ?>/comisiones/create" id="comisionForm">
+                        <input type="hidden" name="_token" id="csrf_token" value="<?php echo htmlspecialchars(Csrf::token()); ?>">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
@@ -22,7 +36,7 @@
                                     <select class="form-select" id="empleado_id" name="empleado_id" required>
                                         <option value="">Seleccionar empleado...</option>
                                         <?php foreach ($empleados as $empleado): ?>
-                                            <option value="<?php echo $empleado['id']; ?>">
+                                            <option value="<?php echo $empleado['id']; ?>" <?php echo (isset($_SESSION['form_data']['empleado_id']) && $_SESSION['form_data']['empleado_id'] == $empleado['id']) ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($empleado['nombre'] . ' ' . $empleado['apellido']); ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -35,7 +49,7 @@
                                     <select class="form-select" id="tipo_comision" name="tipo_comision" required onchange="actualizarInfoTipo()">
                                         <option value="">Seleccionar tipo...</option>
                                         <?php foreach ($tiposComision as $tipo => $config): ?>
-                                            <option value="<?php echo $tipo; ?>" data-requiere-aprobacion="<?php echo $config['requiere_aprobacion'] ? '1' : '0'; ?>" data-limite-dias="<?php echo $config['limite_dias']; ?>">
+                                            <option value="<?php echo $tipo; ?>" data-requiere-aprobacion="<?php echo $config['requiere_aprobacion'] ? '1' : '0'; ?>" data-limite-dias="<?php echo $config['limite_dias']; ?>" <?php echo (isset($_SESSION['form_data']['tipo_comision']) && $_SESSION['form_data']['tipo_comision'] == $tipo) ? 'selected' : ''; ?>>
                                                 <?php echo ucfirst($tipo); ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -46,27 +60,27 @@
 
                         <div class="form-group mb-3">
                             <label for="descripcion" class="form-label">Descripción *</label>
-                            <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required placeholder="Describa detalladamente el propósito de la comisión"></textarea>
+                            <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required placeholder="Describa detalladamente el propósito de la comisión"><?php echo htmlspecialchars($_SESSION['form_data']['descripcion'] ?? ''); ?></textarea>
                         </div>
 
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
                                     <label for="monto" class="form-label">Monto ($) *</label>
-                                    <input type="number" class="form-control" id="monto" name="monto" step="0.01" min="0" required onchange="validarLimiteMensual()">
+                                    <input type="number" class="form-control" id="monto" name="monto" step="0.01" min="0" required onchange="validarLimiteMensual()" value="<?php echo htmlspecialchars($_SESSION['form_data']['monto'] ?? ''); ?>">
                                     <small class="form-text text-muted" id="limite-info"></small>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
                                     <label for="fecha_asignacion" class="form-label">Fecha de Asignación *</label>
-                                    <input type="date" class="form-control" id="fecha_asignacion" name="fecha_asignacion" required onchange="validarLimiteMensual()">
+                                    <input type="date" class="form-control" id="fecha_asignacion" name="fecha_asignacion" required onchange="validarLimiteMensual()" value="<?php echo htmlspecialchars($_SESSION['form_data']['fecha_asignacion'] ?? ''); ?>">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
                                     <label for="fecha_vencimiento" class="form-label">Fecha de Vencimiento</label>
-                                    <input type="date" class="form-control" id="fecha_vencimiento" name="fecha_vencimiento" onchange="calcularDias()">
+                                    <input type="date" class="form-control" id="fecha_vencimiento" name="fecha_vencimiento" onchange="calcularDias()" value="<?php echo htmlspecialchars($_SESSION['form_data']['fecha_vencimiento'] ?? ''); ?>">
                                     <small class="form-text text-muted" id="dias-info"></small>
                                 </div>
                             </div>
@@ -161,12 +175,13 @@ function validarLimiteMensual() {
         const mes = fecha.getMonth() + 1;
         const anio = fecha.getFullYear();
 
+        const csrfToken = document.getElementById('csrf_token').value;
         fetch('<?php echo BASE_URL; ?>/comisiones/validar-limite', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: `empleado_id=${empleadoId}&monto=${monto}&mes=${mes}&anio=${anio}`
+            body: `empleado_id=${empleadoId}&monto=${monto}&mes=${mes}&anio=${anio}&_token=${encodeURIComponent(csrfToken)}`
         })
         .then(response => response.json())
         .then(data => {

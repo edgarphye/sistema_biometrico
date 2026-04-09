@@ -1,0 +1,3 @@
+ALTER TABLE usuarios ADD COLUMN totp_secret VARCHAR(255) NULL;
+ALTER TABLE usuarios ADD COLUMN totp_enabled TINYINT(1) DEFAULT 0;
+ALTER TABLE usuarios ADD COLUMN totp_setup_date TIMESTAMP NULL;

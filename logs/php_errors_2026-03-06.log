@@ -1,0 +1,507 @@
+[2026-03-06 08:59:25] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /
+--------------------------------------------------------------------------------
+[2026-03-06 08:59:25] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /login
+--------------------------------------------------------------------------------
+[2026-03-06 08:59:25] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /api/log-error
+--------------------------------------------------------------------------------
+[2026-03-06 08:59:25] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /login
+--------------------------------------------------------------------------------
+[2026-03-06 08:59:31] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /login
+--------------------------------------------------------------------------------
+[2026-03-06 08:59:39] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /login
+--------------------------------------------------------------------------------
+[2026-03-06 08:59:39] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /dashboard
+--------------------------------------------------------------------------------
+[2026-03-06 08:59:42] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 136
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(136): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-06 09:00:14] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados
+--------------------------------------------------------------------------------
+[2026-03-06 09:00:20] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados?search=106
+--------------------------------------------------------------------------------
+[2026-03-06 09:00:22] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados/datos-completos/106
+--------------------------------------------------------------------------------
+[2026-03-06 09:00:22] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /api/log-error
+--------------------------------------------------------------------------------
+[2026-03-06 09:00:22] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /api/log-error
+#0 {main}
+[2026-03-06 09:02:38] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-06 09:02:41] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-06 09:02:41] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /api/log-error
+--------------------------------------------------------------------------------
+[2026-03-06 09:02:41] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /api/log-error
+#0 {main}
+[2026-03-06 09:05:41] [WARNING] session_start(): open(/tmp\sess_516ace74f12d8bac4453b25e83fa9ec2, O_RDWR) failed: No such file or directory (2) en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:05:41] [WARNING] session_start(): Failed to read session data: files (path: /tmp) en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:08:16] [FATAL_ERROR] Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1701 Cannot truncate a table referenced in a foreign key constraint (`sistema_biometrico`.`retardos`, CONSTRAINT `fk_retardos_tipo_just` FOREIGN KEY (`tipo_justificacion_id`) REFERENCES `sistema_biometrico`.`tipos_justificacion` (`id`)) in Command line code:1
+Stack trace:
+#0 Command line code(1): PDO->exec('TRUNCATE TABLE ...')
+#1 {main}
+  thrown en Command line code línea 1
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:12:20] [FATAL_ERROR] Uncaught PDOException: SQLSTATE[01000]: Warning: 1265 Data truncated for column 'tipo_incidencia' at row 1 in Command line code:1
+Stack trace:
+#0 Command line code(1): PDOStatement->execute(Array)
+#1 {main}
+  thrown en Command line code línea 1
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:26:10] [WARNING] session_start(): open(/tmp\sess_48d8c20648e68d5d30af40c9b85375ac, O_RDWR) failed: No such file or directory (2) en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:26:10] [WARNING] session_start(): Failed to read session data: files (path: /tmp) en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:26:10] [FATAL_ERROR] Uncaught Error: Call to undefined method ConfiguracionController::procesarDat() in Command line code:16
+Stack trace:
+#0 {main}
+  thrown en Command line code línea 16
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:26:35] [WARNING] session_start(): open(/tmp\sess_110272ef8c5813dbe4461c4dda9d432b, O_RDWR) failed: No such file or directory (2) en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:26:35] [WARNING] session_start(): Failed to read session data: files (path: /tmp) en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:26:35] [WARNING] session_start(): open(/tmp\sess_729332de4e4b4395118af927de0bc842, O_RDWR) failed: No such file or directory (2) en C:\tools\nginx\html\sistema_biometrico\controllers\ConfiguracionController.php línea 455
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:26:35] [WARNING] session_start(): Failed to read session data: files (path: /tmp) en C:\tools\nginx\html\sistema_biometrico\controllers\ConfiguracionController.php línea 455
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:26:47] [WARNING] http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\config.php:6) en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 61
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:26:47] [WARNING] Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\config.php:6) en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 62
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:27:30] [EXCEPTION] Error
+Mensaje: Class "ConfiguracionController" not found
+URI: N/A
+#0 {main}
+[2026-03-06 09:27:57] [EXCEPTION] Error
+Mensaje: Class "ConfiguracionController" not found
+URI: N/A
+#0 {main}
+[2026-03-06 09:28:20] [EXCEPTION] Error
+Mensaje: Class "ConfiguracionController" not found
+URI: N/A
+#0 {main}
+[2026-03-06 09:28:58] [EXCEPTION] PDOException
+Mensaje: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'sistema_biometrico.zk_empleado_mapeo' doesn't exist
+URI: N/A
+#0 C:\tools\nginx\html\sistema_biometrico\test_process_dat.php(24): PDO->query('SELECT empleado...')
+#1 {main}
+[2026-03-06 09:29:31] [EXCEPTION] PDOException
+Mensaje: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'sistema_biometrico.zk_empleado_mapeo' doesn't exist
+URI: N/A
+#0 C:\tools\nginx\html\sistema_biometrico\test_process_dat.php(26): PDO->query('SELECT empleado...')
+#1 {main}
+[2026-03-06 09:30:09] [FATAL_ERROR] Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'sistema_biometrico.zkteco_empleado_mapeo' doesn't exist in Command line code:1
+Stack trace:
+#0 Command line code(1): PDO->query('SELECT COUNT(*)...')
+#1 {main}
+  thrown en Command line code línea 1
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:30:55] [EXCEPTION] PDOException
+Mensaje: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'sistema_biometrico.zk_empleado_mapeo' doesn't exist
+URI: N/A
+#0 C:\tools\nginx\html\sistema_biometrico\test_process_dat.php(26): PDO->query('SELECT empleado...')
+#1 {main}
+[2026-03-06 09:32:09] [WARNING] Undefined array key "insertados" en C:\tools\nginx\html\sistema_biometrico\test_process_dat.php línea 63
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:32:09] [WARNING] Undefined array key "actualizados" en C:\tools\nginx\html\sistema_biometrico\test_process_dat.php línea 64
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:32:09] [WARNING] Undefined array key "omitidos_duplicados" en C:\tools\nginx\html\sistema_biometrico\test_process_dat.php línea 65
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:32:09] [WARNING] Undefined array key "errores" en C:\tools\nginx\html\sistema_biometrico\test_process_dat.php línea 66
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:35:22] [WARNING] Undefined array key "insertados" en C:\tools\nginx\html\sistema_biometrico\test_process_dat.php línea 63
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:35:22] [WARNING] Undefined array key "actualizados" en C:\tools\nginx\html\sistema_biometrico\test_process_dat.php línea 64
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:35:22] [WARNING] Undefined array key "omitidos_duplicados" en C:\tools\nginx\html\sistema_biometrico\test_process_dat.php línea 65
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:35:22] [WARNING] Undefined array key "errores" en C:\tools\nginx\html\sistema_biometrico\test_process_dat.php línea 66
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:40:17] [EXCEPTION] PDOException
+Mensaje: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'sistema_biometrico.zkteco_empleado_mapeo' doesn't exist
+URI: N/A
+#0 C:\tools\nginx\html\sistema_biometrico\test_process.php(25): PDO->query('SELECT empleado...')
+#1 {main}
+[2026-03-06 09:40:33] [WARNING] Undefined array key 0 en C:\tools\nginx\html\sistema_biometrico\test_debug.php línea 19
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:43:24] [WARNING] Undefined array key "insertados" en C:\tools\nginx\html\sistema_biometrico\test_process.php línea 54
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:43:24] [WARNING] Undefined array key "actualizados" en C:\tools\nginx\html\sistema_biometrico\test_process.php línea 55
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:43:24] [WARNING] Undefined array key "omitidos_duplicados" en C:\tools\nginx\html\sistema_biometrico\test_process.php línea 56
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:43:24] [WARNING] Undefined array key "errores" en C:\tools\nginx\html\sistema_biometrico\test_process.php línea 57
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:45:41] [WARNING] session_start(): open(/tmp\sess_23a836f5541221f09b46ffd9e12ba1be, O_RDWR) failed: No such file or directory (2) en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:45:41] [WARNING] session_start(): Failed to read session data: files (path: /tmp) en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:48:40] [WARNING] session_start(): Session cannot be started after headers have already been sent en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:48:40] [WARNING] Cannot modify header information - headers already sent by (output started at Command line code:5) en C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php línea 263
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:48:40] [WARNING] session_start(): Session cannot be started after headers have already been sent en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:48:40] [WARNING] Cannot modify header information - headers already sent by (output started at Command line code:5) en C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php línea 322
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:49:04] [WARNING] session_start(): Session cannot be started after headers have already been sent en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:49:04] [WARNING] Cannot modify header information - headers already sent by (output started at Command line code:5) en C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php línea 263
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:49:04] [WARNING] session_start(): Session cannot be started after headers have already been sent en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:49:04] [WARNING] Cannot modify header information - headers already sent by (output started at Command line code:5) en C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php línea 322
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:49:27] [WARNING] session_start(): Session cannot be started after headers have already been sent en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:49:27] [WARNING] Cannot modify header information - headers already sent by (output started at Command line code:5) en C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php línea 322
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:49:27] [WARNING] session_start(): Session cannot be started after headers have already been sent en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:49:27] [WARNING] Cannot modify header information - headers already sent by (output started at Command line code:5) en C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php línea 322
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:49:53] [WARNING] session_start(): Session cannot be started after headers have already been sent en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:49:53] [WARNING] Cannot modify header information - headers already sent by (output started at Command line code:5) en C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php línea 263
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:49:53] [WARNING] session_start(): Session cannot be started after headers have already been sent en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:49:53] [WARNING] Cannot modify header information - headers already sent by (output started at Command line code:5) en C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php línea 322
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:50:39] [WARNING] session_start(): Session cannot be started after headers have already been sent en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:50:39] [WARNING] Cannot modify header information - headers already sent by (output started at Command line code:5) en C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php línea 322
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:51:23] [WARNING] session_start(): Session cannot be started after headers have already been sent en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:51:23] [WARNING] Cannot modify header information - headers already sent by (output started at Command line code:5) en C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php línea 263
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:51:23] [WARNING] session_start(): Session cannot be started after headers have already been sent en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:51:23] [WARNING] Cannot modify header information - headers already sent by (output started at Command line code:5) en C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php línea 322
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:51:23] [WARNING] session_start(): Session cannot be started after headers have already been sent en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:51:23] [WARNING] Cannot modify header information - headers already sent by (output started at Command line code:5) en C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php línea 322
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:51:23] [FATAL_ERROR] Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near ')
+            ORDER BY FIELD(tipo_incidencia, ), nombre' at line 3 in C:\tools\nginx\html\sistema_biometrico\models\TipoJustificacion.php:62
+Stack trace:
+#0 C:\tools\nginx\html\sistema_biometrico\models\TipoJustificacion.php(62): PDO->prepare('\n            SE...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php(353): TipoJustificacion->getAllForIncidencia('normal')
+#2 Command line code(16): JustificacionController->getAsistenciaAjax(25399)
+#3 {main}
+  thrown en C:\tools\nginx\html\sistema_biometrico\models\TipoJustificacion.php línea 62
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:51:53] [WARNING] session_start(): Session cannot be started after headers have already been sent en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:51:53] [WARNING] Cannot modify header information - headers already sent by (output started at Command line code:5) en C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php línea 263
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:51:53] [WARNING] session_start(): Session cannot be started after headers have already been sent en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:51:53] [WARNING] Cannot modify header information - headers already sent by (output started at Command line code:5) en C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php línea 322
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:51:53] [WARNING] session_start(): Session cannot be started after headers have already been sent en C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php línea 8
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:51:53] [WARNING] Cannot modify header information - headers already sent by (output started at Command line code:5) en C:\tools\nginx\html\sistema_biometrico\controllers\JustificacionController.php línea 322
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 09:56:01] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /
+--------------------------------------------------------------------------------
+[2026-03-06 09:56:01] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /login
+--------------------------------------------------------------------------------
+[2026-03-06 09:56:01] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /api/log-error
+--------------------------------------------------------------------------------
+[2026-03-06 09:56:01] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /login
+--------------------------------------------------------------------------------
+[2026-03-06 09:56:03] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /login
+--------------------------------------------------------------------------------
+[2026-03-06 09:57:59] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /login
+--------------------------------------------------------------------------------
+[2026-03-06 09:58:07] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /login
+--------------------------------------------------------------------------------
+[2026-03-06 09:58:07] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /dashboard
+--------------------------------------------------------------------------------
+[2026-03-06 09:58:10] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 136
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(136): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-06 09:58:14] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /configuracion
+--------------------------------------------------------------------------------
+[2026-03-06 09:58:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-06 09:58:59] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /configuracion/uploadZkteco
+--------------------------------------------------------------------------------
+[2026-03-06 09:59:22] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-06 09:59:23] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /.well-known/appspecific/com.chrome.devtools.json
+--------------------------------------------------------------------------------
+[2026-03-06 10:00:55] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-06 10:00:56] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-06 10:00:57] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-06 10:00:57] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-06 10:01:08] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados
+--------------------------------------------------------------------------------
+[2026-03-06 10:01:11] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados?search=106
+--------------------------------------------------------------------------------
+[2026-03-06 10:01:12] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados/datos-completos/106
+--------------------------------------------------------------------------------
+[2026-03-06 10:01:12] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /api/log-error
+--------------------------------------------------------------------------------
+[2026-03-06 10:01:12] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /api/log-error
+#0 {main}
+[2026-03-06 10:28:12] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /
+--------------------------------------------------------------------------------
+[2026-03-06 10:28:16] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 136
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(136): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-06 10:28:23] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados
+--------------------------------------------------------------------------------
+[2026-03-06 10:28:28] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados?search=106
+--------------------------------------------------------------------------------
+[2026-03-06 10:28:29] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados/datos-completos/106
+--------------------------------------------------------------------------------
+[2026-03-06 10:28:29] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /api/log-error
+--------------------------------------------------------------------------------
+[2026-03-06 10:28:29] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /api/log-error
+#0 {main}
+[2026-03-06 10:28:41] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /logout
+--------------------------------------------------------------------------------
+[2026-03-06 10:28:41] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /login
+--------------------------------------------------------------------------------
+[2026-03-06 10:30:55] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /login
+--------------------------------------------------------------------------------
+[2026-03-06 10:30:55] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /dashboard
+--------------------------------------------------------------------------------
+[2026-03-06 10:30:58] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 136
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(136): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-06 10:31:01] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /configuracion
+--------------------------------------------------------------------------------
+[2026-03-06 10:31:01] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-06 10:31:14] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /configuracion/uploadZkteco
+--------------------------------------------------------------------------------
+[2026-03-06 10:31:34] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-06 10:31:41] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados
+--------------------------------------------------------------------------------
+[2026-03-06 10:31:44] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados?search=106
+--------------------------------------------------------------------------------
+[2026-03-06 10:31:45] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados/datos-completos/106
+--------------------------------------------------------------------------------
+[2026-03-06 10:31:46] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /api/log-error
+--------------------------------------------------------------------------------
+[2026-03-06 10:31:46] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /api/log-error
+#0 {main}
+[2026-03-06 10:33:25] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /logout
+--------------------------------------------------------------------------------
+[2026-03-06 10:33:25] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /login
+--------------------------------------------------------------------------------
+[2026-03-06 10:34:27] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-06 10:34:27] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /login
+--------------------------------------------------------------------------------
+[2026-03-06 10:34:36] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /login
+--------------------------------------------------------------------------------
+[2026-03-06 10:34:36] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /dashboard
+--------------------------------------------------------------------------------
+[2026-03-06 10:34:39] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 136
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(136): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-06 10:34:43] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados
+--------------------------------------------------------------------------------
+[2026-03-06 10:34:46] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados?search=106
+--------------------------------------------------------------------------------
+[2026-03-06 10:34:52] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados/datos-completos/106
+--------------------------------------------------------------------------------
+[2026-03-06 10:34:52] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /api/log-error
+--------------------------------------------------------------------------------
+[2026-03-06 10:34:52] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /api/log-error
+#0 {main}
+[2026-03-06 21:47:47] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en /usr/share/nginx/html/sistema_biometrico/index.php línea 50
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-03-06 21:47:52] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en /usr/share/nginx/html/sistema_biometrico/index.php línea 50
+URI: /api/tipos-justificacion
+--------------------------------------------------------------------------------
+[2026-03-06 21:47:52] [FATAL_ERROR] Uncaught Error: Cannot use object of type Closure as array in /usr/share/nginx/html/sistema_biometrico/index.php:147
+Stack trace:
+#0 Command line code(4): require()
+#1 {main}
+  thrown en /usr/share/nginx/html/sistema_biometrico/index.php línea 147
+URI: /api/tipos-justificacion
+--------------------------------------------------------------------------------

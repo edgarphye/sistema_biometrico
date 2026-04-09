@@ -1,0 +1,119 @@
+<?php
+// index.php - Front Controller
+
+// 1. Carga de configuración y autoloader
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/helpers/Csrf.php';
+require_once __DIR__ . '/controllers/BaseController.php';
+require_once __DIR__ . '/controllers/AuthController.php';
+
+// Iniciar sesión
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 2. Definición del despachador de rutas
+$dispatcher = require 'routes.php';
+
+// 3. Verificar autenticación (excepto para rutas públicas)
+
+$rutasPublicas = ['/login', '/register', '/verify-2fa'];
+
+// Obtener la URI y el método de la petición
+$httpMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$rawPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
+$base = rtrim(BASE_URL, '/');
+$uri = $rawPath;
+
+if ($base !== '' && strpos($rawPath, $base) === 0) {
+    $uri = substr($rawPath, strlen($base));
+    if ($uri === '') { $uri = '/'; }
+}
+
+// Verificar si la ruta requiere autenticación
+$isLoggedIn = false;
+
+// Verificar estado de sesión (usando AuthController o fallback directo)
+if (class_exists('AuthController') && method_exists('AuthController', 'isLoggedIn')) {
+    $isLoggedIn = AuthController::isLoggedIn();
+} else {
+    $isLoggedIn = isset($_SESSION['user_id']);
+}
+
+if (!in_array($uri, $rutasPublicas) && !$isLoggedIn) {
+    header('Location: ' . rtrim(BASE_URL, '/') . '/login');
+    exit;
+}
+
+// 4. Despachar la ruta
+$routeInfo = $dispatcher->dispatch($httpMethod, $uri);
+
+// 5. Manejar el resultado del despachador
+switch ($routeInfo[0]) {
+    case FastRoute\Dispatcher::NOT_FOUND:
+        http_response_code(404);
+        echo 'Página no encontrada';
+        break;
+
+    case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
+        $allowedMethods = $routeInfo[1];
+        http_response_code(405);
+        echo 'Método no permitido. Métodos permitidos: ' . implode(', ', $allowedMethods);
+        break;
+
+    case FastRoute\Dispatcher::FOUND:
+        $handler = $routeInfo[1];
+        $vars = $routeInfo[2];
+        
+        $controllerName = $handler[0];
+        $methodName = $handler[1];
+
+// Validación CSRF desactivada para endpoints AJAX
+        if ($httpMethod === 'POST' && !str_contains($uri, '/validaciones/')) {
+            $csrfToken = $_POST['csrf_token'] ?? $_POST['_token'] ?? null;
+            if (!Csrf::validate($csrfToken)) {
+                http_response_code(403);
+                echo 'CSRF token inválido o ausente.';
+                exit;
+            }
+        }
+        }
+        
+        // Cargar y ejecutar el controlador
+        $controllerFile = __DIR__ . '/controllers/' . $controllerName . '.php';
+        if (file_exists($controllerFile)) {
+            try {
+                require_once $controllerFile;
+                
+                if (class_exists($controllerName)) {
+                    $controller = new $controllerName();
+                    
+                    if (method_exists($controller, $methodName)) {
+                        // Llamar al método del controlador con los parámetros de la ruta
+                        call_user_func_array([$controller, $methodName], array_values($vars));
+                    } else {
+                        throw new Exception("El método '$methodName' no existe en el controlador '$controllerName'.");
+                    }
+                } else {
+                    throw new Exception("La clase '$controllerName' no fue encontrada.");
+                }
+            } catch (Throwable $e) {
+                // Capturar cualquier error en la ejecución del controlador para que no falle fatalmente
+                http_response_code(500);
+                error_log("Error en ruta $uri: " . $e->getMessage());
+                // Mostrar detalles del error para depuración
+                echo "<h1>Error Interno (500)</h1>";
+                echo "<p>Ocurrió un error al procesar su solicitud.</p>";
+                echo "<hr>";
+                echo "<p><strong>Error:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
+                echo "<p><strong>Ubicación:</strong> " . htmlspecialchars($e->getFile()) . " en línea " . $e->getLine() . "</p>";
+                echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
+            }
+
+        } else {
+            http_response_code(500);
+            echo "Error: No se encontró el archivo del controlador '$controllerName'.";
+        }
+        break;
+}

@@ -4,15 +4,18 @@ require_once 'models/Asistencia.php';
 require_once 'models/Retardo.php';
 require_once 'models/Comision.php';
 require_once 'models/Ausencia.php';
+require_once __DIR__ . '/BaseController.php';
+require_once __DIR__ . '/../models/Database.php';
 
-class ReportesController {
+class ReportesController extends BaseController {
     private $empleadoModel;
     private $asistenciaModel;
     private $retardoModel;
     private $comisionModel;
     private $ausenciaModel;
 
-    public function __construct() {
+public function __construct($skipAuth = false) {
+        parent::__construct();
         $this->empleadoModel = new Empleado();
         $this->asistenciaModel = new Asistencia();
         $this->retardoModel = new Retardo();
@@ -220,6 +223,7 @@ class ReportesController {
     }
 
     public function generar() {
+        // Skip auth check - API endpoint
         $tipo = $_GET['tipo_reporte'] ?? '';
         $empleado_id = $_GET['empleado_id'] ?? '';
         $fecha_inicio = $_GET['fecha_inicio'] ?? '';
@@ -228,6 +232,18 @@ class ReportesController {
         $resultados = [];
 
         switch ($tipo) {
+            case 'falta':
+            case 'vacaciones':
+            case 'licencia_medica':
+            case 'dia_economico':
+            case 'comision_todo_dia':
+            case 'constancia_tiempo':
+            case 'PDSEP-SNTE':
+            case 'EYR':
+            case 'CLIDDA':
+            case 'cuidados_maternos':
+                $resultados = $this->generarReporteAsistencia($empleado_id, $fecha_inicio, $fecha_fin, $tipo);
+                break;
             case 'retardos':
                 $resultados = $this->generarReporteRetardos($empleado_id, $fecha_inicio, $fecha_fin);
                 break;
@@ -237,16 +253,87 @@ class ReportesController {
             case 'ausencias':
                 $resultados = $this->generarReporteAusencias($empleado_id, $fecha_inicio, $fecha_fin);
                 break;
-            case 'asistencia':
+            case 'resumen':
+                $resultados = $this->generarReporteResumen();
+                break;
+            default:
                 $resultados = $this->generarReporteAsistencia($empleado_id, $fecha_inicio, $fecha_fin);
                 break;
         }
 
-        header('Content-Type: application/json');
-        echo json_encode([
+        $this->jsonResponse([
             'tipo' => $tipo,
             'datos' => $resultados
         ]);
+    }
+
+    private function generarReporteResumen() {
+        $conn = Database::getInstance()->getConnection();
+        
+        $stmt = $conn->query("SELECT tipo_asistencia, COUNT(*) as total FROM asistencia GROUP BY tipo_asistencia ORDER BY total DESC");
+        $tipos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $resultados = [];
+        foreach ($tipos as $t) {
+            $resultados[] = [
+                'tipo' => $t['tipo_asistencia'],
+                'total' => (int)$t['total']
+            ];
+        }
+        
+        return $resultados;
+    }
+
+    private function generarReporteAsistencia($empleado_id, $fecha_inicio, $fecha_fin, $tipo_asistencia = null) {
+        $conn = Database::getInstance()->getConnection();
+        
+        $sql = "SELECT a.empleado_id, a.fecha, a.hora_entrada, a.hora_salida, a.tipo_asistencia,
+                       e.nombre, e.apellido
+                FROM asistencia a
+                JOIN empleados e ON a.empleado_id = e.id
+                WHERE 1=1";
+        
+        $params = [];
+        
+        if ($tipo_asistencia) {
+            $sql .= " AND a.tipo_asistencia = ?";
+            $params[] = $tipo_asistencia;
+        }
+        
+        if ($empleado_id) {
+            $sql .= " AND a.empleado_id = ?";
+            $params[] = $empleado_id;
+        }
+        
+        if ($fecha_inicio) {
+            $sql .= " AND a.fecha >= ?";
+            $params[] = $fecha_inicio;
+        }
+        
+        if ($fecha_fin) {
+            $sql .= " AND a.fecha <= ?";
+            $params[] = $fecha_fin;
+        }
+        
+        $sql .= " ORDER BY e.apellido, e.nombre, a.fecha";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($params);
+        $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $resultados = [];
+        foreach ($registros as $r) {
+            $resultados[] = [
+                'empleado' => $r['apellido'] . ' ' . $r['nombre'],
+                'empleado_id' => $r['empleado_id'],
+                'fecha' => $r['fecha'],
+                'hora_entrada' => $r['hora_entrada'],
+                'hora_salida' => $r['hora_salida'],
+                'tipo' => $r['tipo_asistencia']
+            ];
+        }
+        
+        return $resultados;
     }
 
     private function generarReporteRetardos($empleado_id, $fecha_inicio, $fecha_fin) {
@@ -264,7 +351,7 @@ class ReportesController {
                 'empleado' => $empleadosMap[$retardo['empleado_id']] ?? 'Desconocido',
                 'fecha' => $retardo['fecha'],
                 'minutos_retardo' => $retardo['minutos_retardo'],
-                'tipo' => $retardo['tipo'],
+                'tipo' => $retardo['tipo'] ?? $retardo['tipo_retraso'] ?? 'menor',
                 'justificado' => $retardo['justificado']
             ];
         }
@@ -323,36 +410,142 @@ class ReportesController {
         return $resultados;
     }
 
-    private function generarReporteAsistencia($empleado_id, $fecha_inicio, $fecha_fin) {
-        $asistencias = $this->asistenciaModel->getByEmpleado($empleado_id, $fecha_inicio, $fecha_fin);
-        $empleados = $this->empleadoModel->getAll();
-
-        $empleadosMap = [];
-        foreach ($empleados as $emp) {
-            $empleadosMap[$emp['id']] = $emp['nombre'] . ' ' . $emp['apellido'];
-        }
+    public function exportarExcel() {
+        $this->requireAuth();
+        $tipo = $_GET['tipo_reporte'] ?? '';
+        $empleado_id = $_GET['empleado_id'] ?? '';
+        $fecha_inicio = $_GET['fecha_inicio'] ?? '';
+        $fecha_fin = $_GET['fecha_fin'] ?? '';
 
         $resultados = [];
-        foreach ($asistencias as $asistencia) {
-            $resultados[] = [
-                'empleado' => $empleadosMap[$asistencia['empleado_id']] ?? 'Desconocido',
-                'tipo' => $asistencia['tipo'],
-                'timestamp' => $asistencia['timestamp'],
-                'dispositivo_id' => $asistencia['dispositivo_id']
-            ];
+
+        switch ($tipo) {
+            case 'falta':
+            case 'vacaciones':
+            case 'licencia_medica':
+            case 'dia_economico':
+            case 'comision_todo_dia':
+            case 'constancia_tiempo':
+            case 'PDSEP-SNTE':
+            case 'EYR':
+            case 'CLIDDA':
+            case 'cuidados_maternos':
+                $resultados = $this->generarReporteAsistencia($empleado_id, $fecha_inicio, $fecha_fin, $tipo);
+                break;
+            case 'retardos':
+                $resultados = $this->generarReporteRetardos($empleado_id, $fecha_inicio, $fecha_fin);
+                break;
+            case 'resumen':
+                $resultados = $this->generarReporteResumen();
+                break;
+            default:
+                $resultados = $this->generarReporteAsistencia($empleado_id, $fecha_inicio, $fecha_fin);
+                break;
         }
 
-        return $resultados;
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=reporte_' . $tipo . '_' . date('Ymd') . '.csv');
+
+        $output = fopen('php://output', 'w');
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBB));
+
+        if (!empty($resultados)) {
+            fputcsv($output, array_keys($resultados[0]), ';');
+            foreach ($resultados as $row) {
+                fputcsv($output, $row, ';');
+            }
+        }
+
+        fclose($output);
+        exit;
     }
 
-    public function exportarExcel() {
-        // Esta función exportaría los datos a Excel
-        // Por ahora, solo redirigimos al reporte JSON
-        if (!isset($_SERVER['QUERY_STRING']) || empty($_SERVER['QUERY_STRING'])) {
-            header('Location: /sistema_biometrico/reportes');
-            exit;
+    public function attendanceSummary() {
+        $this->jsonResponse(['data' => []]);
+    }
+
+    public function employeePerformance() {
+        $this->jsonResponse(['data' => []]);
+    }
+
+    public function payrollExport() {
+        echo "Exportación de nómina no implementada";
+    }
+
+    public function scheduled() {
+        $this->jsonResponse(['success' => false, 'message' => 'Reportes programados no implementados']);
+    }
+    
+    public function reportesExcel() {
+        $tipo = $_GET['tipo_reporte'] ?? 'retardos';
+        $empleado_id = $_GET['empleado_id'] ?? '';
+        $fecha_inicio = $_GET['fecha_inicio'] ?? '';
+        $fecha_fin = $_GET['fecha_fin'] ?? '';
+
+        // If this is an API request (has tipo_reporte), return JSON
+        if (isset($_GET['tipo_reporte'])) {
+            try {
+                $conn = Database::getInstance()->getConnection();
+                
+                $sql = "SELECT r.empleado_id, r.fecha, r.hora_entrada, r.hora_salida, r.minutos_retardo, r.justificado,
+                               e.nombre, e.apellido
+                        FROM retardos r
+                        JOIN empleados e ON r.empleado_id = e.id
+                        WHERE 1=1";
+                
+                $params = [];
+                if ($empleado_id) {
+                    $sql .= " AND r.empleado_id = ?";
+                    $params[] = $empleado_id;
+                }
+                if ($fecha_inicio) {
+                    $sql .= " AND r.fecha >= ?";
+                    $params[] = $fecha_inicio;
+                }
+                if ($fecha_fin) {
+                    $sql .= " AND r.fecha <= ?";
+                    $params[] = $fecha_fin;
+                }
+                
+                $sql .= " ORDER BY e.apellido, e.nombre, r.fecha";
+                
+                $stmt = $conn->prepare($sql);
+                $stmt->execute($params);
+                $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                $resultados = [];
+                foreach ($registros as $r) {
+                    $resultados[] = [
+                        'empleado' => $r['apellido'] . ' ' . $r['nombre'],
+                        'empleado_id' => $r['empleado_id'],
+                        'fecha' => $r['fecha'],
+                        'hora_entrada' => $r['hora_entrada'] ?: '-',
+                        'hora_salida' => $r['hora_salida'] ?: '-',
+                        'minutos_retardo' => $r['minutos_retardo'],
+                        'justificado' => $r['justificado']
+                    ];
+                }
+                
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode([
+                    'tipo' => $tipo,
+                    'datos' => $resultados
+                ]);
+            } catch (Exception $e) {
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode([
+                    'success' => false,
+                    'error' => $e->getMessage()
+                ]);
+            }
+            return;
         }
-        header('Location: /sistema_biometrico/reportes/generar?' . $_SERVER['QUERY_STRING']);
+
+        // Otherwise, show the view
+        ob_start();
+        include __DIR__ . '/../views/reportes/retardos_incidencias.php';
+        $content = ob_get_clean();
+        include __DIR__ . '/../views/layout.php';
     }
 }
 ?>

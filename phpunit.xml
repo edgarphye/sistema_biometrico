@@ -1,8 +1,120 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit bootstrap="tests/bootstrap.php" colors="true">
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
+    bootstrap="tests/bootstrap.php"
+    colors="true"
+    executionOrder="depends,defects"
+    beStrictAboutOutputDuringTests="true"
+    failOnRisky="true"
+    failOnWarning="true"
+    timeoutForSmallTests="1"
+    timeoutForMediumTests="10"
+    timeoutForLargeTests="60"
+    verbose="true">
+
     <testsuites>
+        <!-- Tests Unitarios -->
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
+            <exclude>tests/Unit/Integration</exclude>
+        </testsuite>
+        
+        <!-- Tests de Integración -->
+        <testsuite name="Integration">
+            <directory>tests/Unit/Integration</directory>
+            <directory>tests/Integration</directory>
+        </testsuite>
+        
+        <!-- Tests de API -->
+        <testsuite name="API">
+            <directory>tests/API</directory>
+        </testsuite>
+        
+        <!-- Tests de Base de Datos -->
+        <testsuite name="Database">
+            <directory>tests/Database</directory>
+        </testsuite>
+        
+        <!-- Tests de Seguridad -->
+        <testsuite name="Security">
+            <directory>tests/Security</directory>
+        </testsuite>
+        
+        <!-- Tests de Performance -->
+        <testsuite name="Performance">
+            <directory>tests/Performance</directory>
+        </testsuite>
+        
+        <!-- Tests E2E -->
+        <testsuite name="E2E">
+            <directory>tests/E2E</directory>
         </testsuite>
     </testsuites>
+
+    <!-- Cobertura de Código -->
+    <coverage>
+        <include>
+            <directory suffix=".php">models</directory>
+            <directory suffix=".php">controllers</directory>
+            <directory suffix=".php">services</directory>
+            <directory suffix=".php">helpers</directory>
+        </include>
+        <exclude>
+            <directory>vendor</directory>
+            <directory>tests</directory>
+            <directory>logs</directory>
+            <directory>cache</directory>
+            <directory>temp</directory>
+            <file>config.php</file>
+            <file>index.php</file>
+            <file>*.php.bak</file>
+        </exclude>
+    </coverage>
+
+    <!-- Logging -->
+    
+
+    <!-- Variables de entorno para tests -->
+    <php>
+        <ini name="error_reporting" value="E_ALL &amp; ~E_DEPRECATED &amp; ~E_STRICT"/>
+        <ini name="display_errors" value="1"/>
+        <ini name="display_startup_errors" value="1"/>
+        <ini name="log_errors" value="1"/>
+        <ini name="error_log" value="tests/logs/phpunit.log"/>
+        
+        <!-- Variables de entorno de testing -->
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_DEBUG" value="true"/>
+        <env name="DB_HOST" value="localhost"/>
+        <env name="DB_NAME" value="sistema_biometrico_test"/>
+        <env name="DB_USER" value="test_user"/>
+        <env name="DB_PASSWORD" value="test_password"/>
+        <env name="CACHE_DRIVER" value="array"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="MAIL_DRIVER" value="array"/>
+        <env name="LOG_LEVEL" value="debug"/>
+        <env name="ENCRYPTION_KEY" value="test_encryption_key_32_chars"/>
+        <env name="BASE_URL" value="http://localhost:8000"/>
+        <env name="API_VERSION" value="v1"/>
+        <env name="TIMEZONE" value="America/Mexico_City"/>
+    </php>
+
+    <!-- Filtros y grupos -->
+    <groups>
+        <include>
+            <group>default</group>
+            <group>unit</group>
+            <group>integration</group>
+            <group>api</group>
+        </include>
+        <exclude>
+            <group>slow</group>
+            <group>manual</group>
+            <group>wip</group>
+        </exclude>
+    </groups>
+
+    
+
 </phpunit>

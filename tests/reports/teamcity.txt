@@ -1,0 +1,6 @@
+
+##teamcity[testCount count='5' flowId='22892']
+
+##teamcity[testSuiteStarted name='AsistenciaModelTest' locationHint='php_qn://C:\tools\nginx\html\sistema_biometrico\tests\Unit\AsistenciaModelTest.php::\AsistenciaModelTest' flowId='22892']
+
+##teamcity[testStarted name='testCreateAttendanceRecord' locationHint='php_qn://C:\tools\nginx\html\sistema_biometrico\tests\Unit\AsistenciaModelTest.php::\AsistenciaModelTest::testCreateAttendanceRecord' flowId='22892']

@@ -1,0 +1,111 @@
+[2026-04-07 21:24:32] [EXCEPTION] PDOException
+Mensaje: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date value: '2025-13-01' for column `sistema_biometrico`.`asistencia`.`fecha` at row 1
+URI: N/A
+#0 /usr/share/nginx/html/sistema_biometrico/import_excel_dgifa.php(248): PDOStatement->execute()
+#1 /usr/share/nginx/html/sistema_biometrico/import_excel_dgifa.php(276): ImportadorExcel->importFromExcel()
+#2 {main}
+[2026-04-07 21:26:00] [EXCEPTION] PDOException
+Mensaje: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date value: '2025-13-01' for column `sistema_biometrico`.`asistencia`.`fecha` at row 1
+URI: N/A
+#0 /usr/share/nginx/html/sistema_biometrico/import_excel_dgifa.php(256): PDOStatement->execute()
+#1 /usr/share/nginx/html/sistema_biometrico/import_excel_dgifa.php(286): ImportadorExcel->importFromExcel()
+#2 {main}
+[2026-04-07 21:26:12] [EXCEPTION] PDOException
+Mensaje: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date value: '2025-13-01' for column `sistema_biometrico`.`asistencia`.`fecha` at row 1
+URI: N/A
+#0 /usr/share/nginx/html/sistema_biometrico/import_excel_dgifa.php(256): PDOStatement->execute()
+#1 /usr/share/nginx/html/sistema_biometrico/import_excel_dgifa.php(286): ImportadorExcel->importFromExcel()
+#2 {main}
+[2026-04-07 21:30:21] [EXCEPTION] PDOException
+Mensaje: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date value: '2025-13-01' for column `sistema_biometrico`.`asistencia`.`fecha` at row 1
+URI: N/A
+#0 /usr/share/nginx/html/sistema_biometrico/import_excel_dgifa.php(266): PDOStatement->execute()
+#1 /usr/share/nginx/html/sistema_biometrico/import_excel_dgifa.php(298): ImportadorExcel->importFromExcel()
+#2 {main}
+[2026-04-07 21:30:31] [EXCEPTION] PDOException
+Mensaje: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date value: '2025-13-01' for column `sistema_biometrico`.`asistencia`.`fecha` at row 1
+URI: N/A
+#0 /usr/share/nginx/html/sistema_biometrico/import_excel_dgifa.php(266): PDOStatement->execute()
+#1 /usr/share/nginx/html/sistema_biometrico/import_excel_dgifa.php(298): ImportadorExcel->importFromExcel()
+#2 {main}
+[2026-04-07 21:31:29] [FATAL_ERROR] Uncaught PDOException: SQLSTATE[01000]: Warning: 1265 Data truncated for column 'tipo_asistencia' at row 1 in Command line code:85
+Stack trace:
+#0 Command line code(85): PDOStatement->execute()
+#1 {main}
+  thrown en Command line code línea 85
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-07 21:33:43] [EXCEPTION] PDOException
+Mensaje: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date value: '2025-13-01' for column `sistema_biometrico`.`asistencia`.`fecha` at row 1
+URI: N/A
+#0 /usr/share/nginx/html/sistema_biometrico/import_excel_dgifa.php(267): PDOStatement->execute()
+#1 /usr/share/nginx/html/sistema_biometrico/import_excel_dgifa.php(299): ImportadorExcel->importFromExcel()
+#2 {main}
+[2026-04-07 21:37:47] [WARNING] file_get_contents(/tmp/dgifa_data.json): Failed to open stream: No such file or directory en Command line code línea 25
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-07 21:37:47] [WARNING] foreach() argument must be of type array|object, null given en Command line code línea 33
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-07 21:38:00] [WARNING] file_get_contents(/tmp/dgifa_data.json): Failed to open stream: No such file or directory en Command line code línea 9
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-07 21:38:00] [FATAL_ERROR] Uncaught TypeError: count(): Argument #1 ($value) must be of type Countable|array, null given in Command line code:10
+Stack trace:
+#0 {main}
+  thrown en Command line code línea 10
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-07 21:52:27] [FATAL_ERROR] Uncaught PDOException: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date value: '2025-13-01' for column `sistema_biometrico`.`asistencia`.`fecha` at row 1 in Command line code:83
+Stack trace:
+#0 Command line code(83): PDOStatement->execute()
+#1 {main}
+  thrown en Command line code línea 83
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-07 21:57:54] [DEPRECATED] trim(): Passing null to parameter #1 ($string) of type string is deprecated en Command line code línea 31
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-07 22:05:58] [FATAL_ERROR] Uncaught PDOException: SQLSTATE[01000]: Warning: 1265 Data truncated for column 'tipo_asistencia' at row 1 in Command line code:77
+Stack trace:
+#0 Command line code(77): PDOStatement->execute()
+#1 {main}
+  thrown en Command line code línea 77
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-07 22:14:48] [FATAL_ERROR] Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near ')' at line 1 in Command line code:20
+Stack trace:
+#0 Command line code(20): PDO->prepare()
+#1 {main}
+  thrown en Command line code línea 20
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-07 22:23:44] [WARNING] Undefined variable $nombre en Command line code línea 29
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-07 22:23:44] [WARNING] foreach() argument must be of type array|object, null given en Command line code línea 29
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-07 22:45:32] [FATAL_ERROR] Uncaught PDOException: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date value: '2025-13-01' for column `sistema_biometrico`.`asistencia`.`fecha` at row 1 in Command line code:88
+Stack trace:
+#0 Command line code(88): PDOStatement->execute()
+#1 {main}
+  thrown en Command line code línea 88
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-07 23:04:52] [FATAL_ERROR] Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'justificado' in 'SET' in Command line code:20
+Stack trace:
+#0 Command line code(20): PDO->exec()
+#1 {main}
+  thrown en Command line code línea 20
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-07 23:14:18] [WARNING] file_get_contents(/tmp/dgifa_import_69d5e4252c250.json): Failed to open stream: No such file or directory en Command line code línea 20
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-07 23:14:18] [FATAL_ERROR] Uncaught TypeError: count(): Argument #1 ($value) must be of type Countable|array, null given in Command line code:21
+Stack trace:
+#0 {main}
+  thrown en Command line code línea 21
+URI: N/A
+--------------------------------------------------------------------------------

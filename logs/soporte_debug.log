@@ -1,6 +1,0 @@
-2025-11-20T06:06:02+00:00 - canAccessSoporte called userId=10 filename=soporte_retardo_test_1763618762.pdf user=false
-2025-11-20T06:06:02+00:00 - canAccessSoporte called userId=11 filename=soporte_retardo_test_1763618762.pdf user=false
-2025-11-20T06:06:02+00:00 - canAccessSoporte called userId=12 filename=soporte_retardo_test_1763618762.pdf user=false
-2025-11-20T06:07:05+00:00 - canAccessSoporte called userId=13 filename=soporte_retardo_test_1763618825.pdf user={"id":13,"username":"admin_test","password":"$2y$12$S23kxa4GwMeajDb3fFkRIevgCjPKyZY5.u339xAgMjkxrNevftwIm","rol":"admin","empleado_id":null}
-2025-11-20T06:07:05+00:00 - canAccessSoporte called userId=14 filename=soporte_retardo_test_1763618825.pdf user={"id":14,"username":"emp_test","password":"$2y$12$nWmI6gOAYz9H8ftkMVxahu2RsRxRTqKTaN2gCI5k3h7sGeNpx6\/fe","rol":"usuario","empleado_id":32}
-2025-11-20T06:07:05+00:00 - canAccessSoporte called userId=15 filename=soporte_retardo_test_1763618825.pdf user={"id":15,"username":"other_test","password":"$2y$12$WCdZk5t8KHgTeJwyZTaPqOuxouck8rS9gy2aQwyrRprpSZRzrUHAW","rol":"usuario","empleado_id":null}

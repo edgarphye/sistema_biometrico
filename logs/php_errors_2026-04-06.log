@@ -1,0 +1,12 @@
+[2026-04-06 02:24:25] [WARNING] require_once(/usr/share/nginx/html/sistema_biometrico/models/Vacaciones.php): Failed to open stream: No such file or directory en Command line code línea 3
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-06 02:24:25] [FATAL_ERROR] Uncaught Error: Failed opening required '/usr/share/nginx/html/sistema_biometrico/models/Vacaciones.php' (include_path='.:/usr/share/pear:/usr/share/php') in Command line code:3
+Stack trace:
+#0 {main}
+  thrown en Command line code línea 3
+URI: N/A
+--------------------------------------------------------------------------------
+[2026-04-06 02:47:14] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en /usr/share/nginx/html/sistema_biometrico/index.php línea 52
+URI: /empleados
+--------------------------------------------------------------------------------

@@ -1,0 +1,6 @@
+DEBUG Línea 1 - datos extraídos: {"empleado_id":113,"datetime":"2026-02-03 14:25:44","tipo":1,"verificacion":0,"resultado":1,"dispositivo_id":0,"fecha":"2026-02-03","hora":"14:25:44","accion":1}
+DEBUG Línea 2 - datos extraídos: {"empleado_id":828,"datetime":"2026-02-03 14:31:25","tipo":1,"verificacion":0,"resultado":1,"dispositivo_id":0,"fecha":"2026-02-03","hora":"14:31:25","accion":1}
+DEBUG Línea 3 - datos extraídos: {"empleado_id":113,"datetime":"2026-02-03 14:32:15","tipo":1,"verificacion":0,"resultado":1,"dispositivo_id":0,"fecha":"2026-02-03","hora":"14:32:15","accion":1}
+Registros parseados: 6711
+DEBUG lines: 0
+

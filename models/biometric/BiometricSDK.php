@@ -154,6 +154,8 @@ abstract class BiometricSDK implements BiometricInterface
             return $result;
         } catch (Exception $e) {
             $this->handleSDKError('connectDevice', $e);
+            // Lanzar excepción para asegurar que siempre hay un retorno
+            throw new Exception("No se pudo conectar al dispositivo: " . $e->getMessage());
         }
     }
 
@@ -172,6 +174,8 @@ abstract class BiometricSDK implements BiometricInterface
             return $result;
         } catch (Exception $e) {
             $this->handleSDKError('receiveBiometricData', $e);
+            // Lanzar excepción para asegurar retorno
+            throw new Exception("No se pudo recibir datos biométricos: " . $e->getMessage());
         }
     }
 
@@ -197,6 +201,8 @@ abstract class BiometricSDK implements BiometricInterface
             return $result;
         } catch (Exception $e) {
             $this->handleSDKError('verifyIdentity', $e);
+            // Lanzar excepción para asegurar retorno
+            throw new Exception("No se pudo verificar identidad: " . $e->getMessage());
         }
     }
 
@@ -209,6 +215,8 @@ abstract class BiometricSDK implements BiometricInterface
             return $result;
         } catch (Exception $e) {
             $this->handleSDKError('getDeviceStatus', $e);
+            // Lanzar excepción para asegurar retorno
+            throw new Exception("No se pudo obtener estado de dispositivos: " . $e->getMessage());
         }
     }
 

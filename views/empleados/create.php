@@ -1,22 +1,29 @@
+<?php 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+require_once __DIR__ . '/../../helpers/Csrf.php'; 
+ob_start();
+?>
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Nuevo Empleado</h2>
-    <a href="/sistema_biometrico/empleados" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Volver
-    </a>
+    <h2 class="text-primary"><i class="fas fa-user-plus me-2"></i>Nuevo Empleado</h2>
+    <a href="<?php echo BASE_URL; ?>/empleados" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
 </div>
 <div class="container-fluid">
 
     <div class="card">
+        <div class="card-header" style="background: linear-gradient(135deg, #9F2241 0%, #691C32 100%); color: #ffffff; border-bottom: none;">
+            <h5 class="mb-0"><i class="fas fa-user-plus me-2"></i>Formulario de Registro</h5>
+        </div>
         <div class="card-body">
-            <form method="POST" action="/sistema_biometrico/empleados/create" enctype="multipart/form-data">
+            <form method="POST" action="<?php echo BASE_URL; ?>/empleados/create" enctype="multipart/form-data">
+                <input type="hidden" name="_token" id="csrf_token" value="<?php echo htmlspecialchars(Csrf::token()); ?>">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="nombre_completo" class="form-label">Nombre Completo</label>
                             <input type="text" class="form-control" id="nombre_completo" name="nombre_completo" required>
-                            <div class="form-text">
-                                Nombre completo del empleado (este campo es para identificación general)
-                            </div>
+                            <div class="form-text">Nombre completo del empleado (este campo es para identificación general)</div>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -26,7 +33,7 @@
                                 <option value="">Seleccionar sexo</option>
                                 <option value="H">Hombre</option>
                                 <option value="M">Mujer</option>
-                            </select>
+                             </select>
                         </div>
                     </div>
                 </div>
@@ -42,39 +49,39 @@
                             <label for="entidad_federativa" class="form-label">Entidad Federativa de Nacimiento</label>
                             <select class="form-control" id="entidad_federativa" name="entidad_federativa" required>
                                 <option value="">Seleccionar entidad</option>
-                                <option value="AGUASCALIENTES">Aguascalientes</option>
-                                <option value="BAJA CALIFORNIA">Baja California</option>
-                                <option value="BAJA CALIFORNIA SUR">Baja California Sur</option>
-                                <option value="CAMPECHE">Campeche</option>
-                                <option value="COAHUILA">Coahuila</option>
-                                <option value="COLIMA">Colima</option>
-                                <option value="CHIAPAS">Chiapas</option>
-                                <option value="CHIHUAHUA">Chihuahua</option>
-                                <option value="DISTRITO FEDERAL">Distrito Federal</option>
-                                <option value="DURANGO">Durango</option>
-                                <option value="GUANAJUATO">Guanajuato</option>
-                                <option value="GUERRERO">Guerrero</option>
-                                <option value="HIDALGO">Hidalgo</option>
-                                <option value="JALISCO">Jalisco</option>
-                                <option value="MEXICO">México</option>
-                                <option value="MICHOACAN">Michoacán</option>
-                                <option value="MORELOS">Morelos</option>
-                                <option value="NAYARIT">Nayarit</option>
-                                <option value="NUEVO LEON">Nuevo León</option>
-                                <option value="OAXACA">Oaxaca</option>
-                                <option value="PUEBLA">Puebla</option>
-                                <option value="QUERETARO">Querétaro</option>
-                                <option value="QUINTANA ROO">Quintana Roo</option>
-                                <option value="SAN LUIS POTOSI">San Luis Potosí</option>
-                                <option value="SINALOA">Sinaloa</option>
-                                <option value="SONORA">Sonora</option>
-                                <option value="TABASCO">Tabasco</option>
-                                <option value="TAMAULIPAS">Tamaulipas</option>
-                                <option value="TLAXCALA">Tlaxcala</option>
-                                <option value="VERACRUZ">Veracruz</option>
-                                <option value="YUCATAN">Yucatán</option>
-                                <option value="ZACATECAS">Zacatecas</option>
-                                <option value="NACIDO EXTRANJERO">Nacido en el Extranjero</option>
+                                <option value="AS">Aguascalientes</option>
+                                <option value="BC">Baja California</option>
+                                <option value="BS">Baja California Sur</option>
+                                <option value="CC">Campeche</option>
+                                <option value="CL">Coahuila</option>
+                                <option value="CM">Colima</option>
+                                <option value="CS">Chiapas</option>
+                                <option value="CH">Chihuahua</option>
+                                <option value="DF">Distrito Federal</option>
+                                <option value="DG">Durango</option>
+                                <option value="GT">Guanajuato</option>
+                                <option value="GR">Guerrero</option>
+                                <option value="HG">Hidalgo</option>
+                                <option value="JC">Jalisco</option>
+                                <option value="MC">México</option>
+                                <option value="MN">Michoacán</option>
+                                <option value="MS">Morelos</option>
+                                <option value="NT">Nayarit</option>
+                                <option value="NL">Nuevo León</option>
+                                <option value="OC">Oaxaca</option>
+                                <option value="PL">Puebla</option>
+                                <option value="QT">Querétaro</option>
+                                <option value="QR">Quintana Roo</option>
+                                <option value="SP">San Luis Potosí</option>
+                                <option value="SL">Sinaloa</option>
+                                <option value="SR">Sonora</option>
+                                <option value="TC">Tabasco</option>
+                                <option value="TS">Tamaulipas</option>
+                                <option value="TL">Tlaxcala</option>
+                                <option value="VZ">Veracruz</option>
+                                <option value="YN">Yucatán</option>
+                                <option value="ZS">Zacatecas</option>
+                                <option value="NE">Nacido en el Extranjero</option>
                             </select>
                         </div>
                     </div>
@@ -107,7 +114,7 @@
                             <label for="rfc" class="form-label">RFC</label>
                             <div class="input-group">
                                 <input type="text" class="form-control" id="rfc" name="rfc" required maxlength="13" readonly>
-                                <button class="btn btn-outline-primary" type="button" id="generarCodigosBtn">
+                                <button class="btn btn-pantone-secondary" type="button" id="generarCodigosBtn">
                                     <i class="fas fa-magic"></i> Generar RFC/CURP
                                 </button>
                             </div>
@@ -123,11 +130,56 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="area" class="form-label">Área</label>
-                            <input type="text" class="form-control" id="area" name="area" required>
+                            <label for="jefe_directo_id" class="form-label">Jefe Directo (Mando)</label>
+                            <select class="form-select" id="jefe_directo_id" name="jefe_directo_id" required>
+                                <option value="">Seleccionar...</option>
+                                <?php 
+                                require_once __DIR__ . '/../../models/Catalogo.php';
+                                $catalogo = new Catalogo();
+                                $mandos = $catalogo->getAllMandos();
+                                foreach ($mandos as $mando): 
+                                ?>
+                                <option value="<?= htmlspecialchars($mando['clave_area']) ?>" 
+                                    data-area="<?= htmlspecialchars($mando['area']) ?>"
+                                    data-nombre="<?= htmlspecialchars($mando['nombre_mando']) ?>">
+                                    <?= htmlspecialchars($mando['nombre_mando']) ?> - <?= htmlspecialchars($mando['area']) ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="form-text">Seleccione el mando para autocompletar área y clave</div>
                         </div>
                     </div>
                     <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="area" class="form-label">Área</label>
+                            <input type="text" class="form-control" id="area" name="area" required readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="area" class="form-label">Área (Departamento)</label>
+                            <input type="text" class="form-control" id="area" name="area" required readonly>
+                            <div class="form-text">Se autocompleta al seleccionar el mando</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="area_fisica" class="form-label">Área Física (Ubicación)</label>
+                            <input type="text" class="form-control" id="area_fisica" name="area_fisica" placeholder="Ej: Edificio A, Planta Baja">
+                            <div class="form-text">Ubicación física donde trabaja el empleado</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="clave_depto" class="form-label">Clave Área (Del Mando)</label>
+                            <input type="text" class="form-control" id="clave_depto" name="clave_depto" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
                         <div class="mb-3">
                             <label for="jerarquia" class="form-label">Jerarquía</label>
                             <select class="form-control" id="jerarquia" name="jerarquia" required>
@@ -158,8 +210,8 @@
                 <!-- Sección de registro biométrico -->
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="card border-info mb-3">
-                            <div class="card-header bg-info text-white">
+                        <div class="card mb-3" style="border: 2px solid #235B4E;">
+                            <div class="card-header" style="background: linear-gradient(135deg, #235B4E 0%, #10312B 100%); color: #ffffff;">
                                 <h5 class="mb-0"><i class="fas fa-fingerprint"></i> Registro Biométrico</h5>
                             </div>
                             <div class="card-body">
@@ -179,26 +231,35 @@
                                     <div class="mb-3">
                                         <label for="dispositivo_huella" class="form-label">Dispositivo Biométrico</label>
                                         <select class="form-select" id="dispositivo_huella" name="dispositivo_huella">
-                                            <?php if (!empty($dispositivos)): ?>
-                                                <?php foreach ($dispositivos as $dispositivo): ?>
-                                                    <option value="<?php echo htmlspecialchars($dispositivo['dispositivo_id']); ?>">
-                                                        Dispositivo <?php echo htmlspecialchars($dispositivo['dispositivo_id']); ?> - <?php echo htmlspecialchars($dispositivo['nombre']); ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            <?php else: ?>
-                                                <option value="1">Dispositivo 1 (Predeterminado)</option>
-                                            <?php endif; ?>
+                                            <option value="">Seleccione un dispositivo...</option>
                                         </select>
                                         <div class="form-text">
                                             Seleccione el dispositivo biométrico para capturar la huella.
                                         </div>
                                     </div>
 
-                                    <div class="alert alert-info">
+                                    <div class="mb-3" id="test-device-container" style="display: none;">
+                                        <button type="button" class="btn btn-pantone-secondary btn-sm" id="test-device-btn">
+                                            <i class="fas fa-plug"></i> Probar Conexión </button>
+                                        <div id="test-result" class="mt-2"></div>
+                                    </div>
+
+                                    <div class="mb-3" id="capture-container" style="display: none;">
+                                        <button type="button" class="btn btn-pantone-secondary btn-lg w-100" id="capture-fingerprint-btn">
+                                            <i class="fas fa-fingerprint"></i> Iniciar Registro de Huella
+                                        </button>
+                                        <div id="capture-result" class="mt-2"></div>
+                                    </div>
+
+<div class="alert alert-info">
                                         <i class="fas fa-info-circle"></i>
-                                        <strong>Instrucciones:</strong> Una vez que marque la opción de registrar huella,
-                                        al guardar el empleado se activará automáticamente el proceso de captura de huella
-                                        desde el dispositivo seleccionado.
+                                        <strong>Proceso de registro:</strong>
+                                        <ol class="mb-0 mt-2">
+                                            <li>Seleccione un dispositivo biométrico de la lista</li>
+                                            <li>Pruebe la conexión con el dispositivo</li>
+                                            <li>Capture la huella dactilar del empleado</li>
+                                            <li>Guarde el empleado para completar el registro</li>
+                                        </ol>
                                     </div>
                                 </div>
                             </div>
@@ -211,16 +272,57 @@
                         <?php echo htmlspecialchars($error); ?>
                     </div>
                 <?php endif; ?>
+                
+                <?php if (isset($_SESSION['form_errors'])): ?>
+                    <div class="alert alert-danger">
+                        <h6><i class="fas fa-exclamation-triangle"></i> Errores de validación:</h6>
+                        <ul class="mb-0">
+                            <?php foreach ($_SESSION['form_errors'] as $field => $error): ?>
+                                <li><?php echo htmlspecialchars($error); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <?php unset($_SESSION['form_errors']); ?>
+                <?php endif; ?>
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> Guardar Empleado
+                </button>
+                <button type="reset" class="btn btn-outline-secondary">
+                    <i class="fas fa-undo"></i> Limpiar
                 </button>
             </form>
         </div>
     </div>
 </div>
-<?php include __DIR__ . '/../layout.php'; ?>
+
+<!-- Modal de registro biométrico -->
+<?php try {
+    include __DIR__ . '/fingerprint_modal.php';
+} catch (Exception $e) {
+    error_log("Error cargando modal de huella: " . $e->getMessage());
+    // Continuar sin el modal si hay error
+} ?>
 
 <script>
+const BASE_URL = '<?php echo defined('BASE_URL') ? rtrim(BASE_URL, '/') : '/sistema_biometrico'; ?>';
+
+// Auto-fill area and clave_depto when mando is selected
+document.getElementById('jefe_directo_id').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const areaMando = selectedOption.dataset.area || '';
+    const claveArea = selectedOption.value || '';
+    
+    const areaInput = document.getElementById('area');
+    const claveDeptoInput = document.getElementById('clave_depto');
+    
+    if (areaInput && areaMando) {
+        areaInput.value = areaMando;
+    }
+    if (claveDeptoInput && claveArea) {
+        claveDeptoInput.value = claveArea;
+    }
+});
+
 document.getElementById('foto_cara').addEventListener('change', function(e) {
     const file = e.target.files[0];
     const preview = document.getElementById('image-preview');
@@ -238,13 +340,219 @@ document.getElementById('foto_cara').addEventListener('change', function(e) {
     }
 });
 
+// Variables globales
+let dispositivosCargados = false;
+
+// Cargar dispositivos biométricos
+async function cargarDispositivos() {
+    try {
+        const response = await fetch(BASE_URL + '/dispositivos/getStatus');
+        const data = await response.json();
+        
+        console.log('Dispositivos response:', data);
+        
+        const select = document.getElementById('dispositivo_huella');
+        select.innerHTML = '<option value="">Seleccione un dispositivo...</option>';
+        
+        if (data.success && data.dispositivos && data.dispositivos.length > 0) {
+            data.dispositivos.forEach(dispositivo => {
+                const option = document.createElement('option');
+                option.value = dispositivo.dispositivo_id;
+                option.textContent = `${dispositivo.nombre} (${dispositivo.sede}) - ${dispositivo.status}`;
+                option.dataset.online = dispositivo.online;
+                select.appendChild(option);
+            });
+            
+            dispositivosCargados = true;
+        } else {
+            // Si no hay dispositivos, agregar opción por defecto
+            const option = document.createElement('option');
+            option.value = "1";
+            option.textContent = "Dispositivo por defecto";
+            select.appendChild(option);
+            dispositivosCargados = true;
+            console.warn('No se encontraron dispositivos, usando valor por defecto');
+        }
+    } catch (error) {
+        console.error('Error cargando dispositivos:', error);
+        // Agregar opción por defecto en caso de error
+        const select = document.getElementById('dispositivo_huella');
+        select.innerHTML = '<option value="1">Dispositivo por defecto</option>';
+        dispositivosCargados = true;
+    }
+}
+
 // Controlar visibilidad de la sección de dispositivo biométrico
-document.getElementById('registrar_huella').addEventListener('change', function(e) {
+document.getElementById('registrar_huella').addEventListener('change', async function(e) {
     const dispositivoSection = document.getElementById('dispositivo-section');
+    const dispositivoSelect = document.getElementById('dispositivo_huella');
+    
     if (e.target.checked) {
         dispositivoSection.style.display = 'block';
+        dispositivoSelect.setAttribute('required', '');
+        
+        // Cargar dispositivos si no se han cargado
+        if (!dispositivosCargados) {
+            await cargarDispositivos();
+        }
     } else {
         dispositivoSection.style.display = 'none';
+        dispositivoSelect.removeAttribute('required');
+        dispositivoSelect.value = '';
+    }
+});
+
+// Manejar selección de dispositivo
+document.getElementById('dispositivo_huella').addEventListener('change', function(e) {
+    const testContainer = document.getElementById('test-device-container');
+    const captureContainer = document.getElementById('capture-container');
+    const selectedOption = e.target.options[e.target.selectedIndex];
+    
+    if (e.target.value && selectedOption.dataset.online === 'true') {
+        testContainer.style.display = 'block';
+        captureContainer.style.display = 'block';
+    } else {
+        testContainer.style.display = 'none';
+        captureContainer.style.display = 'none';
+        
+        if (e.target.value) {
+            showAlert('test-result', 'El dispositivo seleccionado está desconectado', 'warning');
+        }
+    }
+});
+
+// Probar conexión con dispositivo
+document.getElementById('test-device-btn').addEventListener('click', async function() {
+    const deviceId = document.getElementById('dispositivo_huella').value;
+    if (!deviceId) {
+        showAlert('test-result', 'Seleccione un dispositivo primero', 'warning');
+        return;
+    }
+    
+    const btn = this;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Probando...';
+    btn.disabled = true;
+    
+    try {
+        const csrfToken = document.getElementById('csrf_token').value;
+        const url = BASE_URL + '/biometricos/test-dispositivo/' + deviceId;
+        console.log('Intentando conectar a URL:', url);
+        console.log('BASE_URL:', BASE_URL);
+        console.log('deviceId:', deviceId);
+        console.log('csrfToken:', csrfToken);
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': 'application/json'
+            },
+            body: new URLSearchParams({
+                'csrf_token': csrfToken
+            })
+        });
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        // Verificar si la respuesta es OK
+        if (!response.ok) {
+            const text = await response.text();
+            console.error('Error response (first 500 chars):', text.substring(0, 500));
+            throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}`);
+        }
+        
+        const data = await response.json();
+        console.log('Response data:', data);
+        
+        if (data.success) {
+            showAlert('test-result', 
+                `Conexión exitosa con ${data.dispositivo.nombre}<br>
+                IP: ${data.dispositivo.ip_address}<br>
+                Modelo: ${data.dispositivo.model || 'Desconocido'}`, 
+                'success');
+        } else {
+            showAlert('test-result', `Error de conexión: ${data.error}`, 'danger');
+        }
+    } catch (error) {
+        showAlert('test-result', `Error: ${error.message}`, 'danger');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
+
+// Capturar huella dactilar
+document.getElementById('capture-fingerprint-btn').addEventListener('click', function() {
+    const deviceId = document.getElementById('dispositivo_huella').value;
+    if (!deviceId) {
+        showAlert('capture-result', 'Seleccione un dispositivo primero', 'warning');
+        return;
+    }
+    
+    // Agregar campo oculto para almacenar la huella capturada
+    let fingerprintField = document.getElementById('captured_fingerprint');
+    if (!fingerprintField) {
+        fingerprintField = document.createElement('input');
+        fingerprintField.type = 'hidden';
+        fingerprintField.id = 'captured_fingerprint';
+        fingerprintField.name = 'captured_fingerprint';
+        document.querySelector('form').appendChild(fingerprintField);
+    }
+    
+    // Mostrar modal de captura
+    showFingerprintModal(deviceId);
+});
+
+// Función para mostrar alertas
+function showAlert(containerId, message, type) {
+    const container = document.getElementById(containerId);
+    const alertClass = type === 'success' ? 'alert-success' : 
+                      type === 'warning' ? 'alert-warning' : 'alert-danger';
+    
+    container.innerHTML = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Auto-eliminar después de 5 segundos
+    setTimeout(() => {
+        const alert = container.querySelector('.alert');
+        if (alert && alert.parentNode) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+// Validación del formulario antes de enviar
+document.querySelector('form').addEventListener('submit', function(e) {
+    const registrarHuella = document.getElementById('registrar_huella').checked;
+    
+    if (registrarHuella) {
+        const deviceId = document.getElementById('dispositivo_huella').value;
+        const fingerprintCaptured = document.getElementById('captured_fingerprint')?.value;
+        
+        if (!deviceId) {
+            e.preventDefault();
+            alert('Seleccione un dispositivo biométrico para registrar la huella');
+            return;
+        }
+        
+        if (!fingerprintCaptured) {
+            e.preventDefault();
+            alert('Debe capturar la huella dactilar antes de guardar el empleado');
+            return;
+        }
+    }
+});
+
+// Cargar dispositivos al iniciar si el checkbox está marcado
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('registrar_huella').checked) {
+        cargarDispositivos();
     }
 });
 
@@ -269,31 +577,33 @@ document.getElementById('generarCodigosBtn').addEventListener('click', function(
     btn.disabled = true;
 
     // Enviar datos al servidor para generar ambos códigos
+    const csrfToken = document.getElementById('csrf_token').value;
+    
     Promise.all([
-        fetch('/sistema_biometrico/empleados/generate_rfc', {
+        fetch(BASE_URL + '/empleados/generate_rfc', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: JSON.stringify({
-                fecha_nacimiento: fechaNacimiento,
+            body: new URLSearchParams({
+                csrf_token: csrfToken,
+                nombres: nombres,
                 primer_apellido: primerApellido,
                 segundo_apellido: segundoApellido,
-                nombres: nombres,
-                sexo: sexo,
-                entidad_federativa: entidadFederativa
+                fecha_nacimiento: fechaNacimiento
             })
         }),
-        fetch('/sistema_biometrico/empleados/generate_curp', {
+        fetch(BASE_URL + '/empleados/generate_curp', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: JSON.stringify({
-                fecha_nacimiento: fechaNacimiento,
+            body: new URLSearchParams({
+                csrf_token: csrfToken,
+                nombres: nombres,
                 primer_apellido: primerApellido,
                 segundo_apellido: segundoApellido,
-                nombres: nombres,
+                fecha_nacimiento: fechaNacimiento,
                 sexo: sexo,
                 entidad_federativa: entidadFederativa
             })
@@ -343,3 +653,7 @@ document.getElementById('generarCodigosBtn').addEventListener('click', function(
 
 
 </script>
+<?php
+$content = ob_get_clean();
+include __DIR__ . '/../layout.php';
+?>

@@ -1,14 +1,23 @@
 <?php
 require_once 'models/HorarioLaboral.php';
 require_once 'models/EmpleadoHorarios.php';
+require_once 'models/DispositivoBiometrico.php';
+require_once 'models/Ciclo.php';
+require_once __DIR__ . '/BaseController.php';
 
-class HorariosController {
+class HorariosController extends BaseController {
     private $horarioModel;
     private $empleadoHorariosModel;
+    private $dispositivoModel;
+    private $cicloModel;
 
     public function __construct() {
+        parent::__construct();
+        $this->requireAuth();
         $this->horarioModel = new HorarioLaboral();
         $this->empleadoHorariosModel = new EmpleadoHorarios();
+        $this->dispositivoModel = new DispositivoBiometrico();
+        $this->cicloModel = new Ciclo();
     }
 
     /**
@@ -16,6 +25,7 @@ class HorariosController {
      */
     public function index() {
         $horarios = $this->horarioModel->getAll();
+        $sedes = $this->dispositivoModel->getAllSedes();
         include 'views/horarios/index.php';
     }
 
@@ -24,22 +34,24 @@ class HorariosController {
      */
     public function create() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $sede = !empty($_POST['sede']) ? $_POST['sede'] : null;
             $data = [
                 'nombre' => $_POST['nombre'],
                 'hora_entrada' => $_POST['hora_entrada'],
                 'hora_salida' => $_POST['hora_salida'],
                 'tolerancia_minutos' => (int)($_POST['tolerancia_minutos'] ?? 10),
-                'descripcion' => $_POST['descripcion'] ?? null
+                'descripcion' => $_POST['descripcion'] ?? null,
+                'sede' => $sede
             ];
 
             if ($this->horarioModel->create($data)) {
-                header('Location: /sistema_biometrico/horarios');
-                exit;
+                $this->redirect('/sistema_biometrico/horarios');
             } else {
                 $error = 'Error al crear el horario';
             }
         }
 
+        $sedes = $this->dispositivoModel->getAllSedes();
         include 'views/horarios/create.php';
     }
 
@@ -49,43 +61,38 @@ class HorariosController {
     public function show($id) {
         $horario = $this->horarioModel->getById($id);
         if (!$horario) {
-            header('Location: /sistema_biometrico/horarios');
-            exit;
+            $this->redirect('/sistema_biometrico/horarios');
         }
-
-        // Obtener empleados asignados a este horario
-        $empleados = $this->getEmpleadosByHorario($id);
-
-        include 'views/horarios/show.php';
+        $this->render('horarios/show', ['horario' => $horario]);
     }
 
     /**
      * Editar horario
      */
     public function edit($id) {
-        $horario = $this->horarioModel->getById($id);
-        if (!$horario) {
-            header('Location: /sistema_biometrico/horarios');
-            exit;
-        }
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $sede = !empty($_POST['sede']) ? $_POST['sede'] : null;
             $data = [
                 'nombre' => $_POST['nombre'],
                 'hora_entrada' => $_POST['hora_entrada'],
                 'hora_salida' => $_POST['hora_salida'],
                 'tolerancia_minutos' => (int)($_POST['tolerancia_minutos'] ?? 10),
-                'descripcion' => $_POST['descripcion'] ?? null
+                'descripcion' => $_POST['descripcion'] ?? null,
+                'sede' => $sede
             ];
 
             if ($this->horarioModel->update($id, $data)) {
-                header('Location: /sistema_biometrico/horarios');
-                exit;
+                $this->redirect('/sistema_biometrico/horarios');
             } else {
                 $error = 'Error al actualizar el horario';
             }
         }
-
+        
+        $horario = $this->horarioModel->getById($id);
+        if (!$horario) {
+            $this->redirect('/sistema_biometrico/horarios');
+        }
+        $sedes = $this->dispositivoModel->getAllSedes();
         include 'views/horarios/edit.php';
     }
 
@@ -94,60 +101,10 @@ class HorariosController {
      */
     public function delete($id) {
         if ($this->horarioModel->delete($id)) {
-            header('Location: /sistema_biometrico/horarios');
-            exit;
+            $this->redirect('/sistema_biometrico/horarios?deleted=true');
         } else {
-            header('Location: /sistema_biometrico/horarios?error=delete_failed');
-            exit;
+            $this->redirect('/sistema_biometrico/horarios?error=delete_failed');
         }
-    }
-
-    /**
-     * Asignar horario a empleado
-     */
-    public function asignar() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $empleado_id = (int)$_POST['empleado_id'];
-            $horario_id = (int)$_POST['horario_id'];
-            $dia_semana = $_POST['dia_semana'];
-
-            if ($this->empleadoHorariosModel->asignarHorario($empleado_id, $horario_id, $dia_semana)) {
-                header('Location: /sistema_biometrico/empleados/' . $empleado_id);
-                exit;
-            } else {
-                $error = 'Error al asignar horario';
-            }
-        }
-
-        // Obtener datos para el formulario
-        require_once 'models/Empleado.php';
-        $empleadoModel = new Empleado();
-        $empleados = $empleadoModel->getAll();
-        $horarios = $this->horarioModel->getAll();
-
-        include 'views/horarios/asignar.php';
-    }
-
-    /**
-     * Remover horario de empleado
-     */
-    public function remover($empleado_id, $dia_semana) {
-        if ($this->empleadoHorariosModel->removerHorario($empleado_id, $dia_semana)) {
-            header('Location: /sistema_biometrico/empleados/' . $empleado_id);
-            exit;
-        } else {
-            header('Location: /sistema_biometrico/empleados/' . $empleado_id . '?error=remove_failed');
-            exit;
-        }
-    }
-
-    /**
-     * Obtener empleados asignados a un horario específico
-     */
-    private function getEmpleadosByHorario($horario_id) {
-        // Esta función necesitaría una consulta específica
-        // Por ahora retornamos array vacío
-        return [];
     }
 }
 ?>

@@ -1,0 +1,230 @@
+[2026-03-24 09:22:48] [ERROR] {}
+URL: http://127.0.0.1/analisis-predictivo
+Line: 
+Stack: SyntaxError: Unexpected token 'C', "CSRF token"... is not valid JSON
+--------------------------------------------------------------------------------
+[2026-03-24 09:22:48] [AJAX_ERROR] AJAX Error 403: Forbidden
+URL: http://127.0.0.1/analisis-predictivo/config
+Line: 
+Stack: CSRF token inválido o ausente.
+--------------------------------------------------------------------------------
+[2026-03-24 09:22:51] [ERROR] {}
+URL: http://127.0.0.1/analisis-predictivo
+Line: 
+Stack: SyntaxError: Unexpected token 'C', "CSRF token"... is not valid JSON
+--------------------------------------------------------------------------------
+[2026-03-24 09:22:51] [AJAX_ERROR] AJAX Error 403: Forbidden
+URL: http://127.0.0.1/analisis-predictivo/config
+Line: 
+Stack: CSRF token inválido o ausente.
+--------------------------------------------------------------------------------
+[2026-03-24 09:22:51] [ERROR] {}
+URL: http://127.0.0.1/analisis-predictivo
+Line: 
+Stack: SyntaxError: Unexpected token 'C', "CSRF token"... is not valid JSON
+--------------------------------------------------------------------------------
+[2026-03-24 09:22:51] [AJAX_ERROR] AJAX Error 403: Forbidden
+URL: http://127.0.0.1/analisis-predictivo/config
+Line: 
+Stack: CSRF token inválido o ausente.
+--------------------------------------------------------------------------------
+[2026-03-24 09:23:20] [ERROR] {}
+URL: http://127.0.0.1/analisis-predictivo
+Line: 
+Stack: SyntaxError: Unexpected token 'C', "CSRF token"... is not valid JSON
+--------------------------------------------------------------------------------
+[2026-03-24 09:23:20] [AJAX_ERROR] AJAX Error 403: Forbidden
+URL: http://127.0.0.1/analisis-predictivo/config
+Line: 
+Stack: CSRF token inválido o ausente.
+--------------------------------------------------------------------------------
+[2026-03-24 09:23:20] [ERROR] {}
+URL: http://127.0.0.1/analisis-predictivo
+Line: 
+Stack: SyntaxError: Unexpected token 'C', "CSRF token"... is not valid JSON
+--------------------------------------------------------------------------------
+[2026-03-24 09:23:20] [AJAX_ERROR] AJAX Error 403: Forbidden
+URL: http://127.0.0.1/analisis-predictivo/config
+Line: 
+Stack: CSRF token inválido o ausente.
+--------------------------------------------------------------------------------
+[2026-03-24 09:23:20] [ERROR] {}
+URL: http://127.0.0.1/analisis-predictivo
+Line: 
+Stack: SyntaxError: Unexpected token 'C', "CSRF token"... is not valid JSON
+--------------------------------------------------------------------------------
+[2026-03-24 09:23:20] [AJAX_ERROR] AJAX Error 403: Forbidden
+URL: http://127.0.0.1/analisis-predictivo/config
+Line: 
+Stack: CSRF token inválido o ausente.
+--------------------------------------------------------------------------------
+[2026-03-24 09:23:20] [ERROR] {}
+URL: http://127.0.0.1/analisis-predictivo
+Line: 
+Stack: SyntaxError: Unexpected token 'C', "CSRF token"... is not valid JSON
+--------------------------------------------------------------------------------
+[2026-03-24 09:23:21] [AJAX_ERROR] AJAX Error 403: Forbidden
+URL: http://127.0.0.1/analisis-predictivo/config
+Line: 
+Stack: CSRF token inválido o ausente.
+--------------------------------------------------------------------------------
+[2026-03-24 09:35:54] [ERROR] {}
+URL: http://127.0.0.1/analisis-predictivo
+Line: 
+Stack: SyntaxError: Unexpected token 'C', "CSRF token"... is not valid JSON
+--------------------------------------------------------------------------------
+[2026-03-24 09:35:54] [AJAX_ERROR] AJAX Error 403: Forbidden
+URL: http://127.0.0.1/analisis-predictivo/config
+Line: 
+Stack: CSRF token inválido o ausente.
+--------------------------------------------------------------------------------
+[2026-03-24 09:37:46] [ERROR] {}
+URL: http://127.0.0.1/analisis-predictivo
+Line: 
+Stack: SyntaxError: Unexpected token 'C', "CSRF token"... is not valid JSON
+--------------------------------------------------------------------------------
+[2026-03-24 09:37:47] [AJAX_ERROR] AJAX Error 403: Forbidden
+URL: http://127.0.0.1/analisis-predictivo/config
+Line: 
+Stack: CSRF token inválido o ausente.
+--------------------------------------------------------------------------------
+[2026-03-24 13:41:35] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:41:40] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:41:49] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:41:57] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:42:04] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:42:04] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:43:06] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:43:10] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:43:25] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:43:26] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:43:26] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:43:26] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:43:26] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:43:26] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:43:27] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:43:27] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 13:43:27] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados?search=
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados?search=:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados?search=:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 14:49:17] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 14:58:49] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados:3928:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados:1755:104)
+--------------------------------------------------------------------------------
+[2026-03-24 15:19:38] [UNHANDLED_PROMISE] Cannot read properties of null (reading 'value')
+URL: http://127.0.0.1/empleados
+Line: 
+Stack: TypeError: Cannot read properties of null (reading 'value')
+    at guardarJustificacion (http://127.0.0.1/empleados:3908:79)
+    at HTMLButtonElement.onclick (http://127.0.0.1/empleados:1735:104)
+--------------------------------------------------------------------------------

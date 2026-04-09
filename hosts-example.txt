@@ -1,0 +1,12 @@
+# Archivo hosts de Windows para desarrollo
+# Agregar estas líneas a C:\Windows\System32\drivers\etc\hosts
+# Requiere privilegios de administrador para modificar
+
+# Configuración para Sistema Biométrico
+127.0.0.1       localhost
+127.0.0.1       sistema.local
+192.168.100.1   sistema.local
+192.168.100.1   sistema-biometrico.local
+
+# Si tienes otra IP de red, agrégrala también
+# 192.168.1.X    sistema.local

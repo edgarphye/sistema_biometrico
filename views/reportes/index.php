@@ -1,4 +1,13 @@
 <?php
+require_once 'config.php';
+require_once 'models/Database.php';
+
+$db = Database::getInstance();
+$conn = $db->getConnection();
+
+$stmt = $conn->query("SELECT id, nombre, apellido FROM empleados ORDER BY apellido, nombre");
+$empleados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 $content = '
 <div class="container mt-4">
     <h2>Reportes del Sistema Biométrico</h2>
@@ -14,21 +23,37 @@ $content = '
                         <div class="row">
                             <div class="col-md-4">
                                 <label for="tipo_reporte" class="form-label">Tipo de Reporte</label>
-                                <select class="form-select" id="tipo_reporte" name="tipo_reporte" required>
+                                <select class="form-select" id="tipo_reporte" name="tipo_reporte" required onchange="toggleFilters()">
                                     <option value="">Seleccionar...</option>
-                                    <option value="retardos">Retardos</option>
-                                    <option value="comisiones">Comisiones</option>
-                                    <option value="ausencias">Ausencias</option>
-                                    <option value="asistencia">Asistencia General</option>
+                                    <optgroup label="No Justificados">
+                                        <option value="falta">Faltas</option>
+                                    </optgroup>
+                                    <optgroup label="Justificados">
+                                        <option value="vacaciones">Vacaciones</option>
+                                        <option value="licencia_medica">Licencia Médica</option>
+                                        <option value="dia_economico">Día Económico</option>
+                                        <option value="comision_todo_dia">Comisión Todo el Día</option>
+                                        <option value="constancia_tiempo">Constancia de Tiempo</option>
+                                        <option value="PDSEP-SNTE">PDSEP-SNTE</option>
+                                        <option value="EYR">EYR</option>
+                                        <option value="CLIDDA">CLIDDA</option>
+                                        <option value="cuidados_maternos">Cuidados Maternos</option>
+                                    </optgroup>
+                                    <optgroup label="Retardos">
+                                        <option value="retardos">Retardos</option>
+                                    </optgroup>
+                                    <optgroup label="Resumen">
+                                        <option value="resumen">Resumen General</option>
+                                    </optgroup>
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label for="empleado_id" class="form-label">Empleado</label>
+                                <label for="empleado_id" class="form-label">Empleado (ID o Nombre)</label>
                                 <select class="form-select" id="empleado_id" name="empleado_id">
                                     <option value="">Todos los empleados</option>
                                     ' . implode('', array_map(function($emp) {
-                                        return '<option value="' . $emp['id'] . '">' . htmlspecialchars($emp['nombre'] . ' ' . $emp['apellido']) . '</option>';
-                                    }, $empleados ?? [])) . '
+                                        return '<option value="' . $emp['id'] . '">' . htmlspecialchars($emp['apellido'] . ' ' . $emp['nombre']) . ' (ID: ' . $emp['id'] . ')</option>';
+                                    }, $empleados)) . '
                                 </select>
                             </div>
                             <div class="col-md-2">
@@ -48,6 +73,9 @@ $content = '
                                 <button type="button" class="btn btn-success" onclick="exportarExcel()">
                                     <i class="fas fa-file-excel"></i> Exportar a Excel
                                 </button>
+                                <button type="button" class="btn btn-secondary" onclick="imprimirReporte()">
+                                    <i class="fas fa-print"></i> Imprimir
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -59,8 +87,9 @@ $content = '
     <div class="row mt-4">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5>Resultados del Reporte</h5>
+                    <span id="total-registros" class="badge bg-primary"></span>
                 </div>
                 <div class="card-body">
                     <div id="reporte-resultados">
@@ -73,122 +102,129 @@ $content = '
 </div>
 
 <script>
+function toggleFilters() {
+    const tipo = document.getElementById("tipo_reporte").value;
+    const empleadoSelect = document.getElementById("empleado_id");
+    
+    if (tipo === "resumen") {
+        empleadoSelect.value = "";
+        empleadoSelect.disabled = true;
+    } else {
+        empleadoSelect.disabled = false;
+    }
+}
+
 function generarReporte() {
-    const formData = new FormData(document.getElementById(\'reporteForm\'));
+    const formData = new FormData(document.getElementById("reporteForm"));
     const params = new URLSearchParams(formData);
 
-    fetch(\'<?php echo BASE_URL; ?>/reportes/generar?\' + params.toString())
-        .then(response => response.json())
+    document.getElementById("reporte-resultados").innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Generando reporte...</div>';
+
+    fetch("/sistema_biometrico/api/reportes.php?" + params.toString())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("HTTP " + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
+            if (data.success === false) {
+                document.getElementById("reporte-resultados").innerHTML = '<div class="alert alert-danger">' + (data.error || 'Error desconocido') + '</div>';
+                return;
+            }
             mostrarResultados(data);
         })
         .catch(error => {
-            console.error(\'Error:\', error);
-            document.getElementById(\'reporte-resultados\').innerHTML =
-                \'<div class="alert alert-danger">Error al generar el reporte.</div>\';
+            console.error("Error:", error);
+            document.getElementById("reporte-resultados").innerHTML =
+                \'<div class="alert alert-danger">Error al generar el reporte: \' + error.message + \'</div>';
         });
 }
 
 function mostrarResultados(data) {
-    let html = \'\';
+    let html = "";
 
-    if (data.tipo === \'retardos\') {
-        html = generarTablaRetardos(data.datos);
-    } else if (data.tipo === \'comisiones\') {
-        html = generarTablaComisiones(data.datos);
-    } else if (data.tipo === \'ausencias\') {
-        html = generarTablaAusencias(data.datos);
-    } else if (data.tipo === \'asistencia\') {
-        html = generarTablaAsistencia(data.datos);
+    if (data.tipo === "resumen") {
+        html = generarResumen(data.datos);
+    } else if (data.datos && data.datos.length > 0) {
+        html = generarTabla(data.datos, data.tipo);
+    } else {
+        html = \'<div class="alert alert-info">No se encontraron registros con los filtros seleccionados.</div>\';
     }
 
-    document.getElementById(\'reporte-resultados\').innerHTML = html;
+    document.getElementById("reporte-resultados").innerHTML = html;
+    document.getElementById("total-registros").textContent = (data.datos ? data.datos.length : 0) + " registros";
 }
 
-function generarTablaRetardos(datos) {
-    let html = \'<table class="table table-striped"><thead><tr>\';
-    html += \'<th>Empleado</th><th>Fecha</th><th>Minutos de Retardo</th><th>Tipo</th><th>Justificado</th>\';
+function generarResumen(datos) {
+    let html = \'<table class="table table-bordered table-striped"><thead><tr>\';
+    html += \'<th>Tipo</th><th>Total</th><th>Porcentaje</th>\';
     html += \'</tr></thead><tbody>\';
-
+    
+    const total = datos.reduce((sum, item) => sum + item.total, 0);
+    
     datos.forEach(item => {
+        const pct = total > 0 ? ((item.total / total) * 100).toFixed(1) : 0;
+        const badgeClass = item.tipo === "falta" ? "bg-danger" : (item.tipo === "retardos" ? "bg-warning" : "bg-success");
         html += `<tr>
-            <td>${item.empleado}</td>
-            <td>${item.fecha}</td>
-            <td>${item.minutos_retardo}</td>
-            <td><span class="badge bg-${item.tipo === \'menor\' ? \'warning\' : \'danger\'}">${item.tipo}</span></td>
-            <td>${item.justificado ? \'<i class="fas fa-check text-success"></i>\' : \'<i class="fas fa-times text-danger"></i>\'}</td>
+            <td><span class="badge ${badgeClass}">${item.tipo}</span></td>
+            <td>${item.total.toLocaleString()}</td>
+            <td>${pct}%</td>
         </tr>`;
     });
-
+    
+    html += \'<tr class="table-primary"><td><strong>Total</strong></td><td><strong>\' + total.toLocaleString() + \'</strong></td><td>100%</td></tr>\';
     html += \'</tbody></table>\';
     return html;
 }
 
-function generarTablaComisiones(datos) {
-    let html = \'<table class="table table-striped"><thead><tr>\';
-    html += \'<th>Empleado</th><th>Descripción</th><th>Monto</th><th>Fecha Asignación</th><th>Fecha Vencimiento</th><th>Estado</th>\';
+function generarTabla(datos, tipo) {
+    const columns = {
+        "falta": ["Empleado", "ID", "Fecha", "Hora Entrada", "Hora Salida"],
+        "vacaciones": ["Empleado", "ID", "Fecha", "Hora Entrada", "Hora Salida"],
+        "licencia_medica": ["Empleado", "ID", "Fecha", "Hora Entrada", "Hora Salida"],
+        "dia_economico": ["Empleado", "ID", "Fecha", "Hora Entrada", "Hora Salida"],
+        "comision_todo_dia": ["Empleado", "ID", "Fecha", "Hora Entrada", "Hora Salida"],
+        "constancia_tiempo": ["Empleado", "ID", "Fecha", "Hora Entrada", "Hora Salida"],
+        "PDSEP-SNTE": ["Empleado", "ID", "Fecha", "Hora Entrada", "Hora Salida"],
+        "EYR": ["Empleado", "ID", "Fecha", "Hora Entrada", "Hora Salida"],
+        "CLIDDA": ["Empleado", "ID", "Fecha", "Hora Entrada", "Hora Salida"],
+        "cuidados_maternos": ["Empleado", "ID", "Fecha", "Hora Entrada", "Hora Salida"],
+        "retardos": ["Empleado", "ID", "Fecha", "Hora Entrada", "Hora Salida", "Minutos"]
+    };
+    
+    const cols = columns[tipo] || columns["falta"];
+    
+    let html = \'<div class="table-responsive"><table class="table table-striped table-hover"><thead><tr>\';
+    cols.forEach(col => html += \'<th>\' + col + \'</th>\');
     html += \'</tr></thead><tbody>\';
-
+    
     datos.forEach(item => {
-        const estado = item.justificada ? \'Justificada\' : (new Date(item.fecha_vencimiento) < new Date() ? \'Vencida\' : \'Pendiente\');
-        const badgeClass = item.justificada ? \'success\' : (new Date(item.fecha_vencimiento) < new Date() ? \'danger\' : \'warning\');
-
-        html += `<tr>
-            <td>${item.empleado}</td>
-            <td>${item.descripcion}</td>
-            <td>$${item.monto}</td>
-            <td>${item.fecha_asignacion}</td>
-            <td>${item.fecha_vencimiento || \'N/A\'}</td>
-            <td><span class="badge bg-${badgeClass}">${estado}</span></td>
-        </tr>`;
+        html += \'<tr>\';
+        html += \'<td>\' + item.empleado + \'</td>\';
+        html += \'<td>\' + item.empleado_id + \'</td>\';
+        html += \'<td>\' + item.fecha + \'</td>\';
+        html += \'<td>\' + (item.hora_entrada || "-") + \'</td>\';
+        html += \'<td>\' + (item.hora_salida || "-") + \'</td>\';
+        if (tipo === "retardos" && item.minutos_retardo) {
+            html += \'<td><span class="badge bg-warning">\' + item.minutos_retardo + \' min</span></td>\';
+        }
+        html += \'</tr>\';
     });
-
-    html += \'</tbody></table>\';
-    return html;
-}
-
-function generarTablaAusencias(datos) {
-    let html = \'<table class="table table-striped"><thead><tr>\';
-    html += \'<th>Empleado</th><th>Tipo</th><th>Fecha Inicio</th><th>Fecha Fin</th><th>Justificada</th>\';
-    html += \'</tr></thead><tbody>\';
-
-    datos.forEach(item => {
-        html += `<tr>
-            <td>${item.empleado}</td>
-            <td>${item.tipo}</td>
-            <td>${item.fecha_inicio}</td>
-            <td>${item.fecha_fin}</td>
-            <td>${item.justificada ? \'<i class="fas fa-check text-success"></i>\' : \'<i class="fas fa-times text-danger"></i>\'}</td>
-        </tr>`;
-    });
-
-    html += \'</tbody></table>\';
-    return html;
-}
-
-function generarTablaAsistencia(datos) {
-    let html = \'<table class="table table-striped"><thead><tr>\';
-    html += \'<th>Empleado</th><th>Tipo</th><th>Fecha/Hora</th><th>Dispositivo</th>\';
-    html += \'</tr></thead><tbody>\';
-
-    datos.forEach(item => {
-        html += `<tr>
-            <td>${item.empleado}</td>
-            <td><span class="badge bg-${item.tipo === \'entrada\' ? \'success\' : \'warning\'}">${item.tipo}</span></td>
-            <td>${item.timestamp}</td>
-            <td>Dispositivo ${item.dispositivo_id}</td>
-        </tr>`;
-    });
-
-    html += \'</tbody></table>\';
+    
+    html += \'</tbody></table></div>\';
     return html;
 }
 
 function exportarExcel() {
-    const formData = new FormData(document.getElementById(\'reporteForm\'));
+    const formData = new FormData(document.getElementById("reporteForm"));
     const params = new URLSearchParams(formData);
 
-    window.open(\'<?php echo BASE_URL; ?>/reportes/exportar-excel?\' + params.toString(), \'_blank\');
+    window.open("/sistema_biometrico/api/reportes.php?exportar=excel&" + params.toString(), "_blank");
+}
+
+function imprimirReporte() {
+    window.print();
 }
 </script>
 ';

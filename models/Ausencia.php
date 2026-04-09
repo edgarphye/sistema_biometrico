@@ -1,5 +1,5 @@
 <?php
-require_once 'Database.php';
+require_once __DIR__ . '/Database.php';
 
 class Ausencia {
     private $db;
@@ -10,15 +10,25 @@ class Ausencia {
 
     public function create($data) {
         $stmt = $this->db->getConnection()->prepare("
-            INSERT INTO ausencias (empleado_id, fecha_inicio, fecha_fin, tipo)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO ausencias (
+                empleado_id, fecha_inicio, fecha_fin, tipo, motivo, tipo_ausencia,
+                fecha_limite_justificacion, requiere_evidencia, activo, created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
         ");
-        return $stmt->execute([
+        $result = $stmt->execute([
             $data['empleado_id'],
             $data['fecha_inicio'],
             $data['fecha_fin'],
-            $data['tipo']
+            $data['tipo'],
+            $data['motivo'] ?? null,
+            $data['tipo_ausencia'] ?? null,
+            $data['fecha_limite_justificacion'] ?? null,
+            $data['requiere_evidencia'] ?? 0,
+            $data['activo'] ?? 1
         ]);
+
+        return $result ? $this->db->getConnection()->lastInsertId() : false;
     }
 
     public function getByEmpleado($empleado_id, $fecha_inicio = null, $fecha_fin = null) {
@@ -46,7 +56,7 @@ class Ausencia {
     }
 
     public function justificarAusencia($id) {
-        $stmt = $this->db->getConnection()->prepare("UPDATE ausencias SET justificada = 1 WHERE id = ?");
+        $stmt = $this->db->getConnection()->prepare("UPDATE ausencias SET activo = 1 WHERE id = ?");
         return $stmt->execute([$id]);
     }
 
@@ -72,6 +82,25 @@ class Ausencia {
         $stmt = $this->db->getConnection()->prepare($query);
         $stmt->execute($params);
         return $stmt->fetchAll();
+    }
+
+    /**
+     * Verifica si hay una ausencia activa (no justificada) para un empleado en una fecha específica
+     * @param int $empleado_id ID del empleado
+     * @param string $fecha Fecha en formato Y-m-d
+     * @return array|null Datos de la ausencia activa o null si no hay
+     */
+    public function getAusenciaActiva($empleado_id, $fecha) {
+        $stmt = $this->db->getConnection()->prepare("
+            SELECT * FROM ausencias
+            WHERE empleado_id = ?
+            AND ? BETWEEN fecha_inicio AND fecha_fin
+            AND (justificada = 0 OR justificada IS NULL)
+            ORDER BY fecha_inicio DESC
+            LIMIT 1
+        ");
+        $stmt->execute([$empleado_id, $fecha]);
+        return $stmt->fetch();
     }
 }
 ?>

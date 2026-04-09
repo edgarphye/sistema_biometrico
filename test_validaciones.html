@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Validaciones</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Test de Validaciones</h1>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>Probar Endpoint de Validación</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="validacionId" class="form-label">ID de Validación:</label>
+                    <input type="number" class="form-control" id="validacionId" value="4074">
+                </div>
+                
+                <button type="button" class="btn btn-primary" onclick="testValidacion()">
+                    <i class="fas fa-check"></i> Probar Validación
+                </button>
+                
+                <div id="resultado" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- CSRF Token -->
+    <?php 
+    require_once 'helpers/Csrf.php';
+    session_start();
+    $csrfToken = Csrf::generateToken(); 
+    ?>
+    <input type="hidden" id="csrf_token" value="<?php echo $csrfToken; ?>">
+    <meta name="csrf-token" content="<?php echo $csrfToken; ?>">
+    
+    <!-- Definir BASE_URL para JavaScript -->
+    <script>
+        window.BASE_URL = "/sistema_biometrico"; // URL base corregida
+        
+        function getCsrfToken() {
+            return document.getElementById('csrf_token').value || 
+                   document.querySelector('meta[name="csrf-token"]').getAttribute('content') || '';
+        }
+        
+        async function testValidacion() {
+            const id = document.getElementById('validacionId').value;
+            const resultadoDiv = document.getElementById('resultado');
+            
+            resultadoDiv.innerHTML = '<div class="alert alert-info">Probando...</div>';
+            
+            try {
+                const response = await fetch(`${window.BASE_URL}/validaciones/validar/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        csrf_token: getCsrfToken()
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultadoDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h6>✅ Validación exitosa</h6>
+                            <p><strong>ID:</strong> ${data.validacion.id}</p>
+                            <p><strong>Empleado:</strong> ${data.validacion.empleado_nombre}</p>
+                            <p><strong>Tipo:</strong> ${data.validacion.tipo_incidencia}</p>
+                            <p><strong>Estado:</strong> ${data.validacion.estado}</p>
+                            <details>
+                                <summary>Respuesta completa</summary>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    resultadoDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h6>❌ Error en validación</h6>
+                            <p>${data.error}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultadoDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h6>❌ Error de conexión</h6>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

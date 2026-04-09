@@ -206,7 +206,7 @@ $content = '
 
 <script>
 function actualizarEstado() {
-    fetch(\'<?php echo BASE_URL; ?>/asistencia/estado-dispositivos\')
+    fetch(window.BASE_URL + \'/asistencia/estado-dispositivos\')
         .then(response => response.json())
         .then(data => {
             const container = document.getElementById(\'dispositivos-status\');
@@ -297,10 +297,11 @@ function filtrarAsistencia() {
     if (tipoBiometria) formData.append(\'tipo_biometria\', tipoBiometria);
     if (tipoAsistencia) formData.append(\'tipo_asistencia\', tipoAsistencia);
 
-    fetch(\'<?php echo BASE_URL; ?>/asistencia/filtrar-asistencia\', {
+    fetch(window.BASE_URL + \'/asistencia/filtrar-asistencia\', {
         method: \'POST\',
         headers: {
             \'Content-Type\': \'application/x-www-form-urlencoded\',
+            \'X-CSRF-Token\': document.getElementById(\'csrf_token\')?.value || \'\'
         },
         body: formData.toString()
     })
@@ -546,6 +547,7 @@ document.addEventListener(\'DOMContentLoaded\', function() {
     filtrarAsistencia();
 });
 </script>
+<?php
 ';
 
 include __DIR__ . '/../layout.php';

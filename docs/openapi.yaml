@@ -1,0 +1,652 @@
+# 📚 OpenAPI Specification - Sistema Biométrico
+
+**Version**: 1.0.0  
+**Base URL**: https://api.sistema-biometrico.com/v1
+
+openapi: 3.0.3
+
+info:
+  title: Sistema Biométrico API
+  description: API RESTful para el Sistema Biométrico de Control de Asistencia
+  version: 1.0.0
+  contact:
+    email: api-support@sistema-biometrico.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.sistema-biometrico.com/v1
+    description: Servidor de producción
+  - url: https://staging-api.sistema-biometrico.com/v1
+    description: Servidor de staging
+  - url: http://localhost:8000/api/v1
+    description: Servidor de desarrollo
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Autenticación
+      summary: Iniciar sesión
+      description: Autentica un usuario y devuelve un token JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Autenticación exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /empleados:
+    get:
+      tags:
+        - Empleados
+      summary: Obtener lista de empleados
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Area'
+      responses:
+        '200':
+          description: Lista de empleados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmpleadoListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - Empleados
+      summary: Crear nuevo empleado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmpleadoRequest'
+      responses:
+        '201':
+          description: Empleado creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmpleadoCreatedResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /empleados/{id}:
+    get:
+      tags:
+        - Empleados
+      summary: Obtener empleado por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EmpleadoId'
+      responses:
+        '200':
+          description: Detalles del empleado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmpleadoResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Empleados
+      summary: Actualizar empleado
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EmpleadoId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEmpleadoRequest'
+      responses:
+        '200':
+          description: Empleado actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmpleadoUpdatedResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Empleados
+      summary: Eliminar empleado
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EmpleadoId'
+      responses:
+        '200':
+          description: Empleado eliminado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/GenericSuccess'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /asistencia:
+    get:
+      tags:
+        - Asistencia
+      summary: Obtener registros de asistencia
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EmpleadoId'
+        - $ref: '#/components/parameters/FechaInicio'
+        - $ref: '#/components/parameters/FechaFin'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Registros de asistencia
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsistenciaListResponse'
+
+  /asistencia/entrada:
+    post:
+      tags:
+        - Asistencia
+      summary: Registrar entrada
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistroAsistenciaRequest'
+      responses:
+        '201':
+          description: Entrada registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistroAsistenciaResponse'
+
+  /asistencia/salida:
+    post:
+      tags:
+        - Asistencia
+      summary: Registrar salida
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistroAsistenciaRequest'
+      responses:
+        '201':
+          description: Salida registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistroAsistenciaResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Page:
+      in: query
+      name: page
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+      description: Número de página
+    Limit:
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        minimum: 1
+        maximum: 100
+      description: Registros por página
+    Search:
+      in: query
+      name: search
+      schema:
+        type: string
+      description: Término de búsqueda
+    Area:
+      in: query
+      name: area
+      schema:
+        type: string
+      description: Filtro por área
+    EmpleadoId:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+      description: ID del empleado
+    FechaInicio:
+      in: query
+      name: fecha_inicio
+      schema:
+        type: string
+        format: date
+      description: Fecha inicial (YYYY-MM-DD)
+    FechaFin:
+      in: query
+      name: fecha_fin
+      schema:
+        type: string
+        format: date
+      description: Fecha final (YYYY-MM-DD)
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: admin
+        password:
+          type: string
+          format: password
+          example: password123
+
+    AuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+            user:
+              $ref: '#/components/schemas/User'
+            expires_in:
+              type: integer
+              example: 3600
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: admin
+        rol:
+          type: string
+          enum: [admin, user, viewer]
+          example: admin
+        empleado_id:
+          type: integer
+          nullable: true
+          example: null
+
+    Empleado:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nombre:
+          type: string
+          example: Juan
+        apellido:
+          type: string
+          example: Pérez
+        rfc:
+          type: string
+          example: PEJU800101HDFXXX01
+        email:
+          type: string
+          format: email
+          example: juan.perez@empresa.com
+        telefono:
+          type: string
+          example: 5551234567
+        area:
+          type: string
+          example: TI
+        puesto:
+          type: string
+          example: Desarrollador
+        activo:
+          type: boolean
+          example: true
+        fecha_registro:
+          type: string
+          format: date-time
+          example: 2025-01-01T00:00:00Z
+
+    CreateEmpleadoRequest:
+      type: object
+      required:
+        - nombre
+        - apellido
+        - rfc
+        - email
+      properties:
+        nombre:
+          type: string
+          example: Juan
+        apellido:
+          type: string
+          example: Pérez
+        rfc:
+          type: string
+          example: PEJU800101HDFXXX01
+        email:
+          type: string
+          format: email
+          example: juan.perez@empresa.com
+        telefono:
+          type: string
+          example: 5551234567
+        area:
+          type: string
+          example: TI
+        puesto:
+          type: string
+          example: Desarrollador
+
+    UpdateEmpleadoRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          example: Juan
+        apellido:
+          type: string
+          example: Pérez
+        email:
+          type: string
+          format: email
+          example: juan.perez@empresa.com
+        telefono:
+          type: string
+          example: 5551234567
+        area:
+          type: string
+          example: TI
+        puesto:
+          type: string
+          example: Desarrollador
+        activo:
+          type: boolean
+          example: true
+
+    EmpleadoListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            empleados:
+              type: array
+              items:
+                $ref: '#/components/schemas/Empleado'
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+
+    EmpleadoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Empleado'
+
+    EmpleadoCreatedResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 2
+            message:
+              type: string
+              example: Empleado creado exitosamente
+
+    EmpleadoUpdatedResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Empleado actualizado exitosamente
+
+    Pagination:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 10
+        total:
+          type: integer
+          example: 25
+        total_pages:
+          type: integer
+          example: 3
+
+    RegistroAsistenciaRequest:
+      type: object
+      required:
+        - empleado_id
+      properties:
+        empleado_id:
+          type: integer
+          example: 1
+        dispositivo_id:
+          type: string
+          example: BIO001
+        metodo_verificacion:
+          type: string
+          enum: [huella, cara, tarjeta, pin]
+          example: huella
+        timestamp:
+          type: string
+          format: date-time
+          example: 2025-12-01T09:15:00Z
+
+    RegistroAsistenciaResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 123
+            empleado_id:
+              type: integer
+              example: 1
+            fecha:
+              type: string
+              example: 2025-12-01
+            hora_entrada:
+              type: string
+              example: 09:15:00
+            tipo_asistencia:
+              type: string
+              example: retardo_menor
+
+    AsistenciaListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            asistencia:
+              type: array
+              items:
+                $ref: '#/components/schemas/RegistroAsistenciaResponse/data/properties'
+            estadisticas:
+              type: object
+              properties:
+                total_registros:
+                  type: integer
+                  example: 22
+                dias_puntuales:
+                  type: integer
+                  example: 18
+                dias_retardo_menor:
+                  type: integer
+                  example: 3
+                dias_retardo_mayor:
+                  type: integer
+                  example: 1
+
+  responses:
+    Unauthorized:
+      description: No autorizado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: UNAUTHORIZED
+                  message:
+                    type: string
+                    example: Token inválido o expirado
+
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: NOT_FOUND
+                  message:
+                    type: string
+                    example: El recurso solicitado no existe
+
+    ValidationError:
+      description: Error de validación
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: VALIDATION_ERROR
+                  message:
+                    type: string
+                    example: El RFC es inválido
+                  details:
+                    type: object
+                    properties:
+                      field:
+                        type: string
+                        example: rfc
+                      reason:
+                        type: string
+                        example: formato_invalido
+
+    GenericSuccess:
+      description: Respuesta exitosa genérica
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: Operación completada exitosamente
+
+tags:
+  - name: Autenticación
+    description: Endpoints para autenticación de usuarios
+  - name: Empleados
+    description: Gestión de empleados
+  - name: Asistencia
+    description: Control de asistencia y registros

@@ -3,11 +3,14 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 require_once 'vendor/autoload.php'; // Si usas Composer
+require_once __DIR__ . '/BaseController.php';
 
-class EmailController {
+class EmailController extends BaseController {
     private $mailer;
 
     public function __construct() {
+        parent::__construct();
+        $this->requireAuth();
         $this->mailer = new PHPMailer(true);
 
         // Configuración del servidor SMTP
@@ -33,6 +36,7 @@ class EmailController {
             $this->mailer->send();
             return true;
         } catch (Exception $e) {
+            $this->logException($e, ['action' => 'enviarNotificacionRetardo', 'empleado_id' => $empleado['id'] ?? null]);
             error_log("Error enviando email de retardo: {$this->mailer->ErrorInfo}");
             return false;
         }
@@ -48,7 +52,7 @@ class EmailController {
             $this->mailer->send();
             return true;
         } catch (Exception $e) {
-            error_log("Error enviando email de comisión vencida: {$this->mailer->ErrorInfo}");
+            $this->logException($e, ['action' => 'enviarNotificacionComisionVencida', 'empleado_id' => $empleado['id'] ?? null]);
             return false;
         }
     }
@@ -63,6 +67,7 @@ class EmailController {
             $this->mailer->send();
             return true;
         } catch (Exception $e) {
+            $this->logException($e, ['action' => 'enviarNotificacionAusencia', 'empleado_id' => $empleado['id'] ?? null]);
             error_log("Error enviando email de ausencia: {$this->mailer->ErrorInfo}");
             return false;
         }
@@ -81,6 +86,7 @@ class EmailController {
             $this->mailer->clearAddresses();
             return true;
         } catch (Exception $e) {
+            $this->logException($e, ['action' => 'enviarReporteDiario']);
             error_log("Error enviando reporte diario: {$this->mailer->ErrorInfo}");
             return false;
         }
@@ -227,6 +233,96 @@ class EmailController {
         </body>
         </html>
         ";
+    }
+    
+    /**
+     * Enviar notificación de licencia
+     * @param array $notificacion Datos de la notificación
+     * @return bool Éxito de envío
+     */
+    public function enviarNotificacionLicencia($notificacion) {
+        try {
+            $this->mailer->addAddress($notificacion['email'] ?? 'admin@sistema.com');
+            $this->mailer->Subject = 'Solicitud de Licencia - Sistema Biométrico';
+            $this->mailer->Body = $this->plantillaLicencia($notificacion);
+            
+            $this->mailer->send();
+            return true;
+        } catch (Exception $e) {
+            $this->logException($e, ['action' => 'enviarNotificacionLicencia']);
+            error_log("Error enviando notificación de licencia: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Plantilla HTML para notificación de licencia
+     * @param array $notificacion Datos de la notificación
+     * @return string HTML
+     */
+    private function plantillaLicencia($notificacion) {
+        $tipoLicencia = isset($notificacion['tipo']) ? $notificacion['tipo'] : 'desconocida';
+        $tipoColor = ($tipoLicencia === 'enfermedad') ? '#28a745' : '#dc3545';
+        $fechaInicio = isset($notificacion['fecha_inicio']) ? $notificacion['fecha_inicio'] : date('Y-m-d');
+        $fechaFin = isset($notificacion['fecha_fin']) ? $notificacion['fecha_fin'] : date('Y-m-d', strtotime('+7 days'));
+        
+        ob_start();
+        ?>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <title>Solicitud de Licencia</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+                .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                .header { background: linear-gradient(135deg, #9F2241, #235B4E); color: white; padding: 20px; border-radius: 10px 10px 0 0; text-align: center; }
+                .content { padding: 30px; }
+                .details { background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; }
+                .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+                .badge { display: inline-block; padding: 4px 8px; background: <?php echo $tipoColor; ?>; color: white; border-radius: 4px; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>📋 Solicitud de Licencia</h1>
+                    <p>Sistema Biométrico de Control de Asistencia</p>
+                </div>
+                
+                <div class='content'>
+                    <h2>Detalles de la Solicitud</h2>
+                    
+                    <div class='details'>
+                        <p><strong>Empleado:</strong> <?php echo htmlspecialchars($notificacion['empleado_nombre'] . ' ' . $notificacion['empleado_apellido']); ?></p>
+                        <p><strong>Email:</strong> <?php echo htmlspecialchars($notificacion['empleado_email']); ?></p>
+                        <p><strong>RFC:</strong> <?php echo htmlspecialchars($notificacion['empleado_rfc']); ?></p>
+                        <p><strong>Departamento:</strong> <?php echo htmlspecialchars($notificacion['departamento']); ?></p>
+                        <p><strong>Puesto:</strong> <?php echo htmlspecialchars($notificacion['puesto']); ?></p></p>
+                        
+                        <hr style='margin: 20px 0; border: 1px solid #dee2e6;'>
+                        
+                        <p><span class='badge'><?php echo $tipoLicencia; ?></span> <strong>Tipo de Licencia:</strong> <?php echo htmlspecialchars($tipoLicencia); ?></p>
+                        <p><strong>Fecha de Inicio:</strong> <?php echo $fechaInicio; ?></p>
+                        <p><strong>Fecha de Fin:</strong> <?php echo $fechaFin; ?></p>
+                        <p><strong>Motivo:</strong> <?php echo htmlspecialchars($notificacion['motivo'] ?? 'No especificado'); ?></p>
+                        <p><strong>Descripción:</strong> <?php echo htmlspecialchars($notificacion['descripcion'] ?? 'No hay descripción adicional'); ?></p>
+                        
+                        <hr style='margin: 20px 0; border: 1px solid #dee2e6;'>
+                        
+                        <p><strong>Solicitado el:</strong> <?php echo $notificacion['fecha_solicitud'] ?? date('Y-m-d H:i:s'); ?></p>
+                        <p><strong>Estatus Actual:</strong> <span style='color: <?php echo $tipoColor; ?>; font-weight: bold;'>Pendiente de Aprobación</span></p>
+                    </div>
+                </div>
+                
+                <div class='footer'>
+                    <p><strong>Sistema Biométrico - Gestión de Licencias</strong></p>
+                    <p>Esta es una notificación automática. Por favor, no responda a este correo.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        <?php
+        return ob_get_clean();
     }
 }
 ?>

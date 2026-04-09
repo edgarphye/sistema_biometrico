@@ -1,0 +1,291 @@
+"id","zkteo_id","nombre","apellido","rfc","curp","email","telefono","area","area_fisica","puesto","jerarquia","jefe_directo_id","jefe_directo_clave","sexo","fecha_nacimiento","fecha_ingreso","entidad_federativa","huella_dactilar","foto_cara","activo","plaza_confianza","fecha_registro","clave_depto"
+1,"1",GREGORIO,BONILLA ZAMITIZ,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",ARCHIVO DGIFA,,,5064,,,,,,,,1,0,2026-02-27 11:06:14.000,DCPSyGR
+3,,RODOLFO,RAMIREZ RAYMUNDO,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM RAMIRO REYES ESPARZA,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,DATEDPD
+4,"4",LUIS GABRIEL,ESPINOSA LOPEZ,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,,,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+6,,LILIAN AMERICA,GARCIA NUÑEZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,CM ERMILO ABREU,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+9,"9",ALMA ROSALIA,RIVERA SANTIAGO,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,,,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+10,"10",ALEJANDRO,SOTO BERUMEN,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,,,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+11,"11",CLAUDIA OLIVIA,BARRETO GALLARDO,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+12,"12",KAREN AIDE,SANTILLAN REYES,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+13,"13",Empleado ZK 13,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+14,,MARCOS FRANCISCO,GARCIA RAMIREZ,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM ERMILO ABREU,,Empleado,5001,"3",,,,,,,1,0,2026-03-17 13:53:46.000,DATEDPD
+18,"18",DIANA GUADALUPE,NAVARRO QUINTANA,NAQD6810265M3,NAQD681026MDFVNN07,,,Jefatura de Departamento de Recursos Humanos,"","",Empleado,,"",M,1968-10-26,,DF,,uploads/fotos_empleados/empleado_18_1774558875.jpeg,1,0,2026-02-27 10:55:35.000,JDRH
+20,,MARIA MARINA,RENDON SANCHEZ,,,,,Unidad de Transparencia y Auditoria,UNIDAD DE TRANSPARENCIA Y AUDI,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,UTyA
+22,"22",BERENICE,DE LA BARREDA BAUTISTA ,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+23,"23",XIMENA,PUGA VELASCO,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+24,,JOSE DE JESUS,TAPIA GALICIA,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,COORDINACIÓN ADMINISTRATIVA ERMILO ABREU,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+25,"25",EDUARDO DANIEL,ANGELES GUTIERREZ,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,,,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+27,,MIGUEL IGNACIO,ULLOA GONZÁLEZ,,,,,Unidad de Transparencia y Auditoria,UNIDAD DE TRANSPARENCIA Y AUDITORIA,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,UTyA
+29,"29",Empleado ZK 29,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:50:32.000,
+33,"33",HUGO,LONGORIA CASTRO,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,,,,5001,"6",,,,,,,1,0,2026-02-27 10:55:35.000,JDRMS-B
+34,"34",VICTOR ALFONSO,ORTIZ MEDINA,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+35,"35",JOSE ALBERTO,ULLOA AGUILERA,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,,,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+36,"36",MARIO,NAVARRETE ROSALES,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,,,,5001,"6",,,,,,,1,0,2026-02-27 10:55:35.000,JDRMS-B
+38,"38",PADILLA SOLARES SERGIO,PADILLA SOLARES,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,,5001,"6",,,,,,,1,0,2026-03-02 10:50:35.000,JDRMS-B
+39,,GENARO ANDRES,RIVERA TIRADO,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+44,"44",LETICIA,AGUILAR MARTINEZ,,,,,Jefatura de Departamento de Recursos Humanos,,,,5001,,,,,,,,1,0,2026-02-27 10:55:35.000,JDRH
+45,,PORFIRIO,ARREOLA REYES,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,COORDINACIÓN ADMINISTRATIVA ERMILO ABREU,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+46,"46",TANYA YANIN,HERNANDEZ VALLEJO,,,,,Dirección de Planeación,COMISIONADO EN PLANEACIÓN,,,5001,,,,,,,,1,0,2026-02-27 11:06:15.000,DPE
+49,"49",Empleado ZK 49,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:50:40.000,
+52,"52",ERIDANI,BAHENA TORREBLANCA,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,,,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+53,"53",FAUSTO RICARDO,MORALES PIMENTEL,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,,,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+54,"54",ANDREA,GUERRERO CAMPOS,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,"9",,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+55,,CARLOS GABRIEL,GARCIA FLORES,,,,,Dirección de Planeación,COMISIONADO EN PLANEACIÓN,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,DPE
+57,,GAONA GLORIA,RODRÍGUEZ GAONA,,,,,Unidad de Transparencia y Auditoria,UNIDAD DE TRANSPARENCIA Y AUDI,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,UTyA
+58,"58",Empleado ZK 58,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:50:56.000,
+59,"59",Empleado ZK 59,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:50:59.000,
+61,"61",BEATRIZ,GALLEGOS PONTAZA,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+62,,NORA LUISA,FLORES AMADOR,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+65,"65",ALEJANDRO,COLIN SOTELO,,,,,Jefatura de Departamento de Recursos Humanos,,,,5001,,,,,,,,1,0,2026-02-27 10:55:35.000,JDRH
+68,"68",JOSE ANTONIO,LOPEZ MANCERA,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,"9",,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+69,,IRMA,LOPEZ HERNANDEZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+70,,YURIANA,CASIANO CRUZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+71,"71",ALVA,CANDIDO VENTURA,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+72,"72",JONATHAN AXEL,ROMERO SALAZAR,,,,,Dirección de Planeación,COMISIONADO EN PLANEACIÓN,,,5001,,,,,,,,1,0,2026-02-27 11:06:15.000,DPE
+73,"73",Empleado ZK 73,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+74,,KAREN AILIN,LOPEZ LOPEZ,,,,,Area de Diseño,DISEÑO,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,DISEÑO
+77,,ANA LILIA,SALVADOR HERNANDEZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,COORDINACIÓN ADMINISTRATIVA ERMILO ABREU,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+78,"78",FERNANDO ALBERTO,TORIBIO AVILES,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,"9",,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+79,"79",IRENE BEATRIZ,GABRIEL NOGUERA,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+80,,LIDIA LUCIA,MENDOZA MENDIETA,,,,,Unidad de Transparencia y Auditoria,UNIDAD DE TRANSPARENCIA Y AUDI,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,UTyA
+81,"81",KEVIN ABELARDO,ANGELES GORDILLO,,,,,Dirección General de Planeación y Programación Educativa,DIRECCIÓN GENERAL,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,DGPPEE
+82,"82",ABRIL,FERRARA GUTIERREZ,,,,,Dirección General de Planeación y Programación Educativa,DIRECCIÓN GENERAL,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,DGPPEE
+83,"83",GABRIELA,MANRIQUEZ RODRIGUEZ,,,,,Dirección General de Planeación y Programación Educativa,DIRECCIÓN GENERAL,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,DGPPEE
+84,"84",SONIA,MOSCU GALICIA,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+85,"85",Empleado ZK 85,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:51:26.000,
+87,"87",FERNANDO,CISNEROS RAMIREZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,,,,5001,"6",,,1996-05-16,,,,1,0,2026-02-27 10:55:35.000,JDRMS-B
+90,"90",PAULINA SIMMONE,MAGAÑA MARTINEZ,,,,,Dirección de Programación y Presupuesto para el Desarrollo,COMISIONADO EN PLANEACIÓN,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,DPPDA
+93,"93",EMMA,MORALES MENDOZA,,,,,Dirección de Planeación,COMISIONADO EN PLANEACIÓN,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,DPE
+94,"94",CLAUDIA MARGARITA,SANCHEZ MARTINEZ,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,,,,5001,,,,,,,,1,0,2026-02-27 10:55:35.000,DATEDPD
+96,,DALIA,VALENCIA SOSA,,,,,Area de Diseño,DISEÑO,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,DISEÑO
+98,"98",SILVIA PATRICIA,LORA ARMENTA,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,"9",,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+101,"101",PASCUAL,PEREZ MUNIVE,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,"9",,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+102,,MA. GUADALUPE,RICO MEDRANO,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM RAMIRO REYES ESPARZA,,Empleado,5001,"3",,,,,,,1,0,2026-03-17 13:53:46.000,DATEDPD
+103,,ARTURO,HERNÁNDEZ MEJIA,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM RAMIRO REYES ESPARZA,,Empleado,5001,"3",,,,,,,1,0,2026-03-17 13:53:46.000,DATEDPD
+104,,MA. FERNANDA,TORRES SOTO,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,CM RAMIRO REYES ESPARZA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+105,"105",ANA YUNUEN,CASTILLO COLIN,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+106,"106",JOSEFINA,GARCIA MARTINEZ,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,,,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+107,"107",FERNANDA,TELLEZ NEGRETE,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+109,"109",ROSSANA ELIZABETH,ZAPATA MONTEJO,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+110,"110",TERESA,AGUILAR ORDOÑEZ,,,,,Jefatura de Departamento de Recursos Financieros,,,,5001,,,,,,,,1,0,2026-02-27 10:55:35.000,JDRF-B
+113,"113",EDGAR,PHYE PARGA,PEPE721114KZ0,PEPE721114HJCHRD08,,,Jefatura de Departamento de Evaluación,DEPARTAMENTO DE EVALUACIÓN,"",Empleado,5076,"13",H,1972-11-14,,JC,,,1,0,2026-02-27 10:55:35.000,JDE
+114,"114",CLAUDIA SUSANA,VELAZQUEZ AVILA,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,,,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+115,,FELIPE DE JESUS,SALGADO ALVARADO,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM RAMIRO REYES ESPARZA,,Empleado,5001,"3",,,,,,,1,0,2026-03-17 13:53:46.000,DATEDPD
+116,"116",SONIA GUADALUPE,GARDUÑO AGUILAR,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+117,"117",MARIA ELENA,ASCENCIONA GONZALEZ,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+119,,PATRICIA,GARCIA ANDERSON,,,,,Unidad de Transparencia y Auditoria,UNIDAD DE TRANSPARENCIA Y AUDI,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,UTyA
+120,"120",ERENDIRA,AVILA CHAVEZ,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,"9",,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+122,,VICTOR HUGO,ZAMORA PEREZ,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM RAMIRO REYES ESPARZA,,Empleado,5001,"3",,,,,,,1,0,2026-03-17 13:53:46.000,DATEDPD
+124,"124",KARLA MA,GUERRERO BIS,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,,,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+128,,MIRANDA MORENO CLAUDIA,MIRANDA MORENO,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,COORDINACIÓN ADMINISTRATIVA ERMILO ABREU,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+134,"134",LAURA EMILIA,GARCIA PEREZ,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+137,"137",ADRIANA,VELARDE CUELLA,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,,,,5001,"3",,,,,,,1,0,2026-02-27 10:55:35.000,DATEDPD
+141,,ANA KARINA,SOLANO GOMEZ,,,,,Unidad de Transparencia y Auditoria,UNIDAD DE TRANSPARENCIA Y AUDI,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,UTyA
+142,,ALEXA MARIELLE,GODOY NUÑEZ,TMP000142,SIN CURP,,,Dirección de Administración Escolar,ADMÓN ESCOLAR,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:06.000,DAE
+144,"144",JUAN CARLOS,RAMIREZ ROMERO,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,"9",,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+145,"145",FERNANDO,LUNA HERRERA,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,,,,5001,"6",,,,,,,1,0,2026-02-27 10:55:35.000,JDRMS-B
+146,,HECTOR FRANCISCO,ALVAREZ FLORES,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+150,,CHRISTIAN,PANDO ACOSTA,,,,,Dirección de Administración Escolar,ADMÓN ESCOLAR,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,DAE
+152,"152",MARIA DE LOS MILAGROS,RAMIREZ GOMEZ,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+153,"153",PABLO,MACHORRO PINEDA,,,,,Jefatura de Departamento de Recursos Financieros,,,,5001,,,,,,,,1,0,2026-02-27 10:55:35.000,JDRF-B
+157,,EDITH,PEREA HERNANDEZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+158,"158",JORGE,BLAKE SANCHEZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,,,,5001,"6",,,,,,,1,0,2026-02-27 10:55:35.000,JDRMS-B
+160,"160",LUIS A.,IZAGUIRRE OLIVARES,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+161,"161",LAURA,HERNANDEZ GONZALEZ,,,,,Jefatura de Departamento de Recursos Humanos,,,,5001,,,,,,,,1,0,2026-02-27 10:55:35.000,JDRH
+166,,DANIEL,ORTEGA RAMIREZ,,,,,Unidad de Transparencia y Auditoria,UNIDAD DE TRANSPARENCIA Y AUDI,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,UTyA
+167,,ALMA DELIA,ORTIZ GARDUÑO,,,,,Unidad de Transparencia y Auditoria,UNIDAD DE TRANSPARENCIA Y AUDI,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,UTyA
+169,,MARTHA,GONZALEZ GUZMAN,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM ERMILO ABREU,,Empleado,5001,"3",,,,,,,1,0,2026-03-17 13:53:46.000,DATEDPD
+172,"172",FRANCISCO JOSE,ANGELES ARRIETA,,,,,Jefatura de Departamento de Recursos Humanos,,,,5001,,,,,,,,1,0,2026-02-27 10:55:35.000,JDRH
+175,,GERARDO,COLIN REZA,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM ERMILO ABREU,,Empleado,5001,"3",,,,,,,1,0,2026-03-17 13:53:46.000,DATEDPD
+176,,TANIA NATALIE,BUSTOS GARCIA,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM ERMILO ABREU,,Empleado,5001,"3",,,,,,,1,0,2026-03-17 13:53:46.000,DATEDPD
+177,,GUILLERMO,ALVAREZ AGUILAR,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM ERMILO ABREU,,Empleado,5001,"3",,,,,,,1,0,2026-03-17 13:53:46.000,DATEDPD
+179,"179",REBECA GUADALUPE,LOPEZ GOMEZ,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,"9",,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+185,"185",MIGUEL ANGEL,MARTINEZ LOPEZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,,,,5001,"6",,,,,,,1,0,2026-02-27 10:55:35.000,JDRMS-B
+191,"191",PEDRO,GARCIA SANTOS,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,,,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+202,,CESAR ISAIAS,CHAVEZ JAUREGUI,,,,,Unidad de Transparencia y Auditoria,UNIDAD DE TRANSPARENCIA Y AUDI,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,UTyA
+204,"204",FREDY MAYCOL,ALARCON GALICIA,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,,,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+205,"205",Empleado ZK 205,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:50:00.000,
+208,,ROSALIA,SOLIS GUTIERREZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+210,,BLANCA ESTELA,LÓPEZ GÓMEZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+212,"212",MARIA CRISTINA,CRUZ MARTINEZ,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,,,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+213,"213",Empleado ZK 213,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:50:01.000,
+214,"214",XOCHITL MARIELA,SANCHEZ AYALA,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+216,"216",ALEJANDRO,ELIZALDE ACEVES,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,,,,5001,"6",,,,,,,1,0,2026-02-27 10:55:35.000,JDRMS-B
+218,"218",LUZ ELENA,FLORES REYES,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+219,"219",MARCELA,FLORES ESPINDOLA,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+221,"221",DANIELA,GARCIA MALDONADO,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+222,"222",BRENDA GISELLE,CERVANTES HERNANDEZ,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+223,"223",RUBEN,GALVAN RANGEL,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,,,,5001,"6",,,,,,,1,0,2026-02-27 10:55:35.000,JDRMS-B
+225,"225",CESAR JUAN,SANTIAGO CORTES,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,"9",,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+226,"226",GABRIELA,AYALA BENITEZ,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+230,"230",Empleado ZK 230,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+232,"232",MIGUEL,JAIME SERRANO,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+233,"233",Empleado ZK 233,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:16.000,
+235,"235",Empleado ZK 235,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+239,"239",Empleado ZK 239,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:24.000,
+240,"240",Empleado ZK 240,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:50:12.000,
+242,,GUADALUPE,FLORES LOPEZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+244,"244",Empleado ZK 244,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+245,"245",MARIA DE LOURDES,NORIEGA HERNANDEZ,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+247,"247",LUIS ENRIQUE,PEREZ CORNEJO,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+248,"248",ANA SILVIA,PEREZ GUERRA,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+249,"249",Empleado ZK 249,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+251,"251",MARIO ARTURO,CERVANTES MIRANDA,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,"9",,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+252,"252",Empleado ZK 252,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+253,"253",EFRAIN,VALENCIA CALZADILLA,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+255,"255",Empleado ZK 255,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:50:29.000,
+258,"258",VICTOR,CARRILLO ZAMARRIPA,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM LUIS ALVAREZ BARRET,,,5001,"3",,,,,,,1,0,2026-02-27 11:06:13.000,DATEDPD
+259,"259",RUBEN,RODRIGUEZ ROJAS,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,,,,5001,"6",,,,,,,1,0,2026-02-27 10:55:35.000,JDRMS-B
+260,"260",MAGDALENA,GARCIA GARCIA,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+263,,YAZMIN LILIANA,TREJO MONTESILLO,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+267,,CARLOS CANUTO,VIRGEN TRUJILLO,,,,,Unidad de Transparencia y Auditoria,UNIDAD DE TRANSPARENCIA Y AUDI,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,UTyA
+293,,MARTHA LUZ,BAÑOS ENCISO,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+314,"314",LAURA LETICIA,GARCIA MORALES,,,,,Jefatura de Departamento de Recursos Humanos,,,,5001,,,,,,,,1,0,2026-02-27 10:55:35.000,JDRH
+318,"318",NANCY ISABEL,ORTEGA ANDRADE,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+325,"325",FABIO M.,CORONA CARRION,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM LUIS ALVAREZ BARRET,,,5001,"3",,,,,,,1,0,2026-02-27 11:06:13.000,DATEDPD
+327,"327",OSCAR,MENDOZA HERNANDEZ,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,,,,5001,"3",,,,,,,1,0,2026-02-27 10:55:35.000,DATEDPD
+328,"328",MICHEL,GONZALEZ GARCIA,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,,,,5001,"3",,,,,,,1,0,2026-02-27 10:55:35.000,DATEDPD
+349,,IXCHEL,VEGA BLANCO,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM CARLOS A CARRILLO,,Empleado,5001,"3",,,,,,,1,0,2026-03-17 13:53:46.000,DATEDPD
+350,,HUMBERTO,GARCIA MEJIA,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM CARLOS A CARRILLO,,Empleado,5001,"3",,,,,,,1,0,2026-03-17 13:53:46.000,DATEDPD
+351,,FRANCISCO,DOMINGUEZ MUNIVE,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,CM CARLOS A CARRILLO,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+352,,EMMANUEL,MIRANDA LEON,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM CARLOS A CARRILLO,,Empleado,5001,"3",,,,,,,1,0,2026-03-17 13:53:46.000,DATEDPD
+401,"401",ABRAHAM JOSE,AGUILAR RUIZ,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+407,"407",CECILIA,IBARRA GALICIA,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+408,"408",ANTONIA,HERNANDEZ HERNANDEZ,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+409,,ANA M.,BARBARA SALAZAR,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM RAMIRO REYES ESPARZA,,Empleado,5001,"3",,,,,,,1,0,2026-03-17 13:53:46.000,DATEDPD
+414,"414",GABRIEL,PACHECO LOPEZ,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+418,,ANABEL,PONCE AGUILERA,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,COORDINACIÓN ADMINISTRATIVA ERMILO ABREU,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+419,,ANTONIO,CONTRERAS ARELLANO,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+500,"500",ZAHIDA LUCILA,GOMEZ LOZANO,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+501,"501",ERANDI,ROMERO ZUÑIGA,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,,,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+512,,JONATHAN RODOLFO,VILLARREAL ENCARNACION,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+513,,SECEÑA DIAZ ERIKA,SECEÑA DIAZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+514,"514",ROSA ELIZABETH,DUEÑAS VALDIVIA,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,"9",,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+519,,CARMEN ALEJANDRA,ORTEGA LOPEZ,,,,,Dirección de Administración Escolar,ADMÓN ESCOLAR,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,DAE
+521,"521",JULIETA,CAMPOS MORA,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,"9",,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+522,,JESSICA JANETTE,SANTIBAÑEZ ALONSO,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,COORDINACIÓN ADMINISTRATIVA ERMILO ABREU,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+523,"523",HECTOR HUGO,LONGORIA DIAZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,,,,5001,"6",,,,,,,1,0,2026-02-27 10:55:35.000,JDRMS-B
+524,,PAOLA,ROMERO ZUNIGA,,,,,Area de Diseño,DISEÑO,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,DISEÑO
+525,"525",ROBERTO,ROBLES HUERTA,ROHR790718A78,ROHR790718HDFBRB08,,,Subdirección de Asistencia Técnica a la Escuela,SUBDIRECCIÓN DE ASISTENCIA TÉCNICA A LA ESCUELA,"",Empleado,5043,"22",H,1979-07-18,,DF,,,1,0,2026-02-27 10:55:35.000,SATE
+526,"526",MA DE LOURDES,CORTES ALPIZAR,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+527,"527",JORGE,AVILA ASCENCION,,,,,Jefatura de Departamento de Recursos Humanos,,,,5001,,,,,,,,1,0,2026-02-27 10:55:35.000,JDRH
+531,"531",JULIETA,GOMEZ ORTEGA,,,,,Subdirección de Programas de Desarrollo Profesional Docente,,,,5042,,,,,,,,1,0,2026-02-27 10:55:35.000,SPDPD
+535,"535",EDUWIGES TERESA,RICO CAMACHO,,,,,Jefatura de Departamento de Recursos Financieros,,,,5001,,,,,,,,1,0,2026-02-27 10:55:35.000,JDRF-B
+536,,IVONNE YANIRA,AVENDAÑO SANCHEZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+539,,MARIO ALBERTO,ORTIZ VÁZQUEZ,,,,,Unidad de Transparencia y Auditoria,UNIDAD DE TRANSPARENCIA Y AUDI,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,UTyA
+541,,ANAID ALEJANDRA,HIJAR ZEPEDA,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,COORDINACIÓN ADMINISTRATIVA ERMILO ABREU,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+542,"542",MARCOS,CAMACHO SILVA,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,,,,5001,"6",,,,,,,1,0,2026-02-27 10:55:35.000,JDRMS-B
+544,"544",NOHEMI,ESPIDIO BARRAGAN,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,"9",,,,,,,1,0,2026-02-27 10:55:35.000,DPIEyP
+546,"546",MA DEL ROCIO,GALINDO HERNANDEZ,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:35.000,DCPSyGR
+547,,JESÚS SALVADOR,HERNÁNDEZ GONZÁLEZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,COORDINACIÓN CM RAMIRO REYES,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+553,"553",ADRIANA,AGUIRRE AYALA,,,,,Subdirección de Programas de Desarrollo Profesional Docente,,,,5042,,,,,,,,1,0,2026-02-27 10:55:35.000,SPDPD
+558,"558",ALMA DELIA,GOMEZ MARTINEZ,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+559,"559",JULIO CESAR,MORENO ASCENCIO,,,,,Subdirección de Programas de Apoyo y Desarrollo,,,,5001,,,,,,,,1,0,2026-02-27 10:55:35.000,SPAPD
+561,"561",SILVIA,LEGER RAMIREZ,,,,,Subdirección de Asistencia Técnica a la Escuela,,,,5043,,,,,,,,1,0,2026-02-27 10:55:35.000,SATE
+562,"562",IRMA ROSARIO,PANIAGUA GOMEZ,,,,,Subdirección de Programas de Desarrollo Profesional Docente,,,,5042,,,,,,,,1,0,2026-02-27 10:55:35.000,SPDPD
+563,"563",M DE LOURDES,JIMENEZ MARTINEZ,,,,,Subdirección de Programas de Desarrollo Profesional Docente,,,,5042,,,,,,,,1,0,2026-02-27 10:55:35.000,SPDPD
+565,"565",MARIA ELIZABETH,HERNANDEZ ACOSTA,,,,,Subdirección de Asistencia Técnica a la Escuela,,,,5043,,,,,,,,1,0,2026-02-27 10:55:35.000,SATE
+569,"569",ERIKA,HERNANDEZ BAUTISTA,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,,,,5001,"3",,,,,,,1,0,2026-02-27 10:55:35.000,DATEDPD
+572,"572",IRMA ADRIANA,OSTOA COLIN,,,,,Subdirección de Asistencia Técnica a la Escuela,,,,5043,,,,,,,,1,0,2026-02-27 10:55:35.000,SATE
+575,"575",LUIS JORGE,VAZQUEZ ESCOBEDO,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,,,,5001,"3",,,,,,,1,0,2026-02-27 10:55:35.000,DATEDPD
+576,"576",NORMA ANGELICA,GUIZAR ESPINOSA,,,,,Subdirección de Programas de Apoyo y Desarrollo,,,,5001,,,,,,,,1,0,2026-02-27 10:55:35.000,SPAPD
+578,"578",LAURA ELIZABETH,PEREZ VARGAS,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,CM LUIS ALVAREZ BARRET,,,5001,"6",,,,,,,1,0,2026-02-27 11:06:14.000,JDRMS-B
+584,"584",ALMA ROSA,GARCIA CRUZ,,,,,Subdirección de Programas de Desarrollo Profesional Docente,,,,5042,,,,,,,,1,0,2026-02-27 10:55:35.000,SPDPD
+585,"585",PEDRO,CORTES GARCIA,,,,,Subdirección de Programas de Desarrollo Profesional Docente,,,,5042,,,,,,,,1,0,2026-02-27 10:55:35.000,SPDPD
+587,"587",NORMA GISELL,MENDEZ MARTINEZ,,,,,Subdirección de Asistencia Técnica a la Escuela,,,,5043,,,,,,,,1,0,2026-02-27 10:55:35.000,SATE
+589,"589",GABRIELA DELFINA,ALVARADO ESPINOSA,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+590,"590",AIDA LETICIA,ESPINOSA SALDAÑA,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+591,,ANTONIO,ZETA MORALES,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,CM CARLOS A CARRILLO,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+593,,MIRNA LUZ,GORDILLO CEDEÑO,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,CM RAMIRO REYES ESPARZA,,Empleado,5001,"3",,,,,,,1,0,2026-03-17 13:53:46.000,DATEDPD
+594,"594",MIGUEL,PARRA PEREZ,,,,,Subdirección de Programas de Desarrollo Profesional Docente,,,,5042,,,,,,,,1,0,2026-02-27 10:55:35.000,SPDPD
+595,"595",LUCIA,ARCE INFANTE,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+596,"596",ALVARO,VALENCIA BARTOLO,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:35.000,DFACE
+598,"598",MALINALLY JAZMIN,MEDINA GARIN,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:36.000,DFACE
+601,"601",PAULA MERCEDES,GAMA MUÑOZ,,,,,Subdirección de Asistencia Técnica a la Escuela,,,,5043,,,,,,,,1,0,2026-02-27 10:55:36.000,SATE
+602,"602",FEDERICO,NIETO PINEDA,,,,,Subdirección de Programas de Desarrollo Profesional Docente,,,,5042,,,,,,,,1,0,2026-02-27 10:55:36.000,SPDPD
+604,"604",JULIETA ESTEPHANI,GUADARRAMA GARCIA,,,,,Subdirección de Programas de Apoyo y Desarrollo,,,,5001,,,,,,,,1,0,2026-02-27 10:55:36.000,SPAPD
+605,"605",MARIA LUISA,LOPEZ ESQUER,,,,,Subdirección de Asistencia Técnica a la Escuela,,,,5043,,,,,,,,1,0,2026-02-27 10:55:36.000,SATE
+610,"610",ARTEMIO JUVENTINO,RODRIGUEZ TREJO,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,,,,5001,"3",,,,,,,1,0,2026-02-27 10:55:36.000,DATEDPD
+611,"611",MA DEL CARMEN,RODRIGUEZ APARICIO,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:36.000,DFACE
+616,"616",GUSTAVO ALBERTO,LICEA SOLANO,,,,,Subdirección de Programas de Apoyo y Desarrollo,,,,5001,,,,,,,,1,0,2026-02-27 10:55:36.000,SPAPD
+618,"618",GUILLERMO,GONZALEZ MEJIA,,,,,Subdirección de Programas de Apoyo y Desarrollo,,,,5001,,,,,,,,1,0,2026-02-27 10:55:36.000,SPAPD
+619,"619",TANIA MARIA,QUINTANA FRUTOS,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:36.000,DFACE
+622,"622",HECTOR OSVALDO,MARTINEZ QUIROZ,,,,,Subdirección de Asistencia Técnica a la Escuela,,,,5043,,,,,,,,1,0,2026-02-27 10:55:36.000,SATE
+623,"623",FRANCISCO,PEÑA PICON,,,,,Subdirección de Programas de Apoyo y Desarrollo,,,,5001,,,,,,,,1,0,2026-02-27 10:55:36.000,SPAPD
+625,"625",JANET,GARCÍA CELAYO,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,CM LUIS ALVAREZ BARRET,,,5001,"6",,,,,,,1,0,2026-02-27 11:06:13.000,JDRMS-B
+628,"628",BRUNO,RUIZ BARRERA,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,,,,,,,,1,0,2026-02-27 10:55:36.000,DPIEyP
+631,"631",LUZ ESTELA,TREJO VEGA,,,,,Subdirección de Programas de Desarrollo Profesional Docente,,,,5042,,,,,,,,1,0,2026-02-27 10:55:36.000,SPDPD
+632,,JAVIER ANTONIO,ESQUIVEL SOTO,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+634,,JESÚS,CASTILLO GARCÍA,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+635,"635",PAUL,MARTINEZ HERNANDEZ,,,,,Dirección de Asistencia Técnica a la Escuela y Desarrollo Profesional Docente,,,,5001,,,,,,,,1,0,2026-02-27 10:55:36.000,DATEDPD
+637,"637",ROSA GUILLERMINA,LOPEZ SANCHEZ,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:36.000,DFACE
+638,"638",GERARDO,MENDEZ PINZON,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:36.000,DFACE
+641,"641",Empleado ZK 641,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:51:12.000,
+643,"643",SONIA,NUÑEZ HERNÁNDEZ,,,,,Dirección de Planeación,COMISIONADO EN PLANEACIÓN,,,5001,,,,,,,,1,0,2026-03-02 10:51:13.000,DPE
+645,"645",LUCIA ATALA,MORALES MORALES,,,,,Subdirección de Programas de Apoyo y Desarrollo,,,,5001,,,,,,,,1,0,2026-02-27 10:55:36.000,SPAPD
+650,"650",JAZMIN,MATA RINCON,,,,,Jefatura de Departamento de Recursos Humanos,,,,5001,,,,,,,,1,0,2026-02-27 10:55:36.000,JDRH
+651,"651",MARIBEL,ROMAN OLVERA,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:36.000,DFACE
+652,"652",JORGE LUIS,RUIZ BARRERA,,,,,Jefatura de Departamento de Recursos Financieros,,,,5001,,,,,,,,1,0,2026-02-27 10:55:36.000,JDRF-B
+654,,MARTHA,SÁNCHEZ YAÑEZ,,,,,Unidad de Transparencia y Auditoria,UNIDAD DE TRANSPARENCIA Y AUDI,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,UTyA
+655,"655",JOSE CARMEN,PEREZ GARCIA,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,,,,5001,"6",,,,,,,1,0,2026-02-27 10:55:36.000,JDRMS-B
+656,,IVAN,CRUZ VARGAS,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,CM ERMILO ABREU,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+663,"663",FELIPE,JIMENEZ MARTINEZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,,,,5001,,,,,,,,1,0,2026-02-27 10:55:36.000,JDRMS-B
+670,,GABRIELA,MARTINEZ VELEZ,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,NEZAHUALCOYOTL DGIFA,,Empleado,5001,"6",,,,,,,1,0,2026-03-17 13:53:46.000,JDRMS-B
+802,, ITZEL,HERNANDEZ ROSAS,,,,,Area de Diseño,DISEÑO,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,DISEÑO
+803,,DANIELA,CRUZ RODRIGUEZ,,,,,Area de Diseño,DISEÑO,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,DISEÑO
+818,"818",JUAN MANUEL,GOMEZ MORENO,GOMJ960301TF6,GOMJ960301HDFMRN01,,,Jefatura de Departamento de Recursos Humanos,"","",Empleado,,"",H,1996-03-01,2025-07-16,DF,,uploads/fotos_empleados/empleado_818_1774559818.jpeg,1,0,2026-02-27 10:55:36.000,JDRH
+820,"820",Empleado ZK 820,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:51:22.000,
+828,"828",JUAN CARLOS,SANDOVAL GARIBAY,,,,,Jefatura de Departamento de Recursos Humanos,,,,5001,,,,2025-01-01,,,,1,0,2026-02-27 10:55:36.000,JDRH
+875,"875",JORGE,MENDOZA QUIROZ,,,,,Jefatura de Departamento de Recursos Humanos,,,,5001,,,,,,,,1,0,2026-02-27 10:55:36.000,JDRH
+879,"879",Empleado ZK 879,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+891,"891",DIANA KAREN,MARTINEZ CHAVARRIA,,,,,Dirección de Fortalecimiento Académico y Calidad Educativa,,,,5065,"4",,,,,,,1,0,2026-02-27 10:55:36.000,DFACE
+893,"893",ORLANDO SEBASTIAN,REYES VIVANCO,REVO020430V53,REVO020430HDFYVRA7,,,Jefatura de Departamento de Recursos Humanos,"","",Empleado,,"",H,2002-04-30,,DF,,uploads/fotos_empleados/empleado_893_1774554652.jpg,1,0,2026-02-27 10:55:36.000,JDRH
+896,"896",AICO BERENICE,GARCIA RAMOS,,,,,Jefatura de Departamento de Recursos Materiales y Servicios,ARCHIVO DGIFA,,,5001,"6",,,,,,,1,0,2026-02-27 11:06:14.000,JDRMS-B
+897,"897",INGRID ILEANA,OCAMPO PARDO,,,,,Dirección de Programas de Innovación Educativa y Proyectos,,,,5073,"9",,,,,,,1,0,2026-02-27 10:55:36.000,DPIEyP
+936,"936",Empleado ZK 936,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+955,"955",CLARITA,VICTORIA SANCHEZ,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,,,,,,,,1,0,2026-02-27 10:55:36.000,DCPSyGR
+956,"956",ROSARIO,KUSULA VAZQUEZ,,,,,"Dirección de Convivencia, Participación Social y Gestión del Riesgo",,,,5064,"1",,,,,,,1,0,2026-02-27 10:55:36.000,DCPSyGR
+957,,ANDREA,MOCTEZUMA MENDOZA,,,,,Dirección de Planeación,COMISIONADO EN PLANEACIÓN,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,DPE
+961,,OSCAR DANIEL,REZA MORALES,,,,,Dirección de Administración Escolar,ADMÓN ESCOLAR,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,DAE
+964,"964",Empleado ZK 964,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:51:36.000,
+967,"967",Empleado ZK 967,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:51:36.000,
+1003,"1003",Empleado ZK 1003,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+1004,"1004",Empleado ZK 1004,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:49:42.000,
+1607,,ANA LAURA,POLANCO TAPIA,,,,,Dirección de Planeación,COMISIONADO EN PLANEACIÓN,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,DPE
+1620,,ANGELICA,CHINO MARTINEZ,,,,,Dirección de Planeación,COMISIONADO EN PLANEACIÓN,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,DPE
+1818,,MARIANA,VARGAS BRISENO,,,,,Dirección de Planeación,COMISIONADO EN PLANEACIÓN,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,DPE
+1819,,LESSLY J,SALGADO FRANCO,,,,,Dirección de Planeación,COMISIONADO EN PLANEACIÓN,,Empleado,5001,,,,,,,,1,0,2026-03-17 13:53:46.000,DPE
+2500,"2500",Empleado ZK 2500,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+2501,"2501",Empleado ZK 2501,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:15.000,
+2502,"2502",Empleado ZK 2502,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+2503,"2503",SALVADOR,FUENTES GUTIERREZ,,,,,Dirección de Programación y Presupuesto para el Desarrollo,COMISIONADO EN PLANEACIÓN,,,5001,,,,,,,,1,0,2026-02-27 11:06:15.000,DPPDA
+2504,"2504",Empleado ZK 2504,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:50:20.000,
+2505,"2505",Empleado ZK 2505,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+2506,"2506",Empleado ZK 2506,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+2511,"2511",Empleado ZK 2511,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-03-02 10:50:23.000,
+2512,"2512",Empleado ZK 2512,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+2521,"2521",Empleado ZK 2521,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+2620,"2620",Empleado ZK 2620,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:14.000,
+5000,"5000",Empleado ZK 5000,Apellido Pendiente,,,,,,,,,5001,,,,,,,,1,0,2026-02-27 11:06:17.000,
+5001,,MAGDALENA,CAZARES VILLA,XAXX000000XXX,XAXX000000XXX0,,,MANDO - CAZARES VILLA MAGDALENA,,,Director,5001,,H,,,,,,1,0,2026-03-18 13:02:13.000,DATE
+5042,"",BERENICE,SANCHEZ PACHECO,XAXX000002XXX,XAXX000002XXX0,"",,SUBDIRECCIÓN DE PROGRAMAS DE DESARROLLO PROFESIONAL DOCENTE,,"",Mando,5001,,H,,,,,,1,0,2026-03-18 13:07:33.000,DATE
+5043,"",ANGELICA,TAPIA FIGUEROA LAURA,XAXX000003XXX,XAXX000003XXX0,"",,SUBDIRECCIÓN DE ASISTENCIA TÉCNICA A LA ESCUELA,,"",Mando,5001,,H,,,,,,1,0,2026-03-18 13:07:33.000,DATE
+5044,"",RICARDO,ACEVEDO ZURITA DAVID,XAXX000001XXX,XAXX000001XXX0,"",,SUBDIRECCIÓN DE PARTICIPACIÓN SOCIAL,,"",Mando,5001,,H,,,,,,1,0,2026-03-18 13:07:33.000,DCPSGR
+5047,"",ESTELA,LAMADRID PALOMARES BLANCA,XAXX000004XXX,XAXX000004XXX0,"",,SUBDIRECCIÓN DE GESTIÓN DEL RIESGO,,"",Mando,5001,,H,,,,,,1,0,2026-03-18 13:07:33.000,DCPSGR
+5048,"",BLANCA,ORTEGA SANCHEZ,XAXX000005XXX,XAXX000005XXX0,"",,SUBDIRECCIÓN DE CONVIVENCIA,,"",Mando,5001,,H,,,,,,1,0,2026-03-18 13:07:33.000,DCPSGR
+5049,"",ALMA,RAMIREZ DANTEZ,XAXX000006XXX,XAXX000006XXX0,"",,DEPARTAMENTO PARA LA OPERACIÓN DE PROGRAMAS,,"",Mando,5001,,H,,,,,,1,0,2026-03-18 13:07:33.000,DCPSGR
+5050,"",ALEJANDRA,SAMANO MORALES CLAUDIA,XAXX000007XXX,XAXX000007XXX0,"",,DEPARTAMENTO DE PREVENCIÓN,,"",Mando,5001,,H,,,,,,1,0,2026-03-18 13:07:33.000,DCPSGR
+5063,"",SANDRA,CASIMIRO BARRAGAN,XAXX005022XXX,XAXX005022XXX0,"",,DEPARTAMENTO DE PARTICIPACIÓN SOCIAL,,"",Mando,5001,,H,,,,,,1,0,2026-03-18 13:07:52.000,DCPSGR
+5064,"",VANESSA,JUAREZ BELTRAN OSIRIS,XAXX005023XXX,XAXX005023XXX0,"",,"DIRECCIÓN DE CONVIVENCIA, PARTICIPACIÓN SOCIAL Y GESTIÓN DEL RIESGO",,"",Mando,5001,,H,,,,,,1,0,2026-03-18 13:07:52.000,DCPSGR
+5065,"",LAURA,ANTONIO DE LA CRUZ ANA,XAXX005024XXX,XAXX005024XXX0,"",,DIRECCIÓN DE FORTALECIMIENTO ACADÉMICO Y CALIDAD EDUCATIVA,,"",Mando,5065,,H,,,,,,1,0,2026-03-18 13:07:52.000,DFACE
+5066,"",ELIZA,AVILA MORALES,XAXX005025XXX,XAXX005025XXX0,"",,SUBDIRECCIÓN DE VINCULACIÓN PARA LA CALIDAD Y EQUIDAD EDUCATIVA,,"",Mando,5065,,H,,,,,,1,0,2026-03-18 13:07:52.000,DFACE
+5067,"",ELIZABETH,RUIZ ESPINO,XAXX005026XXX,XAXX005026XXX0,"",,DEPARTAMENTO DE PLANEACIÓN Y GESTIÓN INSTITUCIONAL,,"",Mando,5065,,H,,,,,,1,0,2026-03-18 13:07:52.000,DFACE
+5068,"",OSCAR,TLALMIS JIMENEZ,XAXX005027XXX,XAXX005027XXX0,"",,SUBDIRECCIÓN DE INVESTIGACIÓN Y MEJORA EDUCATIVA,,"",Mando,5065,,H,,,,,,1,0,2026-03-18 13:07:52.000,DFACE
+5069,"",DANIELA,TORRES MENDEZ,XAXX005028XXX,XAXX005028XXX0,"",,DEPARTAMENTO DE MATERIAL DIDÁCTICO Y RECURSOS PEDAGÓGICOS,,"",Mando,5065,,H,,,,,,1,0,2026-03-18 13:07:52.000,DFACE
+5070,"",NANCY,ZUÑIGA ACEVEDO,XAXX005029XXX,XAXX005029XXX0,"",,SUBDIRECCIÓN DE FORTALECIMIENTO PEDAGÓGICO,,"",Mando,5065,,H,,,,,,1,0,2026-03-18 13:07:52.000,DFACE
+5071,"",PEDRO,ALVAREZ CHAVEZ,XAXX005030XXX,XAXX005030XXX0,"",,SUBDIRECCIÓN DE OPERACIÓN Y SEGUIMIENTO DE PROGRAMAS DE INNOVACIÓN EDUCATIVA Y PROYECTOS,,"",Mando,5001,,H,,,,,,1,0,2026-03-18 13:07:52.000,DPIEP
+5072,"",LUVIA,GOMEZ SANCHEZ MARTHA,XAXX005031XXX,XAXX005031XXX0,"",,SUBDIRECCIÓN DE EVALUACIÓN,,"",Mando,5001,,H,,,,,,1,0,2026-03-18 13:07:52.000,DPIEP
+5073,"",TERESA,MELENDEZ IRIGOYEN MARIA,XAXX005032XXX,XAXX005032XXX0,"",,DIRECCIÓN DE PROGRAMAS DE INNOVACIÓN EDUCATIVA Y PROYECTOS,,"",Mando,5001,,H,,,,,,1,0,2026-03-18 13:07:52.000,DPIEP
+5074,"",BERENICE,OLMOS SANCHEZ SOFIA,XAXX005033XXX,XAXX005033XXX0,"",,SUBDIRECCIÓN DE DESARROLLO CURRICULAR,,"",Mando,5001,,H,,,,,,1,0,2026-03-18 13:07:52.000,DPIEP
+5075,"",EUGENIA,OROZCO URIBE MARIA,XAXX005034XXX,XAXX005034XXX0,"",,DEPARTAMENTO DE SEGUIMIENTO DE PROGRAMAS DE INNOVACIÓN EDUCATIVA Y PROYECTOS,,"",Mando,5001,,H,,,,,,1,0,2026-03-18 13:07:52.000,DPIEP
+5076,"",ANGELICA,SANCHEZ GASCA MARTHA,XAXX005035XXX,XAXX005035XXX0,"",,Jefatura de Departamento de Evaluación,,"",Mando,5001,,H,,,,,,1,0,2026-03-18 13:07:52.000,DPIEP

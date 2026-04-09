@@ -1,8 +1,15 @@
 <?php
 require_once 'models/Retardo.php';
 require_once 'models/Usuario.php';
+require_once __DIR__ . '/BaseController.php';
 
-class SoporteController {
+class SoporteController extends BaseController {
+    
+    public function __construct() {
+        parent::__construct();
+        $this->requireAuth();
+    }
+    
     /**
      * Determina si un usuario puede acceder a un archivo de soporte.
      * Retorna true si es admin, si es el empleado propietario del retardo, o si es el aprobador.
@@ -94,12 +101,8 @@ class SoporteController {
      */
     public function serveJustificacion($filename) {
         // Basic session check
-        if (session_status() === PHP_SESSION_NONE) session_start();
-
-        if (empty($_SESSION['user_id'])) {
-            header('Location: ' . BASE_URL . '/login');
-            exit;
-        }
+        // Usamos el método del BaseController
+        $this->requireAuth();
 
         // Sanitize filename (prevent traversal)
         $safeName = basename($filename);
@@ -143,5 +146,29 @@ class SoporteController {
         header('Content-Disposition: ' . $disposition . '; filename="' . $safeName . '"');
         header('Content-Length: ' . filesize($filePath));
         readfile($filePath);
+    }
+
+    /**
+     * Servir archivos subidos generales
+     */
+    public function serveUpload($filepath) {
+        $this->requireAuth();
+        
+        // Prevenir directory traversal
+        if (strpos($filepath, '..') !== false) {
+            http_response_code(403);
+            echo 'Acceso denegado';
+            return;
+        }
+        
+        $fullPath = __DIR__ . '/../uploads/' . $filepath;
+        if (file_exists($fullPath) && is_file($fullPath)) {
+            $mime = mime_content_type($fullPath);
+            header('Content-Type: ' . $mime);
+            readfile($fullPath);
+        } else {
+            http_response_code(404);
+            echo 'Archivo no encontrado';
+        }
     }
 }

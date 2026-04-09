@@ -1,7 +1,7 @@
 <?php
 
 use const Dom\STRING_SIZE_ERR;
-require_once 'Database.php';
+require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/../helpers/Encryption.php';
 
 class Empleado {
@@ -49,47 +49,67 @@ class Empleado {
     }
 
     public function getAll() {
-        $stmt = $this->db->getConnection()->prepare("SELECT * FROM empleados WHERE activo = 1");
+        $stmt = $this->db->getConnection()->prepare("SELECT id, nombre, apellido, rfc, curp, area, jerarquia, sexo, fecha_nacimiento, entidad_federativa, foto_cara, activo, jefe_directo_id,
+            CASE WHEN huella_dactilar IS NOT NULL AND huella_dactilar != '' THEN 1 ELSE 0 END as tiene_huella 
+            FROM empleados WHERE activo = 1");
         $stmt->execute();
         $rows = $stmt->fetchAll();
-        // Descifrar huellas si están presentes
-        foreach ($rows as &$r) {
-            if (!empty($r['huella_dactilar'])) {
-                $r['huella_dactilar'] = Encryption::decrypt($r['huella_dactilar']);
-            }
-        }
+        // No desencriptar huellas, solo indicar si existen
         return $rows;
     }
 
     public function getById($id) {
-        $stmt = $this->db->getConnection()->prepare("SELECT * FROM empleados WHERE id = ? AND activo = 1");
+        $stmt = $this->db->getConnection()->prepare("SELECT id, nombre, apellido, rfc, curp, area, jerarquia, sexo, fecha_nacimiento, fecha_ingreso, entidad_federativa, foto_cara, jefe_directo_id, activo,
+            CASE WHEN huella_dactilar IS NOT NULL AND huella_dactilar != '' THEN 1 ELSE 0 END as tiene_huella 
+            FROM empleados WHERE id = ?");
         $stmt->execute([$id]);
         $row = $stmt->fetch();
-        if ($row && !empty($row['huella_dactilar'])) {
-            $row['huella_dactilar'] = Encryption::decrypt($row['huella_dactilar']);
-        }
         return $row;
+    }
+    
+    /**
+     * Obtiene la huella dactilar encriptada para verificación biométrica
+     * @param int $id ID del empleado
+     * @return string|null Huella encriptada o null si no existe
+     */
+    public function getHuellaEncriptada($id) {
+        $stmt = $this->db->getConnection()->prepare("SELECT huella_dactilar FROM empleados WHERE id = ? AND activo = 1");
+        $stmt->execute([$id]);
+        $row = $stmt->fetch();
+        return $row && !empty($row['huella_dactilar']) ? $row['huella_dactilar'] : null;
     }
 
     public function create($data) {
         $stmt = $this->db->getConnection()->prepare("
-            INSERT INTO empleados (nombre, apellido, rfc, curp, area, jerarquia, huella_dactilar, foto_cara)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO empleados (nombre, apellido, rfc, curp, area, area_fisica, jerarquia, sexo, fecha_nacimiento, entidad_federativa, huella_dactilar, foto_cara, clave_depto, jefe_directo_id, jefe_directo_clave)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $huella = $data['huella_dactilar'] ?? null;
         if ($huella !== null) {
             $huella = Encryption::encrypt($huella);
         }
-        return $stmt->execute([
+        $result = $stmt->execute([
             $data['nombre'],
             $data['apellido'],
             $data['rfc'],
             $data['curp'],
             $data['area'],
+            $data['area_fisica'] ?? null,
             $data['jerarquia'],
+            $data['sexo'] ?? null,
+            $data['fecha_nacimiento'] ?? null,
+            $data['entidad_federativa'] ?? null,
             $huella,
-            $data['foto_cara'] ?? null // Ahora es una ruta de archivo
+            $data['foto_cara'] ?? null,
+            $data['clave_depto'] ?? null,
+            $data['jefe_directo_id'] ?? null,
+            $data['jefe_directo_clave'] ?? null
         ]);
+        
+        if ($result) {
+            return $this->db->getConnection()->lastInsertId();
+        }
+        return false;
     }
 
     public function update($id, $data) {
@@ -100,31 +120,67 @@ class Empleado {
                 rfc = ?,
                 curp = ?,
                 area = ?,
+                area_fisica = ?,
                 jerarquia = ?,
                 huella_dactilar = ?,
-                foto_cara = ?
+                foto_cara = ?,
+                sexo = ?,
+                fecha_nacimiento = ?,
+                entidad_federativa = ?,
+                puesto = ?,
+                clave_depto = ?,
+                jefe_directo_id = ?,
+                jefe_directo_clave = ?,
+                activo = ?
             WHERE id = ?
         ");
         $huella = $data['huella_dactilar'] ?? null;
         if ($huella !== null) {
             $huella = Encryption::encrypt($huella);
         }
+        
+        // Usar la clave directamente como jefe_directo_id
+        $jefeId = !empty($data['jefe_directo_clave']) ? $data['jefe_directo_clave'] : null;
+        
         return $stmt->execute([
             $data['nombre'],
             $data['apellido'],
             $data['rfc'],
             $data['curp'],
             $data['area'],
+            $data['area_fisica'] ?? null,
             $data['jerarquia'],
             $huella,
-            $data['foto_cara'],
+            $data['foto_cara'] ?? null,
+            $data['sexo'] ?? null,
+            $data['fecha_nacimiento'] ?? null,
+            $data['entidad_federativa'] ?? null,
+            $data['puesto'] ?? null,
+            $data['clave_depto'] ?? null,
+            $jefeId,
+            $data['jefe_directo_clave'] ?? null,
+            $data['activo'] ?? 1,
             $id
         ]);
     }
-
+    
     public function delete($id) {
         $stmt = $this->db->getConnection()->prepare("UPDATE empleados SET activo = 0 WHERE id = ?");
         return $stmt->execute([$id]);
+    }
+
+    /**
+     * Obtiene todas las áreas únicas de empleados activos
+     * @return array Lista de áreas únicas
+     */
+    public function getAreasActivas() {
+        $stmt = $this->db->getConnection()->prepare("
+            SELECT DISTINCT area FROM empleados
+            WHERE activo = 1 AND area IS NOT NULL AND area != ''
+            ORDER BY area
+        ");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
     public function readCompleteData($id) {
@@ -160,13 +216,13 @@ class Empleado {
     }
 
     private function getAsistenciasByEmpleado($id) {
-        $stmt = $this->db->getConnection()->prepare("SELECT * FROM asistencias WHERE empleado_id = ? ORDER BY fecha DESC");
+        $stmt = $this->db->getConnection()->prepare("SELECT * FROM asistencia WHERE empleado_id = ?");
         $stmt->execute([$id]);
         return $stmt->fetchAll();
     }
 
     private function getRetardosByEmpleado($id) {
-        $stmt = $this->db->getConnection()->prepare("SELECT * FROM retardos WHERE empleado_id = ? ORDER BY fecha DESC");
+        $stmt = $this->db->getConnection()->prepare("SELECT * FROM retardos WHERE empleado_id = ?");
         $stmt->execute([$id]);
         return $stmt->fetchAll();
     }
@@ -175,200 +231,138 @@ class Empleado {
         $stmt = $this->db->getConnection()->prepare("SELECT * FROM comisiones WHERE empleado_id = ? ORDER BY fecha_vencimiento DESC");
         $stmt->execute([$id]);
         return $stmt->fetchAll();
-    }
+    }     
 
+    /**
+     * Obtiene las ausencias de un empleado específico
+     * @param int $id ID del empleado
+     * @return array Ausencias del empleado
+     */
     private function getAusenciasByEmpleado($id) {
-        $stmt = $this->db->getConnection()->prepare("SELECT * FROM ausencias WHERE empleado_id = ? ORDER BY fecha_inicio DESC");
+        $stmt = $this->db->getConnection()->prepare("
+            SELECT * FROM ausencias 
+            WHERE empleado_id = ? 
+            ORDER BY fecha_inicio DESC 
+            LIMIT 100
+        ");
         $stmt->execute([$id]);
         return $stmt->fetchAll();
     }
-
-// --- Catálogo de entidades federativas ---
-    private const ENTIDADES_FEDERATIVAS = [
-        'AGUASCALIENTES' => 'AS', 'BAJA CALIFORNIA' => 'BC', 'BAJA CALIFORNIA SUR' => 'BS',
-        'CAMPECHE' => 'CC', 'COAHUILA' => 'CL', 'COLIMA' => 'CM', 'CHIAPAS' => 'CS',
-        'CHIHUAHUA' => 'CH', 'DISTRITO FEDERAL' => 'DF', 'CIUDAD DE MEXICO' => 'DF',
-        'DURANGO' => 'DG', 'GUANAJUATO' => 'GT', 'GUERRERO' => 'GR', 'HIDALGO' => 'HG',
-        'JALISCO' => 'JC', 'MEXICO' => 'MC', 'MICHOACAN' => 'MN', 'MORELOS' => 'MS',
-        'NAYARIT' => 'NT', 'NUEVO LEON' => 'NL', 'OAXACA' => 'OC', 'PUEBLA' => 'PL',
-        'QUERETARO' => 'QT', 'QUINTANA ROO' => 'QR', 'SAN LUIS POTOSI' => 'SP',
-        'SINALOA' => 'SL', 'SONORA' => 'SR', 'TABASCO' => 'TC', 'TAMAULIPAS' => 'TS',
-        'TLAXCALA' => 'TL', 'VERACRUZ' => 'VZ', 'YUCATAN' => 'YN', 'ZACATECAS' => 'ZS',
-        'NACIDO EN EL EXTRANJERO' => 'NE'
-    ];
-
-    // ============================================================
-    // === UTILIDADES DE TEXTO ====================================
-    // ============================================================
-
-    private function cleanString(string $string): string
-    {
-        $string = mb_strtoupper(trim($string), 'UTF-8');
-        $string = str_replace(['Á','É','Í','Ó','Ú','Ü'], ['A','E','I','O','U','U'], $string);
-        return preg_replace('/[^A-ZÑ\s]/u', '', $string);
-    }
-
-    private function getSecondVowel(string $palabra): string
-    {
-        $palabra = mb_strtoupper($palabra, 'UTF-8');
-        $vocales = ['A','E','I','O','U'];
-        for ($i = 1, $len = mb_strlen($palabra, 'UTF-8'); $i < $len; $i++) {
-            $c = mb_substr($palabra, $i, 1, 'UTF-8');
-            if (in_array($c, $vocales)) return $c;
+    
+    /**
+     * Obtener empleados con paginación y filtros
+     * @param int $page Página actual (default 1)
+     * @param int $limit Registros por página (default 20)
+     * @param string $search Término de búsqueda (opcional)
+     * @param string $area Filtro por área (opcional)
+     * @param string $jerarquia Filtro por jerarquía (opcional)
+     * @return array Empleados paginados
+     */
+    public function getAllPaginated($page = 1, $limit = 20, $search = '', $area = '', $jerarquia = '') {
+        $offset = ($page - 1) * $limit;
+        
+        // Construir consulta base
+        $sql = "SELECT * FROM empleados WHERE activo = 1";
+        $params = [];
+        
+        // Agregar filtros
+        if (!empty($search)) {
+            $sql .= " AND (nombre LIKE ? OR apellido LIKE ? OR rfc LIKE ? OR curp LIKE ? OR id = ?)";
+            $searchParam = "%{$search}%";
+            $params[] = $searchParam;
+            $params[] = $searchParam;
+            $params[] = $searchParam;
+            $params[] = $searchParam;
+            $params[] = is_numeric($search) ? intval($search) : 0;
         }
-        return 'X';
-    }
-
-    private function getFirstInternalConsonant(string $palabra): string
-    {
-        $palabra = mb_strtoupper($palabra, 'UTF-8');
-        $consonantes = ['B','C','D','F','G','H','J','K','L','M','N','Ñ','P','Q','R','S','T','V','W','X','Y','Z'];
-        for ($i = 1, $len = mb_strlen($palabra, 'UTF-8'); $i < $len; $i++) {
-            $c = mb_substr($palabra, $i, 1, 'UTF-8');
-            if (in_array($c, $consonantes)) return $c;
+        
+        if (!empty($area)) {
+            $sql .= " AND area = ?";
+            $params[] = $area;
         }
-        return 'X';
-    }
-
-    // ============================================================
-    // === RFC =====================================================
-    // ============================================================
-
-    public function generateRFC(string $fechaNacimiento, string $apellidoPaterno, string $apellidoMaterno, string $nombres): string
-    {
-        $aPat = $this->cleanString($apellidoPaterno);
-        $aMat = $this->cleanString($apellidoMaterno);
-        $nom  = $this->cleanString($nombres);
-
-        $partesNom = array_values(array_filter(explode(' ', $nom), fn($x)=>$x!==''));
-        $primerNombre = $partesNom[0] ?? 'X';
-        if (in_array($primerNombre, ['JOSE','MARIA']) && isset($partesNom[1])) {
-            $primerNombre = $partesNom[1];
+        
+        if (!empty($jerarquia)) {
+            $sql .= " AND jerarquia = ?";
+            $params[] = $jerarquia;
         }
-
-        $rfc = mb_substr($aPat, 0, 1, 'UTF-8')
-             . $this->getSecondVowel($aPat)
-             . mb_substr($aMat, 0, 1, 'UTF-8')
-             . mb_substr($primerNombre, 0, 1, 'UTF-8');
-
-        $fecha = DateTime::createFromFormat('Y-m-d', $fechaNacimiento);
-        if (!$fecha) throw new Exception('Fecha inválida, use YYYY-MM-DD');
-        $rfc .= $fecha->format('ymd');
-
-        return $rfc . $this->calculateRFCHomoclaveSAT($rfc);
+        
+        // Agregar ordenamiento y paginación usando índices
+        $sql .= " ORDER BY area ASC, nombre ASC, apellido ASC";
+        $sql .= " LIMIT ? OFFSET ?";
+        $params[] = $limit;
+        $params[] = $offset;
+        
+        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll();
+        
+        // No desencriptar huellas, solo indicar si existen
+        
+        return $rows;
     }
-
-    private function calculateRFCHomoclaveSAT(string $rfcBase): string
-    {
-        $tabla = [
-            ' '=>0,'0'=>0,'1'=>1,'2'=>2,'3'=>3,'4'=>4,'5'=>5,'6'=>6,'7'=>7,'8'=>8,'9'=>9,
-            'A'=>10,'B'=>11,'C'=>12,'D'=>13,'E'=>14,'F'=>15,'G'=>16,'H'=>17,'I'=>18,'J'=>19,
-            'K'=>20,'L'=>21,'M'=>22,'N'=>23,'&'=>24,'O'=>25,'P'=>26,'Q'=>27,'R'=>28,'S'=>29,
-            'T'=>30,'U'=>31,'V'=>32,'W'=>33,'X'=>34,'Y'=>35,'Z'=>36
+    
+    /**
+     * Obtener total de empleados para paginación
+     * @param string $search Término de búsqueda (opcional)
+     * @param string $area Filtro por área (opcional)
+     * @param string $jerarquia Filtro por jerarquía (opcional)
+     * @return int Total de registros
+     */
+    public function getTotalCount($search = '', $area = '', $jerarquia = '') {
+        $sql = "SELECT COUNT(*) as total FROM empleados WHERE activo = 1";
+        $params = [];
+        
+        // Agregar mismos filtros que en getAllPaginated
+        if (!empty($search)) {
+            $sql .= " AND (nombre LIKE ? OR apellido LIKE ? OR rfc LIKE ? OR curp LIKE ?)";
+            $searchParam = "%{$search}%";
+            $params[] = $searchParam;
+            $params[] = $searchParam;
+            $params[] = $searchParam;
+            $params[] = $searchParam;
+        }
+        
+        if (!empty($area)) {
+            $sql .= " AND area = ?";
+            $params[] = $area;
+        }
+        
+        if (!empty($jerarquia)) {
+            $sql .= " AND jerarquia = ?";
+            $params[] = $jerarquia;
+        }
+        
+        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt->execute($params);
+        return (int)$stmt->fetch()['total'];
+    }
+    
+    /**
+     * Obtener información de paginación
+     * @param int $page Página actual
+     * @param int $limit Registros por página
+     * @param int $total Total de registros
+     * @return array Información de paginación
+     */
+    public function getPaginationInfo($page, $limit, $total) {
+        $totalPages = ceil($total / $limit);
+        $hasNext = $page < $totalPages;
+        $hasPrev = $page > 1;
+        
+        return [
+            'current_page' => $page,
+            'per_page' => $limit,
+            'total' => $total,
+            'total_pages' => $totalPages,
+            'has_next' => $hasNext,
+            'has_prev' => $hasPrev,
+            'next_page' => $hasNext ? $page + 1 : null,
+            'prev_page' => $hasPrev ? $page - 1 : null,
+            'showing_from' => min(($page - 1) * $limit + 1, $total),
+            'showing_to' => min($page * $limit, $total)
         ];
-
-        $cadena = '0';
-        foreach (str_split($rfcBase) as $c) {
-            $cadena .= str_pad($tabla[$c] ?? 0, 2, '0', STR_PAD_LEFT);
-        }
-
-        $suma = 0;
-        for ($i = 0; $i < strlen($cadena) - 1; $i++) {
-            $suma += intval(substr($cadena, $i, 2)) * intval(substr($cadena, $i + 1, 2));
-        }
-
-        $valor = $suma % 1000;
-        $entero = floor($valor / 34);
-        $residuo = $valor % 34;
-        $dic = '0123456789ABCDEFGHIJKLMNPQRSTUVWXYZ';
-        $homoclave = $dic[$entero] . $dic[$residuo];
-
-        // dígito verificador
-        $rfcTemp = $rfcBase . $homoclave;
-        $suma2 = 0; $factor = 13;
-        for ($i = 0; $i < strlen($rfcTemp); $i++) {
-            $pos = strpos('0123456789ABCDEFGHIJKLMN&OPQRSTUVWXYZ Ñ', $rfcTemp[$i]);
-            if ($pos !== false) $suma2 += $pos * $factor--;
-        }
-
-        $residuo2 = $suma2 % 11;
-        $dv = $residuo2 == 0 ? '0' : ($residuo2 == 10 ? 'A' : (11 - $residuo2));
-        return $homoclave . $dv;
     }
 
-    // ============================================================
-    // === CURP ====================================================
-    // ============================================================
-
-    public function generateCURP(string $fechaNacimiento, string $apellidoPaterno, string $apellidoMaterno, string $nombres, string $sexo, string $estado): string
-    {
-        $aPat = $this->cleanString($apellidoPaterno);
-        $aMat = $this->cleanString($apellidoMaterno);
-        $nom  = $this->cleanString($nombres);
-        $sexo = mb_strtoupper(trim($sexo), 'UTF-8');
-        $estado = mb_strtoupper(trim($estado), 'UTF-8');
-
-        if (!isset(self::ENTIDADES_FEDERATIVAS[$estado])) {
-            throw new Exception('Entidad federativa no válida');
-        }
-
-        $nomParts = array_values(array_filter(explode(' ', $nom), fn($x)=>$x!==''));
-        $primerNombre = $nomParts[0] ?? 'X';
-        if (in_array($primerNombre, ['JOSE','MARIA']) && isset($nomParts[1])) {
-            $primerNombre = $nomParts[1];
-        }
-
-        $curp = mb_substr($aPat, 0, 1)
-              . $this->getSecondVowel($aPat)
-              . mb_substr($aMat, 0, 1)
-              . mb_substr($primerNombre, 0, 1);
-
-        $fecha = DateTime::createFromFormat('Y-m-d', $fechaNacimiento);
-        if (!$fecha) throw new Exception('Fecha inválida');
-        $curp .= $fecha->format('ymd');
-
-        $curp .= $sexo;
-        $curp .= self::ENTIDADES_FEDERATIVAS[$estado];
-        $curp .= $this->getFirstInternalConsonant($aPat);
-        $curp .= $this->getFirstInternalConsonant($aMat);
-        $curp .= $this->getFirstInternalConsonant($primerNombre);
-
-        $curp .= $this->calculateCurpHomoclave($curp, $fechaNacimiento);
-        return $curp;
-    }
-
-    private function calculateCurpHomoclave(string $curp16, string $fechaNacimiento): string
-    {
-        $vals = [
-            '0'=>0,'1'=>1,'2'=>2,'3'=>3,'4'=>4,'5'=>5,'6'=>6,'7'=>7,'8'=>8,'9'=>9,
-            'A'=>10,'B'=>11,'C'=>12,'D'=>13,'E'=>14,'F'=>15,'G'=>16,'H'=>17,'I'=>18,'J'=>19,
-            'K'=>20,'L'=>21,'M'=>22,'N'=>23,'Ñ'=>24,'O'=>25,'P'=>26,'Q'=>27,'R'=>28,'S'=>29,
-            'T'=>30,'U'=>31,'V'=>32,'W'=>33,'X'=>34,'Y'=>35,'Z'=>36
-        ];
-
-        $sum = 0;
-        for ($i = 0; $i < strlen($curp16); $i++) {
-            $sum += ($vals[$curp16[$i]] ?? 0) * ($i + 1);
-        }
-
-        $year = intval(date('Y', strtotime($fechaNacimiento)));
-        $char17 = $year < 2000 ? (string)($sum % 10) : chr(65 + ($sum % 26));
-
-        $dic = '0123456789ABCDEFGHIJKLMNÑOPQRSTUVWXYZ';
-        $suma2 = 0; $peso = 18;
-        for ($i = 0; $i < strlen($curp16); $i++) {
-            $pos = strpos($dic, $curp16[$i]) ?: 0;
-            $suma2 += $pos * $peso--;
-        }
-
-        $pos17 = strpos($dic, $char17) ?: 0;
-        $suma2 += $pos17 * 2;
-        $res = $suma2 % 10;
-        $digito = $res == 0 ? '0' : (string)((10 - $res) % 10);
-        return $char17 . $digito;
-    }
-
-  
 }
 
 ?>

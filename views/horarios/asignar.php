@@ -1,4 +1,5 @@
 <?php include 'views/layout.php'; ?>
+<?php require_once 'helpers/Csrf.php'; ?>
 
 <div class="container mt-4">
     <div class="row">
@@ -13,6 +14,7 @@
                     <?php endif; ?>
 
                     <form method="POST" action="/sistema_biometrico/horarios/asignar">
+                        <input type="hidden" name="_token" value="<?php echo htmlspecialchars(Csrf::token()); ?>">
                         <div class="form-group">
                             <label for="empleado_id">Empleado *</label>
                             <select class="form-control" id="empleado_id" name="empleado_id" required>
@@ -51,10 +53,10 @@
                             </select>
                         </div>
 
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-success" style="background-color: #235B4E; border-color: #235B4E;">
                             <i class="fas fa-link"></i> Asignar Horario
                         </button>
-                        <a href="/sistema_biometrico/horarios" class="btn btn-secondary">
+                        <a href="/sistema_biometrico/horarios" class="btn btn-secondary" style="border-color: #6F7271; color: #6F7271;">
                             <i class="fas fa-arrow-left"></i> Cancelar
                         </a>
                     </form>

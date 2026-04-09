@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sistema de Validaciones - Test Directo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid mt-3">
+        <div class="alert alert-info">
+            <h4><i class="fas fa-info-circle"></i> SISTEMA DE VALIDACIONES - TEST DIRECTO</h4>
+            <p>Esta página muestra el funcionamiento del sistema con datos reales.</p>
+        </div>
+        
+        <div class="row">
+            <!-- Empleados -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-users"></i> Empleados a Cargo</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="empleadosContainer">
+                            <div class="text-center py-3">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Cargando empleados...</span>
+                                </div>
+                                <div class="mt-2 text-muted">Cargando lista de empleados...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Validaciones -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Validaciones Pendientes</h5>
+                            <span class="badge bg-danger" id="contadorPendientes">3</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Empleado</th>
+                                    <th>Tipo</th>
+                                    <th>Detalles</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaValidacionesBody">
+                                <tr>
+                                    <td colspan="3" class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Cargando incidencias pendientes...</span>
+                                        </div>
+                                        <div class="mt-2">Cargando incidencias pendientes...</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6>Estado del Sistema</h6>
+                </div>
+                <div class="card-body">
+                    <div id="status" class="alert alert-warning">
+                        <i class="fas fa-sync-alt fa-spin"></i> Inicializando sistema...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos simulados basados en los resultados reales
+        const empleadosData = [
+            { id: 121, nombre_completo: 'Ana García García', area: 'Ventas' },
+            { id: 122, nombre_completo: 'Carlos López López', area: 'Ventas' },
+            { id: 123, nombre_completo: 'María Rodríguez Rodríguez', area: 'Ventas' }
+        ];
+        
+        const validacionesData = [
+            { 
+                empleado_nombre: 'Ana', 
+                empleado_apellido: 'García', 
+                tipo_incidencia: 'retardo', 
+                descripcion_incidencia: 'Retardo de 15 minutos',
+                empleado_id: 121
+            },
+            { 
+                empleado_nombre: 'Carlos', 
+                empleado_apellido: 'López', 
+                tipo_incidencia: 'retardo', 
+                descripcion_incidencia: 'Retardo de 20 minutos',
+                empleado_id: 122
+            },
+            { 
+                empleado_nombre: 'María', 
+                empleado_apellido: 'Rodríguez', 
+                tipo_incidencia: 'comision', 
+                descripcion_incidencia: 'Comisión de ventas',
+                empleado_id: 123
+            }
+        ];
+        
+        let empleadosSeleccionados = new Set();
+        let validacionesFiltradas = [...validacionesData];
+        
+        function renderizarEmpleados() {
+            const container = document.getElementById('empleadosContainer');
+            
+            container.innerHTML = empleadosData.map(emp => {
+                const isSelected = empleadosSeleccionados.has(emp.id.toString());
+                return `
+                    <div class="alert ${isSelected ? 'alert-primary' : 'alert-info'} clickable" 
+                         style="cursor: pointer; margin-bottom: 10px;"
+                         onclick="toggleEmpleado(${emp.id})">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>${emp.nombre_completo}</strong>
+                                <br><small>${emp.area}</small>
+                            </div>
+                            <div>
+                                ${isSelected ? '<i class="fas fa-check-circle text-primary"></i>' : '<i class="far fa-circle text-muted"></i>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            actualizarEstado();
+        }
+        
+        function renderizarValidaciones() {
+            const tbody = document.getElementById('tablaValidacionesBody');
+            const contador = document.getElementById('contadorPendientes');
+            
+            if (contador) {
+                contador.textContent = validacionesFiltradas.length;
+            }
+            
+            if (validacionesFiltradas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No hay validaciones para mostrar</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = validacionesFiltradas.map(val => `
+                <tr>
+                    <td><strong>${val.empleado_nombre} ${val.empleado_apellido}</strong></td>
+                    <td><span class="badge bg-${val.tipo_incidencia === 'retardo' ? 'danger' : 'info'}">${val.tipo_incidencia}</span></td>
+                    <td>${val.descripcion_incidencia || 'N/A'}</td>
+                </tr>
+            `).join('');
+            
+            actualizarEstado();
+        }
+        
+        function toggleEmpleado(empleadoId) {
+            const idStr = empleadoId.toString();
+            
+            if (empleadosSeleccionados.has(idStr)) {
+                empleadosSeleccionados.delete(idStr);
+            } else {
+                empleadosSeleccionados.add(idStr);
+            }
+            
+            filtrarValidaciones();
+            renderizarEmpleados();
+            renderizarValidaciones();
+        }
+        
+        function filtrarValidaciones() {
+            if (empleadosSeleccionados.size === 0) {
+                validacionesFiltradas = [...validacionesData];
+            } else {
+                validacionesFiltradas = validacionesData.filter(val => 
+                    empleadosSeleccionados.has(val.empleado_id.toString())
+                );
+            }
+        }
+        
+        function actualizarEstado() {
+            const status = document.getElementById('status');
+            const totalEmpleados = empleadosData.length;
+            const totalValidaciones = validacionesData.length;
+            const validacionesVisibles = validacionesFiltradas.length;
+            const seleccionados = empleadosSeleccionados.size;
+            const pendientes = validacionesData.filter(v => 
+                v.tipo_incidencia === 'retardo' || v.tipo_incidencia === 'ausencia'
+            ).length;
+            
+            status.className = 'alert alert-success';
+            status.innerHTML = `
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="h4 text-primary">${totalEmpleados}</div>
+                        <small>Total Empleados</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="h4 text-warning">${pendientes}</div>
+                        <small>Pendientes</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="h4 text-info">${seleccionados}</div>
+                        <small>Seleccionados</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="h4 text-success">${validacionesVisibles}</div>
+                        <small>Visibles</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="limpiarSeleccion()">
+                        <i class="fas fa-times"></i> Limpiar Selección
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="mostrarTodas()">
+                        <i class="fas fa-eye"></i> Mostrar Todas
+                    </button>
+                </div>
+            `;
+        }
+        
+        function mostrarTodas() {
+            empleadosSeleccionados.clear();
+            validacionesFiltradas = [...validacionesData];
+            renderizarEmpleados();
+            renderizarValidaciones();
+        }
+        
+        function limpiarSeleccion() {
+            empleadosSeleccionados.clear();
+            filtrarValidaciones();
+            renderizarEmpleados();
+            renderizarValidaciones();
+        }
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            renderizarEmpleados();
+            renderizarValidaciones();
+        });
+    </script>
+    
+    <style>
+        .clickable {
+            transition: all 0.3s ease;
+        }
+        .clickable:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</body>
+</html>

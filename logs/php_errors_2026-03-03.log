@@ -1,0 +1,1515 @@
+[2026-03-03 10:43:43] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico
+--------------------------------------------------------------------------------
+[2026-03-03 10:43:43] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 10:43:43] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 10:43:43] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 10:43:45] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 10:46:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 10:46:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/dashboard
+--------------------------------------------------------------------------------
+[2026-03-03 10:46:19] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /sistema_biometrico/dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 116
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(116): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-03 10:47:46] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 10:50:33] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=ascencion
+--------------------------------------------------------------------------------
+[2026-03-03 10:55:32] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion
+--------------------------------------------------------------------------------
+[2026-03-03 10:55:32] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 10:55:42] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 11:00:05] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=jorge+mendoza
+--------------------------------------------------------------------------------
+[2026-03-03 11:00:19] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=mendoza
+--------------------------------------------------------------------------------
+[2026-03-03 11:00:42] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=893
+--------------------------------------------------------------------------------
+[2026-03-03 11:03:14] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=828
+--------------------------------------------------------------------------------
+[2026-03-03 11:03:18] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/828
+--------------------------------------------------------------------------------
+[2026-03-03 11:03:18] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:03:18] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:04:07] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/828
+--------------------------------------------------------------------------------
+[2026-03-03 11:04:07] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:04:07] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:12:47] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion
+--------------------------------------------------------------------------------
+[2026-03-03 11:12:47] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 11:13:49] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/uploadZkteco
+--------------------------------------------------------------------------------
+[2026-03-03 11:14:03] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 11:17:34] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 11:17:38] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=828
+--------------------------------------------------------------------------------
+[2026-03-03 11:17:40] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/828
+--------------------------------------------------------------------------------
+[2026-03-03 11:17:40] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:17:40] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:18:03] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=527
+--------------------------------------------------------------------------------
+[2026-03-03 11:18:06] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/527
+--------------------------------------------------------------------------------
+[2026-03-03 11:18:07] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:18:07] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:21:49] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/justificaciones/ajax-justificar
+--------------------------------------------------------------------------------
+[2026-03-03 11:21:49] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:21:49] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:21:49] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:21:49] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:21:53] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/justificaciones/ajax-justificar
+--------------------------------------------------------------------------------
+[2026-03-03 11:21:53] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:21:53] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:21:53] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:21:53] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:21:55] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/justificaciones/ajax-justificar
+--------------------------------------------------------------------------------
+[2026-03-03 11:21:55] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:21:55] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:21:55] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:21:55] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:21:55] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/justificaciones/ajax-justificar
+--------------------------------------------------------------------------------
+[2026-03-03 11:21:55] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:21:55] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:21:55] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:21:55] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:30:47] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion
+--------------------------------------------------------------------------------
+[2026-03-03 11:30:47] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 11:30:54] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/uploadZkteco
+--------------------------------------------------------------------------------
+[2026-03-03 11:32:51] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 11:32:55] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 11:33:04] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=527
+--------------------------------------------------------------------------------
+[2026-03-03 11:33:06] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/527
+--------------------------------------------------------------------------------
+[2026-03-03 11:33:06] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:33:06] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:41:01] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/justificaciones/ajax-justificar
+--------------------------------------------------------------------------------
+[2026-03-03 11:41:01] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:41:01] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:41:01] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:41:01] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:43:24] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/notas-malas
+--------------------------------------------------------------------------------
+[2026-03-03 11:43:34] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/logout
+--------------------------------------------------------------------------------
+[2026-03-03 11:43:34] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 11:43:51] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 11:43:52] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/dashboard
+--------------------------------------------------------------------------------
+[2026-03-03 11:43:54] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /sistema_biometrico/dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 116
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(116): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-03 11:44:07] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/validaciones
+--------------------------------------------------------------------------------
+[2026-03-03 11:44:13] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/reportes
+--------------------------------------------------------------------------------
+[2026-03-03 11:44:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/validaciones
+--------------------------------------------------------------------------------
+[2026-03-03 11:44:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/validaciones/buscar-empleados
+--------------------------------------------------------------------------------
+[2026-03-03 11:44:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/validaciones/obtener-areas
+--------------------------------------------------------------------------------
+[2026-03-03 11:44:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/validaciones/estadisticas
+--------------------------------------------------------------------------------
+[2026-03-03 11:44:25] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/logout
+--------------------------------------------------------------------------------
+[2026-03-03 11:44:25] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 11:44:50] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 11:44:50] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/dashboard
+--------------------------------------------------------------------------------
+[2026-03-03 11:44:52] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /sistema_biometrico/dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 116
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(116): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-03 11:44:57] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados
+--------------------------------------------------------------------------------
+[2026-03-03 11:45:06] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=527
+--------------------------------------------------------------------------------
+[2026-03-03 11:45:10] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=818
+--------------------------------------------------------------------------------
+[2026-03-03 11:45:13] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/818
+--------------------------------------------------------------------------------
+[2026-03-03 11:45:13] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:45:13] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:48:54] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/validaciones
+--------------------------------------------------------------------------------
+[2026-03-03 11:48:54] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/validaciones/buscar-empleados
+--------------------------------------------------------------------------------
+[2026-03-03 11:48:54] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:48:54] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:48:54] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:48:54] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:48:54] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:48:54] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:48:54] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:48:54] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:48:54] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:48:54] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:48:54] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/validaciones/obtener-areas
+--------------------------------------------------------------------------------
+[2026-03-03 11:48:54] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/validaciones/estadisticas
+--------------------------------------------------------------------------------
+[2026-03-03 11:48:56] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 11:49:05] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 11:49:13] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=527
+--------------------------------------------------------------------------------
+[2026-03-03 11:49:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/527
+--------------------------------------------------------------------------------
+[2026-03-03 11:49:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:49:15] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:51:47] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/527?fecha_inicio=2026-01-01&fecha_fin=2026-01-31
+--------------------------------------------------------------------------------
+[2026-03-03 11:52:09] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/527?fecha_inicio=2026-02-01
+--------------------------------------------------------------------------------
+[2026-03-03 11:52:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/527
+--------------------------------------------------------------------------------
+[2026-03-03 11:54:40] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/comisiones/create?empleado_id=527
+--------------------------------------------------------------------------------
+[2026-03-03 11:54:40] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /favicon.ico
+--------------------------------------------------------------------------------
+[2026-03-03 11:57:37] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=527
+--------------------------------------------------------------------------------
+[2026-03-03 11:57:40] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 11:57:42] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/1
+--------------------------------------------------------------------------------
+[2026-03-03 11:57:42] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 11:57:42] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 11:58:11] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/comisiones/create?empleado_id=1
+--------------------------------------------------------------------------------
+[2026-03-03 12:01:14] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 12:01:17] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/1
+--------------------------------------------------------------------------------
+[2026-03-03 12:01:17] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 12:01:17] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 12:22:24] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/justificaciones/ajax-justificar
+--------------------------------------------------------------------------------
+[2026-03-03 12:22:25] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 12:22:25] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 12:22:25] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 12:22:25] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 12:22:56] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/1
+--------------------------------------------------------------------------------
+[2026-03-03 12:22:56] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 12:22:56] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 12:25:33] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/1
+--------------------------------------------------------------------------------
+[2026-03-03 12:25:33] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 12:25:33] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 12:34:16] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/logout
+--------------------------------------------------------------------------------
+[2026-03-03 12:34:16] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 12:39:39] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico
+--------------------------------------------------------------------------------
+[2026-03-03 12:39:39] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 12:39:47] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 12:39:47] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/dashboard
+--------------------------------------------------------------------------------
+[2026-03-03 12:39:50] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /sistema_biometrico/dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 116
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(116): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-03 12:39:58] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 12:40:10] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=sisneros
+--------------------------------------------------------------------------------
+[2026-03-03 12:40:14] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=cisneros
+--------------------------------------------------------------------------------
+[2026-03-03 12:40:19] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 12:40:19] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 12:40:19] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 12:40:43] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/ciclos
+--------------------------------------------------------------------------------
+[2026-03-03 12:40:43] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/ciclos/json
+--------------------------------------------------------------------------------
+[2026-03-03 12:40:43] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/ciclos/horarios-catalogo
+--------------------------------------------------------------------------------
+[2026-03-03 12:40:44] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/ciclos/bloques/json/13?_=1772563244881
+--------------------------------------------------------------------------------
+[2026-03-03 12:40:47] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/ciclos/bloques/json/5?_=1772563247032
+--------------------------------------------------------------------------------
+[2026-03-03 12:40:51] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 12:40:54] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/ciclos
+--------------------------------------------------------------------------------
+[2026-03-03 12:40:54] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/ciclos/json
+--------------------------------------------------------------------------------
+[2026-03-03 12:40:54] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/ciclos/horarios-catalogo
+--------------------------------------------------------------------------------
+[2026-03-03 12:40:55] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/ciclos/bloques/json/5?_=1772563255816
+--------------------------------------------------------------------------------
+[2026-03-03 12:40:58] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 12:41:03] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=ciseneros
+--------------------------------------------------------------------------------
+[2026-03-03 12:41:07] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=cisneros
+--------------------------------------------------------------------------------
+[2026-03-03 12:41:09] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 12:41:09] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 12:41:09] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 12:48:01] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/horarios/asignar-ciclo-empleado
+--------------------------------------------------------------------------------
+[2026-03-03 12:48:01] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 12:48:02] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 12:48:02] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 12:48:09] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=cisneros
+--------------------------------------------------------------------------------
+[2026-03-03 12:48:36] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion
+--------------------------------------------------------------------------------
+[2026-03-03 12:48:36] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 12:48:48] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/uploadZkteco
+--------------------------------------------------------------------------------
+[2026-03-03 12:49:01] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 12:49:09] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/uploadZkteco
+--------------------------------------------------------------------------------
+[2026-03-03 12:51:09] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 12:51:36] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 12:51:42] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 12:51:46] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 12:51:47] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 12:51:47] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 13:59:29] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico
+--------------------------------------------------------------------------------
+[2026-03-03 13:59:29] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 13:59:29] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 13:59:30] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 13:59:31] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 13:59:33] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 13:59:42] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 13:59:42] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/dashboard
+--------------------------------------------------------------------------------
+[2026-03-03 13:59:46] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /sistema_biometrico/dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 116
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(116): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-03 13:59:53] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/dashboard
+--------------------------------------------------------------------------------
+[2026-03-03 13:59:57] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /sistema_biometrico/dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 116
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(116): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-03 13:59:57] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/dashboard
+--------------------------------------------------------------------------------
+[2026-03-03 13:59:59] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /sistema_biometrico/dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 116
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(116): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-03 13:59:59] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/dashboard
+--------------------------------------------------------------------------------
+[2026-03-03 14:00:03] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /sistema_biometrico/dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 116
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(116): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-03 14:03:37] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico
+--------------------------------------------------------------------------------
+[2026-03-03 14:03:37] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 14:03:53] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 14:03:53] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/dashboard
+--------------------------------------------------------------------------------
+[2026-03-03 14:03:56] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /sistema_biometrico/dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 116
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(116): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-03 14:04:02] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/notas-malas
+--------------------------------------------------------------------------------
+[2026-03-03 14:04:09] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/usuarios
+--------------------------------------------------------------------------------
+[2026-03-03 14:07:08] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion
+--------------------------------------------------------------------------------
+[2026-03-03 14:07:08] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 14:07:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/uploadZkteco
+--------------------------------------------------------------------------------
+[2026-03-03 14:07:30] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 14:07:36] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 14:07:41] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=ascencion
+--------------------------------------------------------------------------------
+[2026-03-03 14:07:43] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/527
+--------------------------------------------------------------------------------
+[2026-03-03 14:07:43] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:07:43] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:11:13] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 14:11:19] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 14:11:19] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:11:19] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:12:36] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=ascencion
+--------------------------------------------------------------------------------
+[2026-03-03 14:12:38] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/527
+--------------------------------------------------------------------------------
+[2026-03-03 14:12:38] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:12:38] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:14:35] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=cisneros+ramirez
+--------------------------------------------------------------------------------
+[2026-03-03 14:14:38] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 14:14:39] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:14:39] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:16:19] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/logout
+--------------------------------------------------------------------------------
+[2026-03-03 14:16:19] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 14:22:54] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico
+--------------------------------------------------------------------------------
+[2026-03-03 14:22:54] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 14:23:04] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 14:23:04] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/dashboard
+--------------------------------------------------------------------------------
+[2026-03-03 14:23:08] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /sistema_biometrico/dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 116
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(116): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-03 14:23:11] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados
+--------------------------------------------------------------------------------
+[2026-03-03 14:24:05] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/1
+--------------------------------------------------------------------------------
+[2026-03-03 14:24:05] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:24:05] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:25:04] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=527
+--------------------------------------------------------------------------------
+[2026-03-03 14:25:06] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/527
+--------------------------------------------------------------------------------
+[2026-03-03 14:25:06] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:25:06] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:25:22] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=cisneros
+--------------------------------------------------------------------------------
+[2026-03-03 14:25:25] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 14:25:25] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:25:25] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:25:55] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 14:25:55] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:25:55] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:28:43] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=527
+--------------------------------------------------------------------------------
+[2026-03-03 14:28:45] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/527
+--------------------------------------------------------------------------------
+[2026-03-03 14:28:45] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:28:45] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:29:26] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion
+--------------------------------------------------------------------------------
+[2026-03-03 14:29:26] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 14:29:33] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/uploadZkteco
+--------------------------------------------------------------------------------
+[2026-03-03 14:29:48] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 14:30:06] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/uploadZkteco
+--------------------------------------------------------------------------------
+[2026-03-03 14:32:20] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /.well-known/appspecific/com.chrome.devtools.json
+--------------------------------------------------------------------------------
+[2026-03-03 14:32:21] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /.well-known/appspecific/com.chrome.devtools.json
+--------------------------------------------------------------------------------
+[2026-03-03 14:32:21] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 14:32:46] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 14:32:51] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=cisneros
+--------------------------------------------------------------------------------
+[2026-03-03 14:33:14] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=garcia+morales
+--------------------------------------------------------------------------------
+[2026-03-03 14:33:26] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=314
+--------------------------------------------------------------------------------
+[2026-03-03 14:33:28] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/314
+--------------------------------------------------------------------------------
+[2026-03-03 14:33:28] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:33:28] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:34:42] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=ascencion
+--------------------------------------------------------------------------------
+[2026-03-03 14:34:45] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/527
+--------------------------------------------------------------------------------
+[2026-03-03 14:34:45] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:34:45] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:36:30] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/justificaciones/ajax-justificar
+--------------------------------------------------------------------------------
+[2026-03-03 14:36:30] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:36:30] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:36:30] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:36:30] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:36:41] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/justificaciones/ajax-justificar
+--------------------------------------------------------------------------------
+[2026-03-03 14:36:41] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:36:41] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:36:41] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:36:41] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:36:48] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/justificaciones/ajax-justificar
+--------------------------------------------------------------------------------
+[2026-03-03 14:36:48] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:36:48] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:36:48] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:36:48] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:36:58] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/justificaciones/ajax-justificar
+--------------------------------------------------------------------------------
+[2026-03-03 14:36:58] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:36:58] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:36:58] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:36:58] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:37:31] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 14:37:35] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 14:37:35] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:37:35] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:47:07] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/ciclos
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:07] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/ciclos/json
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:08] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/ciclos/horarios-catalogo
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:10] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/reportes
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:11] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/validaciones
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:11] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/validaciones/buscar-empleados
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:11] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:11] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:47:11] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:11] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:47:11] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:11] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:47:11] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:11] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:47:11] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:11] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:47:11] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/validaciones/obtener-areas
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:11] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/validaciones/estadisticas
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:13] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/ciclos
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:13] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/ciclos/horarios-catalogo
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:13] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/ciclos/json
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/notas-malas
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:21] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:25] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:28] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:28] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:47:28] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:51:24] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 14:51:26] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 14:51:27] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 14:51:27] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:51:27] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:51:34] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 14:51:36] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 14:51:38] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 14:51:38] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:51:38] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:57:48] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico
+--------------------------------------------------------------------------------
+[2026-03-03 14:57:48] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 14:57:57] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 14:57:57] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/dashboard
+--------------------------------------------------------------------------------
+[2026-03-03 14:58:00] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /sistema_biometrico/dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 116
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(116): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-03 14:58:07] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /empleados
+--------------------------------------------------------------------------------
+[2026-03-03 14:58:12] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 14:58:14] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 14:58:14] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:58:14] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 14:58:25] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/logout
+--------------------------------------------------------------------------------
+[2026-03-03 14:58:25] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 14:58:56] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico
+--------------------------------------------------------------------------------
+[2026-03-03 14:58:56] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 14:58:56] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 14:58:56] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 14:58:59] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 14:59:14] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 14:59:14] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/dashboard
+--------------------------------------------------------------------------------
+[2026-03-03 14:59:17] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /sistema_biometrico/dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 116
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(116): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-03 14:59:23] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion
+--------------------------------------------------------------------------------
+[2026-03-03 14:59:23] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 14:59:36] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/uploadZkteco
+--------------------------------------------------------------------------------
+[2026-03-03 14:59:56] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 15:01:51] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/uploadZkteco
+--------------------------------------------------------------------------------
+[2026-03-03 15:04:38] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/configuracion/getRecentHistory
+--------------------------------------------------------------------------------
+[2026-03-03 15:04:40] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 15:04:45] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:04:46] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 15:04:47] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 15:04:47] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 15:05:38] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/comisiones/create?empleado_id=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:05:38] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /favicon.ico
+--------------------------------------------------------------------------------
+[2026-03-03 15:05:41] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:05:45] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 15:05:45] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 15:05:45] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 15:06:08] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:10] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:10] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:10] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 15:06:11] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:12] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:13] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:13] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 15:06:14] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:16] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:16] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:16] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:16] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:16] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:16] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:18] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:18] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 15:06:18] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 15:14:56] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 15:14:56] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 15:14:56] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 15:17:34] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico
+--------------------------------------------------------------------------------
+[2026-03-03 15:17:34] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 15:17:42] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 15:17:42] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/dashboard
+--------------------------------------------------------------------------------
+[2026-03-03 15:17:45] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /sistema_biometrico/dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 116
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(116): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-03 15:17:50] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 15:17:51] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/1
+--------------------------------------------------------------------------------
+[2026-03-03 15:17:51] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 15:17:51] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 15:18:02] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 15:18:03] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 15:18:04] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 15:18:04] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 15:18:04] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 15:18:04] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 15:18:04] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 15:18:06] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/1
+--------------------------------------------------------------------------------
+[2026-03-03 15:18:06] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 15:18:06] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 15:18:22] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/logout
+--------------------------------------------------------------------------------
+[2026-03-03 15:18:22] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 15:18:58] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico
+--------------------------------------------------------------------------------
+[2026-03-03 15:18:58] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 15:19:06] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 15:19:06] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/dashboard
+--------------------------------------------------------------------------------
+[2026-03-03 15:19:09] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /sistema_biometrico/dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 116
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(116): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-03 15:19:15] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 15:19:31] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:19:35] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 15:19:35] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 15:19:35] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 15:19:46] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/logout
+--------------------------------------------------------------------------------
+[2026-03-03 15:19:46] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 15:27:16] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico
+--------------------------------------------------------------------------------
+[2026-03-03 15:27:16] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 15:27:16] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 15:27:16] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 15:27:19] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 15:27:39] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------
+[2026-03-03 15:27:39] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/dashboard
+--------------------------------------------------------------------------------
+[2026-03-03 15:27:42] [EXCEPTION] PDOException
+Contexto: {"action":"index","section":"comisiones"}
+Mensaje: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'monto' in 'SELECT'
+URI: /sistema_biometrico/dashboard
+Archivo: C:\tools\nginx\html\sistema_biometrico\models\Comision.php Línea: 116
+#0 C:\tools\nginx\html\sistema_biometrico\models\Comision.php(116): PDO->prepare('SELECT SUM(mont...')
+#1 C:\tools\nginx\html\sistema_biometrico\controllers\DashboardController.php(81): Comision->getTotalComisiones(NULL, '03', '2026')
+#2 C:\tools\nginx\html\sistema_biometrico\index.php(167): DashboardController->index()
+#3 {main}
+--------------------------------------------------------------------------------
+[2026-03-03 15:27:55] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados
+--------------------------------------------------------------------------------
+[2026-03-03 15:27:58] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:27:59] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 15:27:59] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 15:27:59] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 15:28:48] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados?search=87
+--------------------------------------------------------------------------------
+[2026-03-03 15:28:50] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/empleados/datos-completos/87
+--------------------------------------------------------------------------------
+[2026-03-03 15:28:50] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/api/log-error
+--------------------------------------------------------------------------------
+[2026-03-03 15:28:50] [EXCEPTION] Error
+Mensaje: Cannot use object of type Closure as array
+URI: /sistema_biometrico/api/log-error
+#0 {main}
+[2026-03-03 15:36:52] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/logout
+--------------------------------------------------------------------------------
+[2026-03-03 15:36:52] [DEPRECATED] session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated en C:\tools\nginx\html\sistema_biometrico\index.php línea 50
+URI: /sistema_biometrico/login
+--------------------------------------------------------------------------------

@@ -1,0 +1,116 @@
+# Sistema Biométrico - Configuración Completa
+
+# Forzar HTTPS en producción (descomentar en producción)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Configuración de seguridad de headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https:; frame-ancestors 'none';"
+</IfModule>
+
+# Configuración de caché para archivos estáticos
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
+</IfModule>
+
+# Compresión de archivos
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+</IfModule>
+
+# Seguridad de archivos
+<Files "*.env">
+    Require all denied
+</Files>
+
+<Files "*.log">
+    Require all denied
+</Files>
+
+<Files "*.key">
+    Require all denied
+</Files>
+
+<Files "*.pem">
+    Require all denied
+</Files>
+
+# Protección de directorios sensibles
+<IfModule mod_authz_core.c>
+    <DirectoryMatch "^/.*/\.(git|svn|hg)">
+        Require all denied
+    </DirectoryMatch>
+    
+    # <Directory "logs">
+    #     Require all denied
+    # </Directory>
+    
+    <Directory "vendor">
+        Require all denied
+    </Directory>
+</IfModule>
+
+# BEGIN clean URLs
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /sistema_biometrico/
+
+    # Allow direct access to uploads directory
+    RewriteCond %{REQUEST_URI} ^/sistema_biometrico/uploads/ [NC]
+    RewriteRule ^ - [L]
+
+    # Allow direct access to soportes directory
+    RewriteCond %{REQUEST_URI} ^/sistema_biometrico/soportes/ [NC]
+    RewriteRule ^ - [L]
+
+    # Evita redireccionar si es un archivo o directorio real
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Redirige todo a index.php
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+# END clean URLs
+
+# Configuración específica para desarrollo
+<IfModule mod_env.c>
+    SetEnv APP_ENV development
+</IfModule>
+
+# Limitar tamaño de uploads
+LimitRequestBody 20971520
+php_value upload_max_filesize 20M
+php_value post_max_size 20M
+php_value max_execution_time 300
+php_value memory_limit 256M
+
+# Error handling para desarrollo
+php_flag display_errors Off
+php_flag log_errors On
+php_value error_log logs/php_errors.log

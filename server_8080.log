@@ -1,0 +1,94 @@
+[Wed Jan 28 09:03:30 2026] PHP 8.4.7 Development Server (http://localhost:8080) started
+[Wed Jan 28 09:03:38 2026] [::1]:53059 Accepted
+[Wed Jan 28 09:03:38 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:03:38 2026] [::1]:53059 [302]: GET /
+[Wed Jan 28 09:03:38 2026] [::1]:53059 Closing
+[Wed Jan 28 09:04:22 2026] [::1]:56879 Accepted
+[Wed Jan 28 09:04:22 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:04:22 2026] [::1]:56879 [200]: GET /test_csrf_validation.php
+[Wed Jan 28 09:04:22 2026] [::1]:56879 Closing
+[Wed Jan 28 09:04:22 2026] [::1]:56880 Accepted
+[Wed Jan 28 09:04:22 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:04:22 2026] [::1]:56880 [404]: GET /favicon.ico
+[Wed Jan 28 09:04:22 2026] [::1]:56880 Closing
+[Wed Jan 28 09:04:23 2026] [::1]:56882 Accepted
+[Wed Jan 28 09:04:23 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:04:23 2026] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 21
+[Wed Jan 28 09:04:23 2026] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 22
+[Wed Jan 28 09:04:23 2026] [::1]:56882 [200]: GET /validaciones/buscar-empleados
+[Wed Jan 28 09:04:23 2026] [::1]:56882 Closing
+[Wed Jan 28 09:04:24 2026] [::1]:56886 Accepted
+[Wed Jan 28 09:04:24 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:04:24 2026] [::1]:56886 [403]: POST /validaciones/buscar-pendientes
+[Wed Jan 28 09:04:24 2026] [::1]:56886 Closing
+[Wed Jan 28 09:06:53 2026] [::1]:56988 Accepted
+[Wed Jan 28 09:06:53 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:06:53 2026] [::1]:56988 [200]: GET /test_csrf_validation.php
+[Wed Jan 28 09:06:53 2026] [::1]:56988 Closing
+[Wed Jan 28 09:06:53 2026] [::1]:56989 Accepted
+[Wed Jan 28 09:06:54 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:06:54 2026] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 21
+[Wed Jan 28 09:06:54 2026] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 22
+[Wed Jan 28 09:06:54 2026] [::1]:56989 [200]: GET /validaciones/buscar-empleados
+[Wed Jan 28 09:06:54 2026] [::1]:56989 Closing
+[Wed Jan 28 09:06:55 2026] [::1]:54783 Accepted
+[Wed Jan 28 09:06:55 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:06:55 2026] [::1]:54783 [403]: POST /validaciones/buscar-pendientes
+[Wed Jan 28 09:06:55 2026] [::1]:54783 Closing
+[Wed Jan 28 09:09:28 2026] [::1]:57748 Accepted
+[Wed Jan 28 09:09:28 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:09:28 2026] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\test_8080.php:10) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 21
+[Wed Jan 28 09:09:28 2026] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\test_8080.php:10) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 22
+[Wed Jan 28 09:09:28 2026] [::1]:57748 [200]: GET /test_8080.php
+[Wed Jan 28 09:09:28 2026] [::1]:57748 Closing
+[Wed Jan 28 09:09:28 2026] [::1]:57749 Accepted
+[Wed Jan 28 09:10:59 2026] [::1]:57749 Closed without sending a request; it was probably just an unused speculative preconnection
+[Wed Jan 28 09:10:59 2026] [::1]:57749 Closing
+[Wed Jan 28 09:13:11 2026] [::1]:61909 Accepted
+[Wed Jan 28 09:13:11 2026] [::1]:61910 Accepted
+[Wed Jan 28 09:13:11 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:13:11 2026] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\test_8080.php:10) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 21
+[Wed Jan 28 09:13:11 2026] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\test_8080.php:10) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 22
+[Wed Jan 28 09:13:11 2026] [::1]:61909 [200]: GET /test_8080.php
+[Wed Jan 28 09:13:11 2026] [::1]:61909 Closing
+[Wed Jan 28 09:13:11 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:13:11 2026] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\test_8080.php:10) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 21
+[Wed Jan 28 09:13:11 2026] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\test_8080.php:10) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 22
+[Wed Jan 28 09:13:11 2026] [::1]:61910 [200]: GET /test_8080.php
+[Wed Jan 28 09:13:11 2026] [::1]:61910 Closing
+[Wed Jan 28 09:13:11 2026] [::1]:61912 Accepted
+[Wed Jan 28 09:13:12 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:13:12 2026] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\test_8080.php:10) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 21
+[Wed Jan 28 09:13:12 2026] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\test_8080.php:10) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 22
+[Wed Jan 28 09:13:12 2026] [::1]:61912 [200]: GET /test_8080.php
+[Wed Jan 28 09:13:12 2026] [::1]:61912 Closing
+[Wed Jan 28 09:13:12 2026] [::1]:61914 Accepted
+[Wed Jan 28 09:13:12 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:13:12 2026] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\test_8080.php:10) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 21
+[Wed Jan 28 09:13:12 2026] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\test_8080.php:10) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 22
+[Wed Jan 28 09:13:12 2026] [::1]:61914 [200]: GET /test_8080.php
+[Wed Jan 28 09:13:12 2026] [::1]:61914 Closing
+[Wed Jan 28 09:13:12 2026] [::1]:61916 Accepted
+[Wed Jan 28 09:13:16 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:13:16 2026] [::1]:61916 [200]: GET /test_csrf_validation.php
+[Wed Jan 28 09:13:16 2026] [::1]:61916 Closing
+[Wed Jan 28 09:13:16 2026] [::1]:61922 Accepted
+[Wed Jan 28 09:13:17 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:13:17 2026] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 21
+[Wed Jan 28 09:13:17 2026] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 22
+[Wed Jan 28 09:13:17 2026] [::1]:61922 [200]: GET /validaciones/buscar-empleados
+[Wed Jan 28 09:13:17 2026] [::1]:61922 Closing
+[Wed Jan 28 09:13:18 2026] [::1]:61925 Accepted
+[Wed Jan 28 09:13:18 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:13:18 2026] [::1]:61925 [403]: POST /validaciones/buscar-pendientes
+[Wed Jan 28 09:13:18 2026] [::1]:61925 Closing
+[Wed Jan 28 09:13:20 2026] [::1]:61927 Accepted
+[Wed Jan 28 09:13:20 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:13:20 2026] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 21
+[Wed Jan 28 09:13:20 2026] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\tools\nginx\html\sistema_biometrico\models\ValidacionJefe.php:512) in C:\tools\nginx\html\sistema_biometrico\controllers\BaseController.php on line 22
+[Wed Jan 28 09:13:20 2026] [::1]:61927 [200]: GET /validaciones/buscar-empleados
+[Wed Jan 28 09:13:20 2026] [::1]:61927 Closing
+[Wed Jan 28 09:13:23 2026] [::1]:61930 Accepted
+[Wed Jan 28 09:13:23 2026] BASE_URL autodetectado: '' desde localhost:8080
+[Wed Jan 28 09:13:23 2026] [::1]:61930 [403]: POST /validaciones/buscar-pendientes
+[Wed Jan 28 09:13:23 2026] [::1]:61930 Closing

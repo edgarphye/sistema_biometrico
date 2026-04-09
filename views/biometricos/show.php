@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dispositivo <?php echo $dispositivoId; ?> - Sistema Biométrico</title>
+    <title>Dispositivo <?php echo $dispositivo['dispositivo_id'] ?? 'Desconocido'; ?> - Sistema Biométrico</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="<?php echo BASE_URL; ?>/public/css/colores-pantone.css" rel="stylesheet">
     <style>
         .employee-row:hover { background-color: #f8f9fa; }
         .biometric-badge { font-size: 0.8em; }
         .log-timeline { position: relative; padding-left: 30px; }
-        .log-timeline::before { content: ''; position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; background: #e9ecef; }
+        .log-timeline::before { content: ''; position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; background: var(--color-secondary); }
         .log-item { margin-bottom: 20px; position: relative; }
-        .log-item::before { content: ''; position: absolute; left: -22px; top: 8px; width: 10px; height: 10px; border-radius: 50%; background: #007bff; }
-        .log-success::before { background: #28a745; }
-        .log-error::before { background: #dc3545; }
-        .log-warning::before { background: #ffc107; }
+        .log-item::before { content: ''; position: absolute; left: -22px; top: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--color-secondary); }
+        .log-success::before { background: var(--color-secondary); }
+        .log-error::before { background: var(--color-danger); }
+        .log-warning::before { background: var(--color-accent-dark); }
     </style>
 </head>
 <body>
@@ -24,7 +25,7 @@
             <a class="navbar-brand" href="<?php echo BASE_URL; ?>/biometricos"><i class="fas fa-arrow-left"></i> Dashboard Biométrico</a>
             <div class="navbar-nav ms-auto">
                 <span class="navbar-text">
-                    <i class="fas fa-server"></i> Dispositivo <?php echo $dispositivoId; ?>
+                    <i class="fas fa-server"></i> Dispositivo <?php echo $dispositivo['dispositivo_id'] ?? 'Desconocido'; ?>
                 </span>
             </div>
         </div>
