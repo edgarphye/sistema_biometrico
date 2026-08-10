@@ -3,6 +3,24 @@
 
 return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     // ---- Rutas de API ----
+    $r->addRoute('GET', '/api/lista-empleados', function() {
+        header('Content-Type: application/json');
+        require_once __DIR__ . '/config.php';
+        require_once __DIR__ . '/api/lista-empleados.php';
+    });
+
+    $r->addRoute('GET', '/api/obtener_registros_justificacion', function() {
+        header('Content-Type: application/json');
+        require_once __DIR__ . '/config.php';
+        require_once __DIR__ . '/api/obtener_registros_justificacion.php';
+    });
+
+    $r->addRoute('POST', '/api/actualizar_justificacion', function() {
+        header('Content-Type: application/json');
+        require_once __DIR__ . '/config.php';
+        require_once __DIR__ . '/api/actualizar_justificacion.php';
+    });
+
     $r->addRoute('POST', '/api/log-error', function() {
         // Simple route handler for logging
         header('Content-Type: application/json');
@@ -67,6 +85,8 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/logout', ['AuthController', 'logout']);
     $r->addRoute('GET', '/verify-2fa', ['AuthController', 'verify2FA']);
     $r->addRoute('POST', '/verify-2fa', ['AuthController', 'verify2FA']);
+    $r->addRoute('GET', '/setup-2fa', ['AuthController', 'setup2FA']);
+    $r->addRoute('POST', '/setup-2fa', ['AuthController', 'setup2FA']);
     
     // ---- Perfil de Usuario (Modal) ----
     $r->addRoute('POST', '/perfil/update', ['PerfilController', 'update']);
@@ -74,6 +94,12 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     // ---- Gestión de Notas Malas ----
     $r->addRoute('GET', '/notas-malas', ['NotasMalasController', 'index']);
     $r->addRoute('GET', '/notas-malas/ajax', ['NotasMalasController', 'ajaxList']);
+    $r->addRoute('GET', '/notas-malas/oficio/{id:\d+}', ['NotasMalasController', 'descargarOficio']);
+    $r->addRoute('GET', '/notas-malas/oficio/{id:\d+}/preview', ['NotasMalasController', 'verOficioHtml']);
+    $r->addRoute('POST', '/notas-malas/generar-oficio', ['NotasMalasController', 'generarOficio']);
+    $r->addRoute('POST', '/notas-malas/generar-todos', ['NotasMalasController', 'generarTodos']);
+    $r->addRoute('GET', '/notas-malas/config', ['NotasMalasController', 'configuracion']);
+    $r->addRoute('POST', '/notas-malas/config', ['NotasMalasController', 'guardarConfiguracion']);
     $r->addRoute('POST', '/notas-malas/evaluar-sanciones', function() {
         header('Content-Type: application/json');
         require_once __DIR__ . '/config.php';
@@ -141,9 +167,9 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('POST', '/usuarios/edit', ['UsuarioController', 'edit']);
     $r->addRoute('GET', '/usuarios/{id:\d+}/edit-modal', ['UsuarioController', 'getEditModal']);
     $r->addRoute('POST', '/usuarios/update', ['UsuarioController', 'updateUser']);
-    $r->addRoute('POST', '/usuarios/{id:\d+}/delete', ['UsuarioController', 'delete']);
     $r->addRoute('POST', '/usuarios/{id:\d+}/toggle-status', ['UsuarioController', 'toggleStatus']);
     $r->addRoute('POST', '/usuarios/{id:\d+}/change-password', ['UsuarioController', 'changePassword']);
+    $r->addRoute('POST', '/usuarios/guardar-menu', ['UsuarioController', 'guardarMenuUsuario']);
 
     // ---- Rutas Principales ----
     $r->addRoute('GET', '/', ['DashboardController', 'index']);
@@ -164,6 +190,7 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('POST', '/empleados/generate_curp', ['EmpleadoController', 'generate_curp']);
     $r->addRoute('POST', '/empleados/capturarHuella', ['EmpleadoController', 'capturarHuella']);
     $r->addRoute('GET', '/empleados/{id:\d+}', ['EmpleadoController', 'show']);
+    $r->addRoute('GET', '/empleados/{id:\d+}/ver', ['EmpleadoController', 'verPerfil']);
     $r->addRoute('GET', '/empleados/{id:\d+}/edit', ['EmpleadoController', 'edit']);
     $r->addRoute('POST', '/empleados/edit', ['EmpleadoController', 'edit']); // Asumiendo que el ID viene en el POST
     $r->addRoute('GET', '/empleados/{id:\d+}/delete', ['EmpleadoController', 'delete']);
@@ -181,6 +208,7 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     
     // ---- Asistencia ----
     $r->addRoute('GET', '/asistencia', ['AsistenciaController', 'index']);
+    $r->addRoute('GET', '/marcaciones', ['MarcacionesController', 'index']);
     $r->addRoute('POST', '/asistencia/registrar-entrada', ['AsistenciaController', 'registrarEntrada']);
     $r->addRoute('POST', '/asistencia/registrar-salida', ['AsistenciaController', 'registrarSalida']);
     $r->addRoute('GET', '/asistencia/estado-dispositivos', ['AsistenciaController', 'getEstadoDispositivos']);
@@ -200,6 +228,7 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
 
     // ---- Reportes ----
     $r->addRoute('GET', '/reportes', ['ReportesController', 'index']);
+    $r->addRoute('GET', '/reportes/', ['ReportesController', 'index']);
     $r->addRoute('GET', '/reportes/generar', ['ReportesController', 'generar']);
     $r->addRoute('GET', '/reportes/exportar-excel', ['ReportesController', 'exportarExcel']);
     $r->addRoute('POST', '/reportes/generar', ['ReportesController', 'generar']);
@@ -215,6 +244,8 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/biometricos', ['BiometricosController', 'index']);
     $r->addRoute('POST', '/biometricos/configurar', ['BiometricosController', 'configurar']);
     $r->addRoute('POST', '/biometricos/sync', ['BiometricosController', 'sync']);
+    $r->addRoute('GET', '/biometricos/gestionar', ['BiometricosController', 'gestionarIndex']);
+    $r->addRoute('GET', '/biometricos/gestionar/{id:\d+}', ['BiometricosController', 'gestionar']);
     $r->addRoute('GET', '/biometricos/{id:\d+}', ['BiometricosController', 'show']);
     $r->addRoute('GET', '/biometricos/capturar/{id:\d+}', ['BiometricosController', 'capturarHuella']);
     $r->addRoute('POST', '/biometricos/registrar-huella', ['BiometricosController', 'registrarHuella']);
@@ -226,6 +257,9 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/biometricos/logs-dispositivo/{id:\d+}', ['BiometricosController', 'getLogsDispositivo']);
     $r->addRoute('GET', '/biometricos/estadisticas-filtradas', ['BiometricosController', 'getEstadisticasFiltradas']);
     $r->addRoute('POST', '/biometricos/test-dispositivo/{id:\d+}', ['BiometricosController', 'testDispositivo']);
+    $r->addRoute('POST', '/biometricos/actualizar-empleado/{id:\d+}', ['BiometricosController', 'actualizarEmpleadoEnDispositivo']);
+    $r->addRoute('POST', '/biometricos/actualizar-empleados-masivo/{id:\d+}', ['BiometricosController', 'actualizarEmpleadosMasivo']);
+    $r->addRoute('POST', '/biometricos/descargar-asistencias/{id:\d+}', ['BiometricosController', 'descargarAsistencias']);
 
     // ---- ZKTeco Logs ----
     $r->addRoute('GET', '/zktecologs', ['ZKTecoController', 'index']);
@@ -233,6 +267,7 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('POST', '/zktecologs/analizar', ['ZKTecoController', 'analizar']);
     $r->addRoute('POST', '/zktecologs/procesar', ['ZKTecoController', 'procesar']);
     $r->addRoute('POST', '/zktecologs/reporte', ['ZKTecoController', 'reporte']);
+    $r->addRoute('GET', '/zktecologs/procesar-web', ['ZKTecoController', 'procesamientoWeb']);
 
     // ---- Configuración ----
     $r->addRoute('GET', '/configuracion', ['ConfiguracionController', 'index']);
@@ -261,12 +296,6 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/validations', ['ValidacionJefeController', 'index']);
     $r->addRoute('GET', '/validations/index', ['ValidacionJefeController', 'index']);
 
-
-    $r->addRoute('POST', '/validations/{id:\d+}/approve', ['ValidacionJefeController', 'approveValidation']);
-    $r->addRoute('POST', '/validations/{id:\d+}/reject', ['ValidacionJefeController', 'rejectValidation']);
-    
-
-
     // ---- Dispositivos (CRUD) ----
     $r->addRoute('GET', '/dispositivos', ['DispositivoBiometricoController', 'index']);
     $r->addRoute('GET', '/dispositivos/create', ['DispositivoBiometricoController', 'create']);
@@ -277,6 +306,7 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('POST', '/dispositivos/test-connection', ['DispositivoBiometricoController', 'testConnection']);
     $r->addRoute('POST', '/dispositivos/sync', ['DispositivoBiometricoController', 'syncEmployees']);
     $r->addRoute('GET', '/dispositivos/status', ['DispositivoBiometricoController', 'getStatus']);
+    $r->addRoute('GET', '/dispositivos/toggle-status', ['DispositivoBiometricoController', 'toggleStatus']);
 
     // ---- Horarios ----
     $r->addRoute('GET', '/horarios', ['HorarioController', 'index']);
@@ -295,12 +325,15 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/horarios/ver-asignaciones', ['HorarioController', 'verAsignaciones']);
     $r->addRoute('GET', '/horarios/empleado/{id:\d+}/historial', ['HorarioController', 'historialEmpleado']);
     $r->addRoute('GET', '/empleados/{id:\d+}/historial-horarios', ['HorarioController', 'historialHorariosJson']);
+    $r->addRoute('GET', '/horarios/mantenimiento', ['HorarioController', 'mantenimiento']);
+    $r->addRoute('POST', '/horarios/mantenimiento/procesar', ['HorarioController', 'procesarMantenimiento']);
+    $r->addRoute('GET', '/horarios/ciclos', ['HorarioController', 'ciclos']);
+    $r->addRoute('POST', '/horarios/ciclos/procesar', ['HorarioController', 'procesarCiclos']);
 
     // ---- Ciclos y Horarios ----
     $r->addRoute('GET', '/ciclos', ['CiclosController', 'index']);
     // Endpoints JSON para la UI de Ciclos
     $r->addRoute('GET', '/ciclos/json', ['CiclosController', 'getAllJson']);
-    $r->addRoute('GET', '/ciclos/json/{id:\d+}', ['CiclosController', 'getByIdJson']);
     $r->addRoute('POST', '/ciclos/create', ['CiclosController', 'create']);
     $r->addRoute('GET', '/ciclos/horarios-catalogo', ['CiclosController', 'getHorariosCatalogo']);
     $r->addRoute('POST', '/ciclos/update', ['CiclosController', 'update']);
@@ -317,6 +350,8 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('POST', '/justificaciones/justificar/{id:\d+}', ['JustificacionController', 'justificar']);
     $r->addRoute('GET', '/justificaciones/justificar/{id:\d+}', ['JustificacionController', 'justificar']);
     $r->addRoute('GET', '/justificaciones/tipos', ['JustificacionController', 'tipos']);
+    $r->addRoute('GET', '/justificaciones/tipos-json', ['JustificacionController', 'tiposJson']);
+    $r->addRoute('GET', '/justificaciones/crear-tipo', ['JustificacionController', 'crearTipo']);
     $r->addRoute('POST', '/justificaciones/crear-tipo', ['JustificacionController', 'crearTipo']);
     // ---- Justificaciones AJAX (para modal en empleados) ----
     $r->addRoute('GET', '/justificaciones/get-retardo/{id:\d+}', ['JustificacionController', 'getRetardoAjax']);
@@ -334,6 +369,8 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('POST', '/sanciones/{id:\d+}/edit', ['SancionController', 'editar']);
     $r->addRoute('GET', '/sanciones/{id:\d+}/delete', ['SancionController', 'eliminar']);
     $r->addRoute('POST', '/sanciones/{id:\d+}/delete', ['SancionController', 'eliminar']);
+    $r->addRoute('POST', '/sanciones/borrar-todas', ['SancionController', 'borrarTodas']);
+    $r->addRoute('GET', '/sanciones/borrar-todas', ['SancionController', 'borrarTodas']);
 
 
     // ---- Comisiones ----
@@ -344,6 +381,7 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('POST', '/comisiones/justificar', ['ComisionController', 'justificar']);
     $r->addRoute('POST', '/comisiones/validar-limite', ['ComisionController', 'validarLimite']);
     $r->addRoute('GET', '/comisiones/get-by-empleado', ['ComisionController', 'getByEmpleado']);
+    $r->addRoute('POST', '/comisiones/actualizar', ['ComisionController', 'actualizar']);
 
     // ---- Días Económicos ----
     $r->addRoute('GET', '/dias-economicos', ['DiasEconomicosController', 'index']);
@@ -351,6 +389,7 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('POST', '/dias-economicos/aprobar', ['DiasEconomicosController', 'aprobar']);
     $r->addRoute('POST', '/dias-economicos/rechazar', ['DiasEconomicosController', 'rechazar']);
     $r->addRoute('GET', '/dias-economicos/empleado/{id:\d+}', ['DiasEconomicosController', 'getPorEmpleado']);
+    $r->addRoute('POST', '/dias-economicos/actualizar', ['DiasEconomicosController', 'actualizar']);
 
     // ---- Validaciones por Jefes ----
     $r->addRoute('GET', '/validaciones', ['ValidacionJefeController', 'index']);
@@ -367,7 +406,13 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/validaciones/estadisticas', ['ValidacionJefeController', 'estadisticas']);
     $r->addRoute('GET', '/validaciones/obtener-areas', ['ValidacionJefeController', 'getAreas']);
     $r->addRoute('GET', '/validaciones/descargar-reporte', ['ValidacionJefeController', 'descargarReporte']);
-    $r->addRoute('POST', '/validaciones/auto-procesar', ['ValidacionJefeController', 'autoProcesar']);
+    
+    // ---- Validaciones: Sistema de Conversación Bidireccional ----
+    $r->addRoute('GET', '/mis-validaciones', ['ValidacionJefeController', 'misValidaciones']);
+    $r->addRoute('GET', '/validaciones/mensajes/{id:\d+}', ['ValidacionJefeController', 'apiObtenerMensajes']);
+    $r->addRoute('POST', '/validaciones/mensajes/agregar', ['ValidacionJefeController', 'apiAgregarMensaje']);
+    $r->addRoute('GET', '/validaciones/contador-no-leidas', ['ValidacionJefeController', 'apiContadorNoLeidas']);
+    $r->addRoute('POST', '/validaciones/marcar-leido', ['ValidacionJefeController', 'apiMarcarLeido']);
     
     // ---- Huellas Dactilares ----
     $r->addRoute('GET', '/huellas', ['HuellaController', 'index']);
@@ -390,6 +435,14 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/database/foreignKeys', ['DatabaseController', 'foreignKeys']);
     $r->addRoute('GET', '/database/status', ['DatabaseController', 'status']);
     $r->addRoute('POST', '/database/deleteBackup', ['DatabaseController', 'deleteBackup']);
+
+    // ---- Configuración de Menú por Usuario ----
+    $r->addRoute('GET', '/permisos-menu', ['MenuConfigController', 'index']);
+    $r->addRoute('POST', '/menu-config/guardar', ['MenuConfigController', 'guardar']);
+    $r->addRoute('GET', '/menu-config/getConfig', ['MenuConfigController', 'getConfig']);
+
+    // ---- Resumen de Justificaciones ----
+    $r->addRoute('GET', '/resumen-justificaciones', ['ResumenJustificacionesController', 'index']);
 
     // ---- Agente IA de Gestión de Asistencia ----
     $r->addRoute('GET', '/agente-ia', ['AgenteIAController', 'index']);
@@ -460,6 +513,9 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/ai/redes-neuronales', ['AIController', 'redesNeuronales']);
     $r->addRoute('GET', '/ai/neuronas-red', ['AIController', 'obtenerNeuronasRed']);
     $r->addRoute('GET', '/ai/detalle-neurona/{id:\d+}', ['AIController', 'obtenerDetalleNeurona']);
+
+    // ---- API unificada para editar registros de tabs del empleado ----
+    $r->addRoute('POST', '/api/actualizar-registro-tab', ['EmpleadoController', 'actualizarRegistroTab']);
 
     // ---- AI Cron (Análisis Programado) ----
     $r->addRoute('GET', '/ai-cron/ejecutar', ['AICronController', 'ejecutarAnalisis']);
