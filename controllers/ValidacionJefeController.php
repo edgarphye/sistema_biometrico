@@ -157,9 +157,12 @@ class ValidacionJefeController extends BaseController {
         }
         
         if ($validacion['jefe_id'] != $jefeId) {
-            error_log("Acceso denegado. Validación ID: $id pertenece al jefe {$validacion['jefe_id']}, usuario actual: $jefeId");
-            $this->jsonResponse(['success' => false, 'error' => 'Validación no encontrada o no autorizado'], 404);
-            return;
+            // Verificar si está autorizado por catalogos_mandos
+            if (!$this->esJefeAutorizadoParaEmpleado($jefeId, $validacion['empleado_id'])) {
+                error_log("Acceso denegado. Validación ID: $id pertenece al jefe {$validacion['jefe_id']}, usuario actual: $jefeId");
+                $this->jsonResponse(['success' => false, 'error' => 'Validación no encontrada o no autorizado'], 404);
+                return;
+            }
         }
         
         // Obtener detalles específicos según tipo
@@ -219,8 +222,10 @@ class ValidacionJefeController extends BaseController {
             
             // Verificar que pertenece al mando
             if ($incidencia['jefe_directo_id'] != $empleadoIdMando) {
-                $this->jsonResponse(['success' => false, 'error' => 'No tienes permiso'], 403);
-                return;
+                if (!$this->esJefeAutorizadoParaEmpleado($empleadoIdMando, $incidencia['empleado_id'])) {
+                    $this->jsonResponse(['success' => false, 'error' => 'No tienes permiso'], 403);
+                    return;
+                }
             }
             
             // Crear objeto de validación
@@ -244,8 +249,45 @@ class ValidacionJefeController extends BaseController {
             ]);
             
         } else {
-            // Buscar en tabla retardos (usar método existente)
-            return $this->validarPorRetardo($id);
+            if ($origen === 'validacion_jefe') {
+                $stmtVj = $pdo->prepare("
+                    SELECT v.*, e.nombre as empleado_nombre, e.apellido as empleado_apellido, e.area as empleado_area
+                    FROM validaciones_jefe v
+                    INNER JOIN empleados e ON v.empleado_id = e.id
+                    WHERE v.id = ?
+                ");
+                $stmtVj->execute([$id]);
+                $vj = $stmtVj->fetch(PDO::FETCH_ASSOC);
+
+                if (!$vj) {
+                    $this->jsonResponse(['success' => false, 'error' => 'Validación no encontrada'], 404);
+                    return;
+                }
+
+                $vj['descripcion_incidencia'] = $this->getDescripcionIncidencia($vj);
+                $vj['fecha_incidencia'] = $vj['fecha'] ?? $vj['fecha_inicio'] ?? $vj['created_at'] ?? date('Y-m-d');
+
+                $this->jsonResponse([
+                    'success' => true,
+                    'validacion' => $vj,
+                    'detalles' => $vj
+                ]);
+                return;
+            }
+
+            // Resolver ID: puede ser validaciones_jefe.id o retardo.id directamente (sin solicitud)
+            $resolvedId = $id;
+
+            if ($origen === 'retardos') {
+                $stmtVj = $pdo->prepare("SELECT incidencia_id FROM validaciones_jefe WHERE id = ?");
+                $stmtVj->execute([$id]);
+                $vj = $stmtVj->fetch(PDO::FETCH_ASSOC);
+                if ($vj) {
+                    $resolvedId = $vj['incidencia_id'];
+                }
+            }
+
+            return $this->validarPorRetardo($resolvedId);
         }
     }
     
@@ -286,8 +328,10 @@ class ValidacionJefeController extends BaseController {
         
         // Verificar que el empleado pertenece al mando actual
         if ($retardo['jefe_directo_id'] != $empleadoIdMando) {
-            $this->jsonResponse(['success' => false, 'error' => 'No tienes permiso para ver este retardo'], 403);
-            return;
+            if (!$this->esJefeAutorizadoParaEmpleado($empleadoIdMando, $retardo['empleado_id'])) {
+                $this->jsonResponse(['success' => false, 'error' => 'No tienes permiso para ver este retardo'], 403);
+                return;
+            }
         }
         
         // Buscar si existe una validacion para este retardo
@@ -624,11 +668,83 @@ class ValidacionJefeController extends BaseController {
             return;
         }
 
-        // Obtener subordinados del jefe actual con contadores separados de retardos e incidencias
+        // Obtener IDs de subordinados (directos + catalogos_mandos)
+        $subordinadoIds = [];
+        
+        $stmtDirectos = $pdo->prepare("SELECT id FROM empleados WHERE jefe_directo_id = ? AND activo = 1");
+        $stmtDirectos->execute([$empleadoIdMando]);
+        $subordinadoIds = $stmtDirectos->fetchAll(PDO::FETCH_COLUMN);
+        
+        $stmtEmpName = $pdo->prepare("SELECT nombre, apellido FROM empleados WHERE id = ?");
+        $stmtEmpName->execute([$empleadoIdMando]);
+        $empName = $stmtEmpName->fetch(PDO::FETCH_ASSOC);
+        
+        $stmtUserInfo = $pdo->prepare("SELECT nombre_completo FROM usuarios WHERE empleado_id = ? AND activo = 1 LIMIT 1");
+        $stmtUserInfo->execute([$empleadoIdMando]);
+        $userName = $stmtUserInfo->fetchColumn();
+        
+        $nombresMando = [];
+        if ($empName) {
+            $nombresMando[] = trim($empName['apellido'] . ' ' . $empName['nombre']);
+        }
+        if ($userName && !in_array($userName, $nombresMando)) {
+            $nombresMando[] = $userName;
+        }
+        
+        if (!empty($nombresMando)) {
+            $placeholders = implode(',', array_fill(0, count($nombresMando), '?'));
+            $stmtMando = $pdo->prepare("
+                SELECT id, clave_area, area FROM catalogos_mandos 
+                WHERE nombre_mando IN ($placeholders) AND activo = 1
+            ");
+            $stmtMando->execute($nombresMando);
+            $rowsMando = $stmtMando->fetchAll(PDO::FETCH_ASSOC);
+            if (!empty($rowsMando)) {
+                $clavesArea = array_column($rowsMando, 'id');
+                $areasMando = array_column($rowsMando, 'area');
+
+                $subPorClave = [];
+                $subPorArea = [];
+
+                if (!empty($clavesArea)) {
+                    $placeholders = implode(',', array_fill(0, count($clavesArea), '?'));
+                    $stmtPorClave = $pdo->prepare("
+                        SELECT id FROM empleados WHERE jefe_directo_clave IN ($placeholders) AND activo = 1
+                    ");
+                    $stmtPorClave->execute($clavesArea);
+                    $subPorClave = $stmtPorClave->fetchAll(PDO::FETCH_COLUMN);
+                }
+
+                if (!empty($areasMando)) {
+                    $placeholdersArea = implode(',', array_fill(0, count($areasMando), '?'));
+                    $stmtPorArea = $pdo->prepare("
+                        SELECT id FROM empleados WHERE area IN ($placeholdersArea) AND activo = 1
+                    ");
+                    $stmtPorArea->execute($areasMando);
+                    $subPorArea = $stmtPorArea->fetchAll(PDO::FETCH_COLUMN);
+                }
+
+                $subordinadoIds = array_merge($subordinadoIds, $subPorClave, $subPorArea);
+                $subordinadoIds = array_values(array_unique($subordinadoIds));
+            }
+        }
+        
+        if (empty($subordinadoIds)) {
+            $this->jsonResponse([
+                'success' => true,
+                'empleados' => [],
+                'message' => 'No tienes subordinados asignados.'
+            ]);
+            return;
+        }
+        
+        $inPlaceholders = implode(',', array_fill(0, count($subordinadoIds), '?'));
+        
+        // Consulta con contadores de retardos e incidencias
         $sql = "
             SELECT DISTINCT e.id, CONCAT(e.nombre, ' ', e.apellido) as nombre_completo, 
                    e.area, e.area_fisica, e.jerarquia,
-                   'directo' as tipo_asignacion,
+                   CASE WHEN e.jefe_directo_id = ? THEN 'directo' ELSE 'mando' END as tipo_asignacion,
                    COALESCE(retardos.cantidad_retardos, 0) as cantidad_retardos,
                    COALESCE(asistencia.cantidad_asistencias, 0) as cantidad_asistencias,
                    (COALESCE(retardos.cantidad_retardos, 0) + COALESCE(asistencia.cantidad_asistencias, 0)) as total_incidencias
@@ -646,9 +762,9 @@ class ValidacionJefeController extends BaseController {
                 AND (estado_validacion IS NULL OR estado_validacion = '' OR estado_validacion LIKE 'pendiente%' OR estado_validacion LIKE '%_info')
                 GROUP BY empleado_id
             ) asistencia ON e.id = asistencia.empleado_id
-            WHERE e.jefe_directo_id = ?";
+            WHERE e.id IN ($inPlaceholders)";
         
-        $parametros = [$empleadoIdMando];
+        $parametros = array_merge([$empleadoIdMando], $subordinadoIds);
         
         // Si solo queremos empleados con incidencias, filtramos
         if ($soloConIncidencias) {
@@ -804,10 +920,10 @@ class ValidacionJefeController extends BaseController {
             return;
         }
 
-        // Obtener empleados a cargo del jefe actual
+        // Obtener empleados a cargo del jefe actual (directos + catalogos_mandos)
         $pdo = Database::getInstance()->getConnection();
         
-        // Primero, obtener los IDs de empleados a cargo del jefe
+        // Obtener IDs por jefe_directo_id directo
         $stmtSubordinados = $pdo->prepare("
             SELECT e.id 
             FROM empleados e
@@ -816,6 +932,52 @@ class ValidacionJefeController extends BaseController {
         ");
         $stmtSubordinados->execute([$_SESSION['user_id']]);
         $subordinadosIds = $stmtSubordinados->fetchAll(PDO::FETCH_COLUMN);
+        
+        // También obtener empleados por catalogos_mandos
+        $stmtEmpName = $pdo->prepare("SELECT e.nombre, e.apellido, u.nombre_completo FROM empleados e INNER JOIN usuarios u ON e.id = u.empleado_id WHERE u.id = ?");
+        $stmtEmpName->execute([$_SESSION['user_id']]);
+        $empName = $stmtEmpName->fetch(PDO::FETCH_ASSOC);
+        if ($empName) {
+            $nombresMando = [trim($empName['apellido'] . ' ' . $empName['nombre'])];
+            if (!empty($empName['nombre_completo']) && !in_array($empName['nombre_completo'], $nombresMando)) {
+                $nombresMando[] = $empName['nombre_completo'];
+            }
+            $placeholders = implode(',', array_fill(0, count($nombresMando), '?'));
+            $stmtMando = $pdo->prepare("
+                SELECT id, clave_area, area FROM catalogos_mandos 
+                WHERE nombre_mando IN ($placeholders) AND activo = 1
+            ");
+            $stmtMando->execute($nombresMando);
+            $rowsMando = $stmtMando->fetchAll(PDO::FETCH_ASSOC);
+            if (!empty($rowsMando)) {
+                $clavesArea = array_column($rowsMando, 'id');
+                $areasMando = array_column($rowsMando, 'area');
+
+                $subPorClave = [];
+                $subPorArea = [];
+
+                if (!empty($clavesArea)) {
+                    $placeholders = implode(',', array_fill(0, count($clavesArea), '?'));
+                    $stmtPorClave = $pdo->prepare("
+                        SELECT id FROM empleados WHERE jefe_directo_clave IN ($placeholders) AND activo = 1
+                    ");
+                    $stmtPorClave->execute($clavesArea);
+                    $subPorClave = $stmtPorClave->fetchAll(PDO::FETCH_COLUMN);
+                }
+
+                if (!empty($areasMando)) {
+                    $placeholdersArea = implode(',', array_fill(0, count($areasMando), '?'));
+                    $stmtPorArea = $pdo->prepare("
+                        SELECT id FROM empleados WHERE area IN ($placeholdersArea) AND activo = 1
+                    ");
+                    $stmtPorArea->execute($areasMando);
+                    $subPorArea = $stmtPorArea->fetchAll(PDO::FETCH_COLUMN);
+                }
+
+                $subordinadosIds = array_merge($subordinadosIds, $subPorClave, $subPorArea);
+                $subordinadosIds = array_values(array_unique($subordinadosIds));
+            }
+        }
         
         if (empty($subordinadosIds)) {
             $this->jsonResponse([
@@ -875,12 +1037,10 @@ class ValidacionJefeController extends BaseController {
                        0 as sin_solicitud
                 FROM retardos r
                 INNER JOIN empleados e ON r.empleado_id = e.id
-                INNER JOIN usuarios u ON e.jefe_directo_id = u.empleado_id
                 LEFT JOIN asistencia a ON r.empleado_id = a.empleado_id AND r.fecha = a.fecha
                 LEFT JOIN empleado_horarios eh ON r.empleado_id = eh.empleado_id 
                     AND r.fecha BETWEEN eh.fecha_inicio AND COALESCE(eh.fecha_fin, CURDATE())
                 WHERE r.empleado_id IN $placeholders
-                AND u.id = ?
                 AND (r.motivo_justificacion IS NOT NULL AND r.motivo_justificacion != '')
             ";
             
@@ -911,12 +1071,10 @@ class ValidacionJefeController extends BaseController {
                        1 as sin_solicitud
                 FROM retardos r
                 INNER JOIN empleados e ON r.empleado_id = e.id
-                INNER JOIN usuarios u ON e.jefe_directo_id = u.empleado_id
                 LEFT JOIN asistencia a ON r.empleado_id = a.empleado_id AND r.fecha = a.fecha
                 LEFT JOIN empleado_horarios eh ON r.empleado_id = eh.empleado_id 
                     AND r.fecha BETWEEN eh.fecha_inicio AND COALESCE(eh.fecha_fin, CURDATE())
                 WHERE r.empleado_id IN $placeholders
-                AND u.id = ?
                 AND (r.motivo_justificacion IS NULL OR r.motivo_justificacion = '')
             ";
             
@@ -958,9 +1116,7 @@ class ValidacionJefeController extends BaseController {
                        0 as sin_solicitud
                 FROM asistencia asis
                 INNER JOIN empleados e ON asis.empleado_id = e.id
-                INNER JOIN usuarios u ON e.jefe_directo_id = u.empleado_id
                 WHERE asis.empleado_id IN $placeholders
-                AND u.id = ?
                 AND asis.tipo_asistencia NOT IN ('normal', 'por_definir')
             ";
             
@@ -976,11 +1132,11 @@ class ValidacionJefeController extends BaseController {
                 WHERE 1=1
             ";
             
-            // Parameters: empleadosIds (para retardos con solicitud), userId, empleadosIds (para retardos sin solicitud), userId, empleadosIds (para asistencia), userId
+            // Parameters: empleadosIds (para retardos con solicitud), empleadosIds (para retardos sin solicitud), empleadosIds (para asistencia)
             $params = array_merge(
-                $empleadosIds, [$_SESSION['user_id']], 
-                $empleadosIds, [$_SESSION['user_id']], 
-                $empleadosIds, [$_SESSION['user_id']]
+                $empleadosIds, 
+                $empleadosIds, 
+                $empleadosIds
             );
             
             // Filtrar solo pendientes si se solicita
@@ -1026,6 +1182,65 @@ class ValidacionJefeController extends BaseController {
                 }
             }
             
+            // Si NO es solo pendientes, incluir también registros de validaciones_jefe (aprobados/rechazados)
+            if (!$soloPendientes) {
+                $placeholdersVj = '(' . implode(',', array_fill(0, count($empleadosIds), '?')) . ')';
+                $sqlVj = "SELECT 
+                    'validacion_jefe' as origen,
+                    v.empleado_id,
+                    v.id as id,
+                    v.tipo_incidencia,
+                    COALESCE(v.fecha_validacion, v.fecha_solicitud) as fecha_incidencia,
+                    NULL as hora_entrada_real,
+                    NULL as hora_entrada,
+                    NULL as hora_salida,
+                    NULL as horario_entrada,
+                    NULL as horario_salida,
+                    DAYNAME(COALESCE(v.fecha_validacion, v.fecha_solicitud)) as dia_semana,
+                    NULL as minutos_retardo,
+                    NULL as justificado,
+                    COALESCE(v.motivo_validacion, v.comentarios_adicionales) as descripcion_incidencia,
+                    0 as requiere_validacion_jefe,
+                    NULL as evidencia_adjunta,
+                    v.estado as estado_validacion_jefe,
+                    0 as prioridad_atencion,
+                    e.nombre as empleado_nombre, e.apellido as empleado_apellido,
+                    CONCAT(e.nombre, ' ', e.apellido) as nombre_completo,
+                    e.area as empleado_area, e.area_fisica as empleado_area_fisica, e.jerarquia as empleado_jerarquia,
+                    0 as sin_solicitud,
+                    v.incidencia_id,
+                    v.fecha_solicitud,
+                    v.motivo_validacion,
+                    v.comentarios_adicionales
+                FROM validaciones_jefe v
+                INNER JOIN empleados e ON v.empleado_id = e.id
+                WHERE v.empleado_id IN $placeholdersVj
+                AND v.estado IN ('aprobado', 'rechazado')";
+                
+                $stmtVj = $pdo->prepare($sqlVj);
+                $stmtVj->execute($empleadosIds);
+                $validacionesJefe = $stmtVj->fetchAll(PDO::FETCH_ASSOC);
+                
+                // Agregar descripción amigable
+                foreach ($validacionesJefe as &$vj) {
+                    $vj['descripcion_incidencia'] = $this->getDescripcionIncidencia($vj) ?: ($vj['descripcion_incidencia'] ?? '');
+                    $vj['tipo_sin_solicitud'] = false;
+                }
+                
+                // Combinar
+                $incidencias = array_merge($incidencias, $validacionesJefe);
+                
+                // Reordenar: sin_solicitud DESC, fecha_incidencia DESC
+                usort($incidencias, function($a, $b) {
+                    $aSin = intval($a['sin_solicitud'] ?? 0);
+                    $bSin = intval($b['sin_solicitud'] ?? 0);
+                    if ($aSin !== $bSin) return $bSin - $aSin;
+                    return strcmp($b['fecha_incidencia'] ?? '', $a['fecha_incidencia'] ?? '');
+                });
+                
+                $total = count($incidencias);
+            }
+            
             $this->jsonResponse([
                 'success' => true,
                 'incidencias' => $incidencias,
@@ -1052,6 +1267,7 @@ class ValidacionJefeController extends BaseController {
                 return "Retardo menor: $minutos min";
             case 'retardo_mayor':
                 return "Retardo mayor: $minutos min";
+            case 'comision':
             case 'comision_entrada':
                 return 'Comisión de entrada';
             case 'comision_salida':
@@ -1076,6 +1292,18 @@ class ValidacionJefeController extends BaseController {
                 return 'Cuidados parentales';
             case 'falta':
                 return 'Falta';
+            case 'constancia_tiempo':
+                return 'Constancia de tiempo';
+            case 'justificacion':
+                return 'Justificación';
+            case 'dia_economico':
+                return 'Día económico';
+            case 'ausencia':
+                return 'Ausencia';
+            case 'vacaciones':
+                return 'Vacaciones';
+            case 'licencia_medica':
+                return 'Licencia médica';
             default:
                 return $inc['descripcion_incidencia'] ?? 'Incidencia';
         }
@@ -1151,19 +1379,13 @@ class ValidacionJefeController extends BaseController {
     private function getEmpleadosACargo($jefeId, $query = '') {
         $pdo = Database::getInstance()->getConnection();
         
-        // Primero obtenemos el área del jefe
-        $stmtJefe = $pdo->prepare("SELECT e.area FROM empleados e WHERE e.id = ?");
-        $stmtJefe->execute([$jefeId]);
-        $areaJefe = $stmtJefe->fetchColumn();
-        
-        // Obtener empleados SOLO por jefe_directo_id (asignación directa)
+        // Obtener empleados por jefe_directo_id (asignación directa)
         $sql = "SELECT e.id, CONCAT(e.nombre, ' ', e.apellido) as nombre_completo, 
                        e.area, e.jerarquia,
                        'directo' as tipo_asignacion
                 FROM empleados e 
-                WHERE e.jefe_directo_id = ?
-                AND (e.nombre LIKE ? OR e.apellido LIKE ? OR e.area LIKE ?)
-                ORDER BY e.nombre";
+                WHERE e.jefe_directo_id = ? AND e.activo = 1
+                AND (e.nombre LIKE ? OR e.apellido LIKE ? OR e.area LIKE ?)";
         
         $parametros = [
             $jefeId, 
@@ -1172,10 +1394,136 @@ class ValidacionJefeController extends BaseController {
             "%{$query}%"
         ];
         
+        // También buscar empleados por jefe_directo_clave en catalogos_mandos
+        $stmtEmpName = $pdo->prepare("SELECT nombre, apellido FROM empleados WHERE id = ?");
+        $stmtEmpName->execute([$jefeId]);
+        $empName = $stmtEmpName->fetch(PDO::FETCH_ASSOC);
+        
+        $stmtUserInfo = $pdo->prepare("SELECT nombre_completo FROM usuarios WHERE empleado_id = ? AND activo = 1 LIMIT 1");
+        $stmtUserInfo->execute([$jefeId]);
+        $userName = $stmtUserInfo->fetchColumn();
+        
+        $nombresMando = [];
+        if ($empName) {
+            $nombresMando[] = trim($empName['apellido'] . ' ' . $empName['nombre']);
+        }
+        if ($userName && !in_array($userName, $nombresMando)) {
+            $nombresMando[] = $userName;
+        }
+        
+        if (!empty($nombresMando)) {
+            $placeholders = implode(',', array_fill(0, count($nombresMando), '?'));
+            $stmtMando = $pdo->prepare("
+                SELECT id, clave_area, area FROM catalogos_mandos 
+                WHERE nombre_mando IN ($placeholders) AND activo = 1
+            ");
+            $stmtMando->execute($nombresMando);
+            $rowsMando = $stmtMando->fetchAll(PDO::FETCH_ASSOC);
+            
+            if (!empty($rowsMando)) {
+                $clavesArea = array_column($rowsMando, 'id');
+                $areasMando = array_column($rowsMando, 'area');
+                $partesUnion = [];
+
+                if (!empty($clavesArea)) {
+                    $placeholders = implode(',', array_fill(0, count($clavesArea), '?'));
+                    $partesUnion[] = "
+                        SELECT e.id, CONCAT(e.nombre, ' ', e.apellido) as nombre_completo, 
+                               e.area, e.jerarquia,
+                               'mando' as tipo_asignacion
+                        FROM empleados e 
+                        WHERE e.jefe_directo_clave IN ($placeholders) AND e.activo = 1
+                        AND (e.nombre LIKE ? OR e.apellido LIKE ? OR e.area LIKE ?)";
+                    $parametros = array_merge($parametros, $clavesArea, ["%{$query}%", "%{$query}%", "%{$query}%"]);
+                }
+
+                if (!empty($areasMando)) {
+                    $placeholdersArea = implode(',', array_fill(0, count($areasMando), '?'));
+                    $partesUnion[] = "
+                        SELECT e.id, CONCAT(e.nombre, ' ', e.apellido) as nombre_completo, 
+                               e.area, e.jerarquia,
+                               'mando' as tipo_asignacion
+                        FROM empleados e 
+                        WHERE e.area IN ($placeholdersArea) AND e.activo = 1
+                        AND (e.nombre LIKE ? OR e.apellido LIKE ? OR e.area LIKE ?)";
+                    $parametros = array_merge($parametros, $areasMando, ["%{$query}%", "%{$query}%", "%{$query}%"]);
+                }
+
+                if (!empty($partesUnion)) {
+                    $sql .= " UNION " . implode(' UNION ', $partesUnion);
+                }
+            }
+        }
+        
+        $sql .= " ORDER BY nombre_completo";
+        
         $stmt = $pdo->prepare($sql);
         $stmt->execute($parametros);
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    /**
+     * Verificar si un jefe está autorizado para un empleado 
+     * (por jefe_directo_id directo o por catalogos_mandos)
+     */
+    private function esJefeAutorizadoParaEmpleado($jefeId, $empleadoId): bool {
+        $pdo = Database::getInstance()->getConnection();
+        
+        // Verificar por jefe_directo_id directo
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM empleados WHERE id = ? AND jefe_directo_id = ?");
+        $stmt->execute([$empleadoId, $jefeId]);
+        if ($stmt->fetchColumn() > 0) return true;
+        
+        // Verificar por catalogos_mandos (jefe_directo_clave y area)
+        $stmtEmpName = $pdo->prepare("SELECT nombre, apellido FROM empleados WHERE id = ?");
+        $stmtEmpName->execute([$jefeId]);
+        $empName = $stmtEmpName->fetch(PDO::FETCH_ASSOC);
+        if (!$empName) return false;
+        
+        $stmtUserInfo = $pdo->prepare("SELECT nombre_completo FROM usuarios WHERE empleado_id = ? AND activo = 1 LIMIT 1");
+        $stmtUserInfo->execute([$jefeId]);
+        $userName = $stmtUserInfo->fetchColumn();
+        
+        $nombresMando = [trim($empName['apellido'] . ' ' . $empName['nombre'])];
+        if ($userName && !in_array($userName, $nombresMando)) {
+            $nombresMando[] = $userName;
+        }
+        
+        $placeholders = implode(',', array_fill(0, count($nombresMando), '?'));
+        $stmtMando = $pdo->prepare("
+            SELECT cm.id, cm.clave_area, cm.area FROM catalogos_mandos cm 
+            WHERE cm.nombre_mando IN ($placeholders) AND cm.activo = 1
+        ");
+        $stmtMando->execute($nombresMando);
+        $rowsMando = $stmtMando->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (empty($rowsMando)) return false;
+        
+        $clavesArea = array_column($rowsMando, 'id');
+        $areasMando = array_column($rowsMando, 'area');
+        
+        $checks = [];
+        $params = [$empleadoId];
+        
+        if (!empty($clavesArea)) {
+            $placeholders = implode(',', array_fill(0, count($clavesArea), '?'));
+            $checks[] = "jefe_directo_clave IN ($placeholders)";
+            $params = array_merge($params, $clavesArea);
+        }
+        
+        if (!empty($areasMando)) {
+            $placeholdersArea = implode(',', array_fill(0, count($areasMando), '?'));
+            $checks[] = "area IN ($placeholdersArea)";
+            $params = array_merge($params, $areasMando);
+        }
+        
+        if (empty($checks)) return false;
+        
+        $sql = "SELECT COUNT(*) FROM empleados WHERE id = ? AND (" . implode(' OR ', $checks) . ")";
+        $stmtEmp = $pdo->prepare($sql);
+        $stmtEmp->execute($params);
+        return $stmtEmp->fetchColumn() > 0;
     }
     
     /**
@@ -1206,11 +1554,72 @@ class ValidacionJefeController extends BaseController {
         
         $sql = "SELECT DISTINCT e.area 
                 FROM empleados e 
-                WHERE e.jefe_directo_id = ? AND e.area IS NOT NULL
-                ORDER BY e.area";
+                WHERE e.jefe_directo_id = ? AND e.area IS NOT NULL";
+        
+        $parametros = [$jefeId];
+        
+        // También incluir áreas de empleados por catalogos_mandos
+        $stmtEmp = $pdo->prepare("SELECT nombre, apellido FROM empleados WHERE id = ?");
+        $stmtEmp->execute([$jefeId]);
+        $emp = $stmtEmp->fetch(PDO::FETCH_ASSOC);
+        
+        $stmtUserInfo = $pdo->prepare("SELECT nombre_completo FROM usuarios WHERE empleado_id = ? AND activo = 1 LIMIT 1");
+        $stmtUserInfo->execute([$jefeId]);
+        $userName = $stmtUserInfo->fetchColumn();
+        
+        $nombresMando = [];
+        if ($emp) {
+            $nombresMando[] = trim($emp['apellido'] . ' ' . $emp['nombre']);
+        }
+        if ($userName && !in_array($userName, $nombresMando)) {
+            $nombresMando[] = $userName;
+        }
+        
+        if (!empty($nombresMando)) {
+            $placeholders = implode(',', array_fill(0, count($nombresMando), '?'));
+            $stmtMando = $pdo->prepare("
+                SELECT id, clave_area, area FROM catalogos_mandos 
+                WHERE nombre_mando IN ($placeholders) AND activo = 1
+            ");
+            $stmtMando->execute($nombresMando);
+            $rowsMando = $stmtMando->fetchAll(PDO::FETCH_ASSOC);
+            if (!empty($rowsMando)) {
+                $clavesArea = array_column($rowsMando, 'id');
+                $areasMando = array_column($rowsMando, 'area');
+                $partesUnion = [];
+
+                if (!empty($clavesArea)) {
+                    $placeholders = implode(',', array_fill(0, count($clavesArea), '?'));
+                    $partesUnion[] = "
+                        SELECT DISTINCT e.area 
+                        FROM empleados e 
+                        WHERE e.jefe_directo_clave IN ($placeholders) AND e.area IS NOT NULL";
+                    $parametros = array_merge($parametros, $clavesArea);
+                }
+
+                if (!empty($areasMando)) {
+                    $placeholdersArea = implode(',', array_fill(0, count($areasMando), '?'));
+                    $partesUnion[] = "
+                        SELECT DISTINCT e.area 
+                        FROM empleados e 
+                        WHERE e.area IN ($placeholdersArea) AND e.area IS NOT NULL";
+                    $parametros = array_merge($parametros, $areasMando);
+                }
+
+                if (!empty($partesUnion)) {
+                    $sql = "
+                        SELECT DISTINCT area FROM (
+                            ($sql)
+                            UNION
+                        " . implode(' UNION ', $partesUnion) . "
+                        ) areas ORDER BY area
+                    ";
+                }
+            }
+        }
         
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$jefeId]);
+        $stmt->execute($parametros);
         
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
@@ -1407,10 +1816,6 @@ class ValidacionJefeController extends BaseController {
                     }
                     
                     // Determinar la consecuencia según los minutos (según documento Lógica de Incidencias)
-                    // Tolerancia: 1-10 min (sin consecuencia)
-                    // Retardo menor: 11-20 min (2 = 1 nota mala)
-                    // Retardo mayor: 21-30 min (1 = 1 nota mala)
-                    // >30 min: falta inmediata
                     if ($minutosRetardo > 30) {
                         $consecuencia = 'falta';
                         $consecuenciaTexto = 'CONSECUENCIA: Esta incidencia ha sido convertida en <strong>FALTA</strong> (>30 min de retraso) y será reportada a Recursos Humanos.';
@@ -1427,7 +1832,6 @@ class ValidacionJefeController extends BaseController {
                     
                     $mensaje = "⚠️ <strong>Rechazado</strong>: Tu justificación ha sido rechazada por $jefeNombre.";
                     
-                    // Agregar motivo y comentarios del rechazo
                     if (!empty($decision['motivo'])) {
                         $mensaje .= " <br><strong>Motivo del rechazo:</strong> {$decision['motivo']}";
                     }
@@ -1443,7 +1847,6 @@ class ValidacionJefeController extends BaseController {
                     $nivel = 'media';
                     $mensaje = "📋 <strong>Información requerida</strong>: $jefeNombre solicita información adicional sobre tu justificación.";
                     
-                    // Mostrar qué información se solicita
                     if (!empty($decision['motivo'])) {
                         $mensaje .= " <br><strong>Información solicitada:</strong> {$decision['motivo']}";
                     }
@@ -1460,7 +1863,16 @@ class ValidacionJefeController extends BaseController {
             }
             
             // Agregar referencia a la incidencia
-            $tipoIncidenciaLabel = ucfirst($tipoIncidencia);
+            $labelMap = [
+                'retardo' => 'Retardo',
+                'comision' => 'Comisión',
+                'dia_economico' => 'Día Económico',
+                'ausencia' => 'Ausencia',
+                'constancia_tiempo' => 'Constancia de Tiempo',
+                'licencia_medica' => 'Licencia Médica',
+                'justificacion' => 'Justificación',
+            ];
+            $tipoIncidenciaLabel = $labelMap[$tipoIncidencia] ?? ucfirst(str_replace('_', ' ', $tipoIncidencia));
             $mensaje .= " <br><small class='text-muted'>Incidencia ID: {$incidenciaId} | Tipo: {$tipoIncidenciaLabel}</small>";
             
             // Insertar alerta para el empleado
@@ -1491,6 +1903,23 @@ class ValidacionJefeController extends BaseController {
                 $datosJson
             ]);
             
+            // === CREAR MENSAJE EN LA CONVERSACIÓN ===
+            $tipoMensaje = match($estado) {
+                'aprobado' => 'decision',
+                'rechazado' => 'decision',
+                'requiere_info' => 'info_request',
+                default => 'sistema'
+            };
+            
+            $textoMensaje = !empty($decision['comentarios']) ? $decision['comentarios'] : strip_tags($mensaje);
+            $this->validacionModel->agregarMensaje(
+                $validacionId,
+                'jefe',
+                $_SESSION['user_id'],
+                $textoMensaje,
+                $tipoMensaje
+            );
+            
             // === AUDITORÍA ===
             require_once __DIR__ . '/../services/AuditService.php';
             $audit = AuditService::getInstance();
@@ -1508,5 +1937,238 @@ class ValidacionJefeController extends BaseController {
             error_log("Error al notificar empleado: " . $e->getMessage());
             return false;
         }
+    }
+
+    // ========================================================================
+    // PANEL DE VALIDACIONES PARA EL EMPLEADO
+    // ========================================================================
+
+    /**
+     * Renderizar el panel de validaciones del empleado
+     */
+    public function misValidaciones() {
+        $this->requireAuth();
+        
+        $pdo = Database::getInstance()->getConnection();
+        
+        // Obtener el empleado_id del usuario actual
+        $stmtUser = $pdo->prepare("SELECT empleado_id FROM usuarios WHERE id = ?");
+        $stmtUser->execute([$_SESSION['user_id']]);
+        $empleadoId = $stmtUser->fetchColumn();
+        
+        $filters = [
+            'estado' => $_GET['estado'] ?? 'pendientes',
+            'fecha_inicio' => $_GET['fecha_inicio'] ?? null,
+            'fecha_fin' => $_GET['fecha_fin'] ?? null
+        ];
+        
+        $validaciones = [];
+        $contadorNoLeidas = 0;
+        $empleado = null;
+        
+        if ($empleadoId) {
+            $validaciones = $this->validacionModel->getValidacionesEmpleado($empleadoId, $filters);
+            $contadorNoLeidas = $this->validacionModel->getContadorNoLeidasEmpleado($empleadoId);
+            
+            $stmtEmp = $pdo->prepare("SELECT CONCAT(nombre, ' ', apellido) as nombre_completo, area, jerarquia FROM empleados WHERE id = ?");
+            $stmtEmp->execute([$empleadoId]);
+            $empleado = $stmtEmp->fetch(PDO::FETCH_ASSOC);
+        }
+        
+        ob_start();
+        include 'views/validaciones/mis_validaciones.php';
+        $content = ob_get_clean();
+        include 'views/layout.php';
+    }
+
+    /**
+     * API: Obtener mensajes de una validación
+     */
+    public function apiObtenerMensajes($validacionId) {
+        if (ob_get_length()) ob_clean();
+        
+        $rol = $_SESSION['rol'] ?? '';
+        $esJefe = in_array($rol, ['jefe', 'admin', 'superadmin']);
+        
+        if (!$esJefe && !$this->esEmpleadoAutorizado($validacionId)) {
+            $this->jsonResponse(['success' => false, 'error' => 'No autorizado'], 403);
+            return;
+        }
+        
+        try {
+            // Resolver: puede ser validaciones_jefe.id o incidencia_id (retardo.id)
+            $resolvedId = $validacionId;
+            $pdo = Database::getInstance()->getConnection();
+            
+            // Intentar como validaciones_jefe.id primero
+            $validacion = $this->validacionModel->getById($validacionId);
+            
+            if (!$validacion) {
+                // No encontrado por id, buscar por incidencia_id
+                $stmtVj = $pdo->prepare("SELECT id FROM validaciones_jefe WHERE incidencia_id = ? LIMIT 1");
+                $stmtVj->execute([$validacionId]);
+                $vjId = $stmtVj->fetchColumn();
+                if ($vjId) {
+                    $resolvedId = $vjId;
+                    $validacion = $this->validacionModel->getById($resolvedId);
+                }
+            }
+            
+            $mensajes = $this->validacionModel->obtenerMensajes($resolvedId);
+            $adjuntos = $this->validacionModel->getAdjuntosPorValidacion($resolvedId);
+            
+            $this->jsonResponse([
+                'success' => true,
+                'mensajes' => $mensajes,
+                'adjuntos' => $adjuntos,
+                'validacion' => $validacion
+            ]);
+        } catch (Exception $e) {
+            $this->jsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * API: Agregar mensaje a una validación
+     */
+    public function apiAgregarMensaje() {
+        if (ob_get_length()) ob_clean();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonResponse(['success' => false, 'error' => 'Método no permitido'], 405);
+            return;
+        }
+        
+        $input = json_decode(file_get_contents('php://input'), true);
+        $validacionId = $input['validacion_id'] ?? null;
+        $mensaje = trim($input['mensaje'] ?? '');
+        
+        if (!$validacionId || !$mensaje) {
+            $this->jsonResponse(['success' => false, 'error' => 'Datos incompletos'], 400);
+            return;
+        }
+        
+        // Determinar quién envía
+        $rol = $_SESSION['rol'] ?? '';
+        $remitenteTipo = in_array($rol, ['jefe', 'admin', 'superadmin']) ? 'jefe' : 'empleado';
+        
+        // Verificar autorización
+        if ($remitenteTipo === 'jefe' && !$this->esJefeTemporal()) {
+            $this->jsonResponse(['success' => false, 'error' => 'No autorizado'], 403);
+            return;
+        }
+        
+        if ($remitenteTipo === 'empleado') {
+            $validacion = $this->validacionModel->getById($validacionId);
+            if (!$validacion) {
+                $this->jsonResponse(['success' => false, 'error' => 'Validación no encontrada'], 404);
+                return;
+            }
+            // Obtener empleado_id del usuario
+            $pdo = Database::getInstance()->getConnection();
+            $stmt = $pdo->prepare("SELECT empleado_id FROM usuarios WHERE id = ?");
+            $stmt->execute([$_SESSION['user_id']]);
+            $empleadoId = $stmt->fetchColumn();
+            if ($validacion['empleado_id'] != $empleadoId) {
+                $this->jsonResponse(['success' => false, 'error' => 'No autorizado para esta validación'], 403);
+                return;
+            }
+        }
+        
+        try {
+            $tipoMensaje = $input['tipo_mensaje'] ?? 
+                          ($remitenteTipo === 'jefe' ? 'info_request' : 'info_response');
+            
+            $msgId = $this->validacionModel->agregarMensaje(
+                $validacionId,
+                $remitenteTipo,
+                $_SESSION['user_id'],
+                $mensaje,
+                $tipoMensaje
+            );
+            
+            // Si el empleado responde, cambiar estado de la validación
+            if ($remitenteTipo === 'empleado' && $tipoMensaje === 'info_response') {
+                $pdo = Database::getInstance()->getConnection();
+                $stmtUpd = $pdo->prepare("UPDATE validaciones_jefe SET estado = 'pendiente' WHERE id = ? AND estado = 'requiere_info'");
+                $stmtUpd->execute([$validacionId]);
+            }
+            
+            $this->jsonResponse([
+                'success' => true,
+                'mensaje_id' => $msgId
+            ]);
+        } catch (Exception $e) {
+            $this->jsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * API: Obtener contador de notificaciones no leídas
+     */
+    public function apiContadorNoLeidas() {
+        if (ob_get_length()) ob_clean();
+        
+        $pdo = Database::getInstance()->getConnection();
+        $stmt = $pdo->prepare("SELECT empleado_id FROM usuarios WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $empleadoId = $stmt->fetchColumn();
+        
+        if (!$empleadoId) {
+            $this->jsonResponse(['success' => true, 'no_leidas' => 0]);
+            return;
+        }
+        
+        $noLeidas = $this->validacionModel->getContadorNoLeidasEmpleado($empleadoId);
+        
+        $this->jsonResponse([
+            'success' => true,
+            'no_leidas' => $noLeidas
+        ]);
+    }
+
+    /**
+     * API: Marcar validación como leída
+     */
+    public function apiMarcarLeido() {
+        if (ob_get_length()) ob_clean();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonResponse(['success' => false, 'error' => 'Método no permitido'], 405);
+            return;
+        }
+        
+        $input = json_decode(file_get_contents('php://input'), true);
+        $validacionId = $input['validacion_id'] ?? null;
+        
+        if (!$validacionId) {
+            $this->jsonResponse(['success' => false, 'error' => 'ID requerido'], 400);
+            return;
+        }
+        
+        $rol = $_SESSION['rol'] ?? '';
+        $tipo = in_array($rol, ['jefe', 'admin', 'superadmin']) ? 'jefe' : 'empleado';
+        
+        $this->validacionModel->marcarComoLeido($validacionId, $tipo);
+        
+        $this->jsonResponse(['success' => true]);
+    }
+
+    /**
+     * Verificar si el empleado actual está autorizado para ver una validación
+     */
+    private function esEmpleadoAutorizado($validacionId) {
+        $pdo = Database::getInstance()->getConnection();
+        $stmt = $pdo->prepare("SELECT empleado_id FROM usuarios WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $empleadoId = $stmt->fetchColumn();
+        
+        if (!$empleadoId) return false;
+        
+        $stmtVal = $pdo->prepare("SELECT empleado_id FROM validaciones_jefe WHERE id = ?");
+        $stmtVal->execute([$validacionId]);
+        $validacionEmpleadoId = $stmtVal->fetchColumn();
+        
+        return $validacionEmpleadoId && $validacionEmpleadoId == $empleadoId;
     }
 }

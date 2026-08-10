@@ -436,7 +436,8 @@
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Fecha Fin</label>
-                                                <input type="date" class="form-control form-control-sm" id="ciclo_fecha_fin" name="fecha_fin" required>
+                                                <input type="date" class="form-control form-control-sm" id="ciclo_fecha_fin" name="fecha_fin">
+                                                <small class="text-muted">Dejar vacío si el ciclo es indefinido</small>
                                             </div>
                                             <button type="submit" class="btn btn-sm" style="background-color: #9F2241; color: white;">
                                                 <i class="fas fa-save me-1"></i>Asignar

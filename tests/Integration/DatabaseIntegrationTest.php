@@ -6,6 +6,9 @@ use PHPUnit\Framework\TestCase;
  * Tests de Integración para Base de Datos
  * Pruebas de conexión real y operaciones CRUD
  */
+/**
+ * @group integration
+ */
 class DatabaseIntegrationTest extends TestCase
 {
     private Database $database;
@@ -41,6 +44,7 @@ class DatabaseIntegrationTest extends TestCase
     public function testCreateAndQueryTable(): void
     {
         // Crear tabla de prueba
+        $this->pdo->exec("DROP TABLE IF EXISTS test_integracion");
         $createTableSql = "
             CREATE TABLE test_integracion (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -69,6 +73,7 @@ class DatabaseIntegrationTest extends TestCase
     public function testCrudOperations(): void
     {
         // Crear tabla
+        $this->pdo->exec("DROP TABLE IF EXISTS test_crud");
         $this->pdo->exec("
             CREATE TABLE test_crud (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -148,6 +153,8 @@ class DatabaseIntegrationTest extends TestCase
     public function testComplexTransactions(): void
     {
         // Crear tablas para testing de transacciones
+        $this->pdo->exec("DROP TABLE IF EXISTS transfers");
+        $this->pdo->exec("DROP TABLE IF EXISTS users");
         $this->pdo->exec("
             CREATE TABLE users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -180,8 +187,8 @@ class DatabaseIntegrationTest extends TestCase
             $amount = 200.00;
             
             // Descontar del usuario A
-            $stmt = $this->pdo->prepare("UPDATE users SET saldo = saldo - :amount WHERE id = 1 AND saldo >= :amount");
-            $stmt1 = $stmt->execute([':amount' => $amount]);
+            $stmt = $this->pdo->prepare("UPDATE users SET saldo = saldo - :amount WHERE id = 1 AND saldo >= :amount_check");
+            $stmt1 = $stmt->execute([':amount' => $amount, ':amount_check' => $amount]);
             
             // Acreditar al usuario B
             $stmt = $this->pdo->prepare("UPDATE users SET saldo = saldo + :amount WHERE id = 2");
@@ -232,6 +239,7 @@ class DatabaseIntegrationTest extends TestCase
     public function testTransactionRollback(): void
     {
         // Crear tabla de prueba
+        $this->pdo->exec("DROP TABLE IF EXISTS test_rollback");
         $this->pdo->exec("
             CREATE TABLE test_rollback (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -277,6 +285,7 @@ class DatabaseIntegrationTest extends TestCase
     public function testIndexesAndPerformance(): void
     {
         // Crear tabla con índices
+        $this->pdo->exec("DROP TABLE IF EXISTS test_indexes");
         $this->pdo->exec("
             CREATE TABLE test_indexes (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -348,6 +357,8 @@ class DatabaseIntegrationTest extends TestCase
     public function testReferentialIntegrity(): void
     {
         // Crear tablas con relación
+        $this->pdo->exec("DROP TABLE IF EXISTS employees");
+        $this->pdo->exec("DROP TABLE IF EXISTS departments");
         $this->pdo->exec("
             CREATE TABLE departments (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -398,6 +409,7 @@ class DatabaseIntegrationTest extends TestCase
      */
     public function testDataTypesAndEncoding(): void
     {
+        $this->pdo->exec("DROP TABLE IF EXISTS test_datatypes");
         $this->pdo->exec("
             CREATE TABLE test_datatypes (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -458,6 +470,7 @@ class DatabaseIntegrationTest extends TestCase
      */
     public function testBasicConcurrency(): void
     {
+        $this->pdo->exec("DROP TABLE IF EXISTS test_concurrency");
         $this->pdo->exec("
             CREATE TABLE test_concurrency (
                 id INT AUTO_INCREMENT PRIMARY KEY,

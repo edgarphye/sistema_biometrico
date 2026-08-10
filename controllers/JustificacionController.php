@@ -1,9 +1,9 @@
 <?php
-require_once 'models/Retardo.php';
-require_once 'models/TipoJustificacion.php';
-require_once 'models/Usuario.php';
-require_once 'models/Empleado.php';
-require_once 'models/ValidacionJefe.php';
+require_once __DIR__ . '/../models/Retardo.php';
+require_once __DIR__ . '/../models/TipoJustificacion.php';
+require_once __DIR__ . '/../models/Usuario.php';
+require_once __DIR__ . '/../models/Empleado.php';
+require_once __DIR__ . '/../models/ValidacionJefe.php';
 require_once __DIR__ . '/../models/Database.php';
 require_once __DIR__ . '/BaseController.php';
 
@@ -127,13 +127,12 @@ class JustificacionController extends BaseController {
                     } else {
                         $allowed = ['application/pdf', 'image/jpeg', 'image/png'];
                         $maxSize = 5 * 1024 * 1024; // 5MB
-                        $fileType = $_FILES['soporte']['type'];
                         $fileTmp = $_FILES['soporte']['tmp_name'];
 
-                        if (!in_array($fileType, $allowed)) {
-                            $error = 'Tipo de soporte no permitido. Use PDF o imagen JPG/PNG.';
-                        } elseif ($_FILES['soporte']['size'] > $maxSize) {
+                        if ($_FILES['soporte']['size'] > $maxSize) {
                             $error = 'El archivo de soporte es demasiado grande (máx. 5MB).';
+                        } elseif (!$this->validateMime($_FILES['soporte'], $allowed)) {
+                            $error = 'Tipo de soporte no permitido. Use PDF o imagen JPG/PNG.';
                         } else {
                             $uploadDir = __DIR__ . '/../uploads/justificaciones/';
                             if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
@@ -232,6 +231,14 @@ class JustificacionController extends BaseController {
         $content = ob_get_clean();
         
         include __DIR__ . '/../views/layout.php';
+    }
+    
+    public function tiposJson() {
+        header('Content-Type: application/json');
+        
+        $tipos = $this->tipoJustificacionModel->getAll();
+        
+        echo json_encode(['success' => true, 'tipos' => $tipos]);
     }
 
     public function crearTipo() {
@@ -503,13 +510,12 @@ class JustificacionController extends BaseController {
                 } else {
                     $allowed = ['application/pdf', 'image/jpeg', 'image/png'];
                     $maxSize = 5 * 1024 * 1024;
-                    $fileType = $_FILES['soporte']['type'];
                     $fileTmp = $_FILES['soporte']['tmp_name'];
 
-                    if (!in_array($fileType, $allowed)) {
-                        throw new Exception('Tipo de soporte no permitido. Use PDF o imagen JPG/PNG.');
-                    } elseif ($_FILES['soporte']['size'] > $maxSize) {
+                    if ($_FILES['soporte']['size'] > $maxSize) {
                         throw new Exception('El archivo de soporte es demasiado grande (máx. 5MB).');
+                    } elseif (!$this->validateMime($_FILES['soporte'], $allowed)) {
+                        throw new Exception('Tipo de soporte no permitido. Use PDF o imagen JPG/PNG.');
                     } else {
                         $uploadDir = __DIR__ . '/../uploads/justificaciones/';
                         if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
@@ -603,32 +609,33 @@ class JustificacionController extends BaseController {
         try {
             $db = Database::getInstance()->getConnection();
             
-            // Obtener el período (mes actual)
+            // El emparejamiento (2 menores = 1 nota, 1 mayor = 1 nota) ocurre DENTRO de la quincena.
+            [$inicioQuincena, $finQuincena] = $this->obtenerRangoQuincena($fecha);
             $periodo = date('Y-m-01', strtotime($fecha));
             
-            // Contar retardos menores bloqueados en el período
+            // Contar retardos menores bloqueados en la quincena
             $stmt = $db->prepare("
                 SELECT COUNT(*) as total 
                 FROM retardos 
                 WHERE empleado_id = ? 
                 AND tipo_retraso = 'retardo_menor' 
                 AND justificacion_bloqueada = 1 
-                AND DATE_FORMAT(fecha, '%Y-%m') = DATE_FORMAT(?, '%Y-%m')
+                AND fecha BETWEEN ? AND ?
             ");
-            $stmt->execute([$empleadoId, $fecha]);
+            $stmt->execute([$empleadoId, $inicioQuincena, $finQuincena]);
             $resultMenores = $stmt->fetch(PDO::FETCH_ASSOC);
             $cantidadMenores = intval($resultMenores['total'] ?? 0);
             
-            // Contar retardos mayores bloqueados en el período
+            // Contar retardos mayores bloqueados en la quincena
             $stmt = $db->prepare("
                 SELECT COUNT(*) as total 
                 FROM retardos 
                 WHERE empleado_id = ? 
                 AND tipo_retraso = 'retardo_mayor' 
                 AND justificacion_bloqueada = 1 
-                AND DATE_FORMAT(fecha, '%Y-%m') = DATE_FORMAT(?, '%Y-%m')
+                AND fecha BETWEEN ? AND ?
             ");
-            $stmt->execute([$empleadoId, $fecha]);
+            $stmt->execute([$empleadoId, $inicioQuincena, $finQuincena]);
             $resultMayores = $stmt->fetch(PDO::FETCH_ASSOC);
             $cantidadMayores = intval($resultMayores['total'] ?? 0);
             
@@ -643,7 +650,7 @@ class JustificacionController extends BaseController {
             $motivo = '';
             
             if ($tipo === 'retardo_menor') {
-                // Regla: cada 2 retardos menores = 1 nota mala
+                // Regla: cada 2 retardos menores = 1 nota mala, dentro de la misma quincena
                 // Verificar si este retardo completa el par
                 if ($cantidadMenores % 2 === 0 && $cantidadMenores > 0) {
                     $crearNota = true;
@@ -652,14 +659,14 @@ class JustificacionController extends BaseController {
                     $notasAnteriores = floor(($cantidadMenores - 1) / 2);
                     $notasAhora = floor($cantidadMenores / 2);
                     $cantidad = $notasAhora - $notasAnteriores;
-                    $motivo = "2 retardos menores sin justificar en período " . date('m/Y', strtotime($fecha)) . " ({$cantidadMenores} retardos menores = {$cantidad} nota mala)";
+                    $motivo = "2 retardos menores sin justificar en quincena " . date('d/m/Y', strtotime($inicioQuincena)) . "-" . date('d/m/Y', strtotime($finQuincena)) . " ({$cantidadMenores} retardos menores = {$cantidad} nota mala)";
                 }
             } elseif ($tipo === 'retardo_mayor') {
                 // Regla: cada retardo mayor = 1 nota mala
                 $crearNota = true;
                 $tipoNota = 'retardo_mayor';
                 $cantidad = 1;
-                $motivo = "Retardo mayor sin justificar en período " . date('m/Y', strtotime($fecha));
+                $motivo = "Retardo mayor sin justificar en quincena " . date('d/m/Y', strtotime($inicioQuincena)) . "-" . date('d/m/Y', strtotime($finQuincena));
             }
             
             if ($crearNota && $cantidad > 0) {
@@ -928,12 +935,12 @@ class JustificacionController extends BaseController {
             if (!empty($_FILES['soporte']) && $_FILES['soporte']['error'] === UPLOAD_ERR_OK) {
                 $allowed = ['application/pdf', 'image/jpeg', 'image/png'];
                 $maxSize = 5 * 1024 * 1024; // 5MB
-                if (!in_array($_FILES['soporte']['type'], $allowed)) {
-                    echo json_encode(['success' => false, 'error' => 'Tipo de archivo no permitido. Use PDF, JPG o PNG.']);
-                    return;
-                }
                 if ($_FILES['soporte']['size'] > $maxSize) {
                     echo json_encode(['success' => false, 'error' => 'El archivo excede el tamaño máximo de 5MB.']);
+                    return;
+                }
+                if (!$this->validateMime($_FILES['soporte'], $allowed)) {
+                    echo json_encode(['success' => false, 'error' => 'Tipo de archivo no permitido. Use PDF, JPG o PNG.']);
                     return;
                 }
                 $uploadDir = __DIR__ . '/../uploads/justificaciones/';
@@ -1125,7 +1132,9 @@ class JustificacionController extends BaseController {
                     ");
                     $stmt->execute([$tipoAsistencia, $empleado_id, $fechaInicio, $fechaFin]);
                     
-                    echo json_encode(['success' => true, 'message' => 'Licencia médica registrada correctamente']);
+                    $this->_crearValidacionJefe($nuevoId, 'licencia_medica', $empleado_id, !empty($soportePath));
+                    
+                    echo json_encode(['success' => true, 'message' => 'Licencia médica registrada correctamente. Pendiente de validación del jefe.']);
                     return;
                 }
                 
@@ -1293,9 +1302,6 @@ class JustificacionController extends BaseController {
             }
             
             // Bloque para justificaciones genéricas (Incidencias)
-            // Se guardan en la tabla retardos como incidencias justificadas pendientes de validación
-            require_once 'models/Retardo.php';
-            
             $motivoJustificacion = trim($_POST['motivo'] ?? '');
             if (empty($motivoJustificacion)) {
                  echo json_encode(['success' => false, 'error' => 'Se requiere un motivo para la justificación']);
@@ -1304,31 +1310,56 @@ class JustificacionController extends BaseController {
             if (!empty($fundamentoTipo)) {
                 $motivoJustificacion .= ' | Fundamento: ' . $fundamentoTipo;
             }
+            if ($soportePath) {
+                $motivoJustificacion .= ' | Evidencia: ' . $soportePath;
+            }
 
             $db = new Database();
             $pdo = $db->getConnection();
-            
-            $stmt = $pdo->prepare("INSERT INTO retardos (
-                empleado_id, fecha, hora_entrada, hora_salida, 
-                minutos_retardo, tipo_retraso, justificado, 
-                motivo_justificacion, evidencia_adjunta, 
-                requiere_validacion_jefe, estado_validacion, asistencia_id, created_at
-            ) VALUES (?, ?, ?, ?, 0, ?, 1, ?, ?, 1, 'pendiente', ?, NOW())");
-            
-            $stmt->execute([
-                $empleado_id,
-                $asistencia['fecha'],
-                $asistencia['hora_entrada'],
-                $asistencia['hora_salida'],
-                $tipo_justificacion, // Usar el tipo del catálogo como tipo_retraso
-                $motivoJustificacion,
-                $soportePath,
-                $asistencia_id
-            ]);
-            
-            $nuevoId = $pdo->lastInsertId();
-            $this->_crearValidacionJefe($nuevoId, 'retardo', $empleado_id, !empty($soportePath));
-            
+
+            // Si el tipo contiene 'retardo', mantener en tabla retardos (genera sanciones)
+            if (strpos($tipo_justificacion, 'retardo') !== false) {
+                $stmt = $pdo->prepare("INSERT INTO retardos (
+                    empleado_id, fecha, hora_entrada, hora_salida, 
+                    minutos_retardo, tipo_retraso, justificado, 
+                    motivo_justificacion, evidencia_adjunta, 
+                    requiere_validacion_jefe, estado_validacion, asistencia_id, created_at
+                ) VALUES (?, ?, ?, ?, 0, ?, 1, ?, ?, 1, 'pendiente', ?, NOW())");
+
+                $stmt->execute([
+                    $empleado_id,
+                    $asistencia['fecha'],
+                    $asistencia['hora_entrada'],
+                    $asistencia['hora_salida'],
+                    $tipo_justificacion,
+                    $motivoJustificacion,
+                    $soportePath,
+                    $asistencia_id
+                ]);
+
+                $nuevoId = $pdo->lastInsertId();
+                $this->_crearValidacionJefe($nuevoId, 'retardo', $empleado_id, !empty($soportePath));
+            } else {
+                // Demás tipos (CLIDDA, PDSEP-SNTE, EYR, DE, F, Falta, etc.) a justificaciones — sin sanciones
+                $stmt = $pdo->prepare("INSERT INTO justificaciones (
+                    empleado_id, tipo_justificacion, motivo, fecha_inicio, fecha_fin,
+                    estatus, asistencia_id, tipo_justificacion_id, created_at
+                ) VALUES (?, ?, ?, ?, ?, 'pendiente', ?, ?, NOW())");
+
+                $stmt->execute([
+                    $empleado_id,
+                    $tipo_justificacion,
+                    $motivoJustificacion,
+                    $asistencia['fecha'],
+                    $asistencia['fecha'],
+                    $asistencia_id,
+                    $tipo_justificacion_id ?? null
+                ]);
+
+                $nuevoId = $pdo->lastInsertId();
+                $this->_crearValidacionJefe($nuevoId, 'justificacion', $empleado_id, !empty($soportePath));
+            }
+
             $asistenciaModel->update($asistencia_id, ['tipo_asistencia' => $tipo_justificacion]);
             
             echo json_encode(['success' => true, 'message' => 'Justificación registrada correctamente']);
@@ -1643,8 +1674,8 @@ class JustificacionController extends BaseController {
                         )");
                         $stmt->execute([$empleado_id, $asistencia_id]);
                     } else {
-                        // Eliminar de retardos
-                        $stmt = $pdo->prepare("DELETE FROM retardos WHERE asistencia_id = ? AND empleado_id = ?");
+                        // Revertir retardo a NO justificado (preserva el registro para evitar duplicados al recalcular)
+                        $stmt = $pdo->prepare("UPDATE retardos SET justificado = 0, tipo_justificacion_id = NULL, motivo_justificacion = NULL, soporte = NULL, aprobado_por = NULL, fecha_aprobacion = NULL WHERE asistencia_id = ? AND empleado_id = ? AND justificado = 1");
                         $stmt->execute([$asistencia_id, $empleado_id]);
                     }
                     break;

@@ -36,7 +36,7 @@ class ZKTecoFormatDetector {
 
         if (!$line) return ['formato' => 'desconocido', 'confianza' => 0, 'mapa_tipos' => []];
 
-        // Analizar estructura:优先检查tabulación,然后espacios
+        // Analizar estructura:tabulación,espacios
         if (strpos($line, "\t") !== false) {
             $campos = explode("\t", $line);
         } else {

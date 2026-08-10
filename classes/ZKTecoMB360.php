@@ -200,7 +200,7 @@ class ZKTecoMB360 {
             foreach ($device_users as $device_user) {
                 try {
                     // Buscar empleado correspondiente en la base de datos
-                    $stmt = $conn->prepare("SELECT id FROM empleados WHERE zk_empleado_id = ? OR id = ?");
+                    $stmt = $conn->prepare("SELECT id FROM empleados WHERE zkteo_id = ? OR id = ?");
                     $stmt->execute([$device_user['user_id'], $device_user['user_id']]);
                     $empleado = $stmt->fetch();
                     
@@ -261,25 +261,31 @@ class ZKTecoMB360 {
     private function buildCommand($command, $userId = 0, $fingerIndex = 0) {
         $packet = '';
         
-        // Header
-        $packet .= pack('V', $this->session_id);
-        $packet .= pack('v', $command);
-        $packet .= pack('v', 0); // Command size
+        // Header (8 bytes)
+        $packet .= pack('V', $this->session_id);  // Session ID (4 bytes)
+        $packet .= pack('v', $command);            // Command code (2 bytes)
         
-        // Data
+        // Calculate data size
+        $dataSize = 0;
+        $data = '';
         if ($userId > 0) {
-            $packet .= pack('V', $userId);
-            if ($fingerIndex > 0) {
-                $packet .= pack('C', $fingerIndex);
+            $data .= pack('V', $userId);           // User ID (4 bytes)
+            $dataSize += 4;
+            if ($fingerIndex >= 0) {                // Fix: >= 0 instead of > 0
+                $data .= pack('C', $fingerIndex);  // Finger index (1 byte)
+                $dataSize += 1;
             }
         }
         
-        // Checksum
+        $packet .= pack('v', $dataSize);           // Command size (2 bytes)
+        $packet .= $data;
+        
+        // Checksum (sum of all bytes before checksum)
         $checksum = 0;
         for ($i = 0; $i < strlen($packet); $i++) {
             $checksum += ord($packet[$i]);
         }
-        $packet .= pack('v', $checksum);
+        $packet .= pack('v', $checksum & 0xFFFF);  // Checksum (2 bytes, mask to 16-bit)
         
         return $packet;
     }
@@ -290,8 +296,53 @@ class ZKTecoMB360 {
     private function parseUserResponse($response) {
         $users = [];
         
-        // Implementar parsing específico del formato ZKTeco
-        // Esto es un ejemplo simplificado
+        if (strlen($response) < 8) {
+            return $users;
+        }
+        
+        // ZKTeco MB360 user record format:
+        // - Header: 8 bytes (session_id, command, size)
+        // - Each user record: ~36 bytes
+        //   - User ID: 4 bytes
+        //   - Name: 24 bytes (padded with zeros)
+        //   - Password: 8 bytes (optional)
+        //   - Flags: 1 byte (admin, enabled, etc.)
+        
+        $offset = 8; // Skip header
+        
+        while ($offset < strlen($response)) {
+            if ($offset + 36 > strlen($response)) {
+                break; // Not enough data for a complete record
+            }
+            
+            // Extract user ID (little-endian 32-bit)
+            $userId = unpack('V', substr($response, $offset, 4))[1];
+            
+            if ($userId > 0 && $userId < 100000) { // Valid user ID range
+                // Extract name (24 bytes, null-terminated)
+                $name = '';
+                for ($i = 0; $i < 24; $i++) {
+                    $char = ord($response[$offset + 4 + $i]);
+                    if ($char == 0) break;
+                    $name .= chr($char);
+                }
+                
+                // Extract flags (1 byte)
+                $flags = ord($response[$offset + 32]);
+                $isAdmin = ($flags & 0x01) == 0x01;
+                $isEnabled = ($flags & 0x02) != 0x02; // Bit 1 = disabled
+                
+                $users[] = [
+                    'user_id' => $userId,
+                    'name' => trim($name),
+                    'is_admin' => $isAdmin,
+                    'is_enabled' => $isEnabled,
+                    'flags' => $flags
+                ];
+            }
+            
+            $offset += 36; // Move to next record
+        }
         
         return $users;
     }
@@ -302,8 +353,68 @@ class ZKTecoMB360 {
     private function parseFingerprintResponse($response) {
         $fingerprints = [];
         
-        // Implementar parsing específico del formato ZKTeco
-        // Esto es un ejemplo simplificado
+        if (strlen($response) < 8) {
+            return $fingerprints;
+        }
+        
+        // ZKTeco fingerprint record format:
+        // - Header: 8 bytes
+        // - User ID: 4 bytes
+        // - Finger index: 1 byte (0-9)
+        // - Template size: 2 bytes
+        // - Template data: variable
+        // - Quality: 1 byte
+        
+        $offset = 8; // Skip header
+        
+        while ($offset < strlen($response)) {
+            if ($offset + 7 > strlen($response)) {
+                break; // Not enough data
+            }
+            
+            // Extract user ID
+            $userId = unpack('V', substr($response, $offset, 4))[1];
+            
+            if ($userId > 0 && $userId < 100000) {
+                // Extract finger index
+                $fingerIndex = ord($response[$offset + 4]);
+                
+                if ($fingerIndex >= 0 && $fingerIndex <= 9) {
+                    // Extract template size
+                    $templateSize = unpack('v', substr($response, $offset + 5, 2))[1];
+                    
+                    if ($templateSize > 0 && $templateSize < 2048 && 
+                        $offset + 7 + $templateSize <= strlen($response)) {
+                        
+                        // Extract template
+                        $template = substr($response, $offset + 7, $templateSize);
+                        
+                        // Extract quality (after template)
+                        $qualityOffset = $offset + 7 + $templateSize;
+                        $quality = ($qualityOffset < strlen($response)) ? 
+                                   ord($response[$qualityOffset]) : 50;
+                        
+                        // Get capture time (use current time as fallback)
+                        $captureTime = date('Y-m-d H:i:s');
+                        
+                        $fingerprints[] = [
+                            'user_id' => $userId,
+                            'finger_index' => $fingerIndex,
+                            'template' => $template,
+                            'template_size' => $templateSize,
+                            'quality' => $quality,
+                            'capture_time' => $captureTime
+                        ];
+                        
+                        // Move past template + quality byte
+                        $offset = $qualityOffset + 1;
+                        continue;
+                    }
+                }
+            }
+            
+            $offset++; // Move forward one byte and try again
+        }
         
         return $fingerprints;
     }
@@ -341,8 +452,51 @@ class ZKTecoMB360 {
      * Obtener número de serie del dispositivo
      */
     private function getDeviceSerial() {
-        // Implementar lectura de número de serie
-        return 'MB3602024001';
+        // Try to read serial from device if connected
+        if ($this->connected && $this->socket) {
+            try {
+                // ZKTeco command to get device info
+                $command = $this->buildCommand(0x0054); // CMD_GET_DEVICE_INFO
+                fwrite($this->socket, $command);
+                $response = fread($this->socket, 1024);
+                
+                if (strlen($response) >= 16) {
+                    // Extract serial from response (bytes 8-15 typically)
+                    $serial = '';
+                    for ($i = 8; $i < 16 && $i < strlen($response); $i++) {
+                        $char = ord($response[$i]);
+                        if ($char == 0) break;
+                        $serial .= chr($char);
+                    }
+                    
+                    if (!empty($serial) && strlen($serial) >= 4) {
+                        return $serial;
+                    }
+                }
+            } catch (Exception $e) {
+                // Fall back to database lookup or default
+            }
+        }
+        
+        // Try to get serial from database for this device IP
+        try {
+            require_once __DIR__ . '/../models/Database.php';
+            $db = new Database();
+            $conn = $db->getConnection();
+            
+            $stmt = $conn->prepare("SELECT dispositivo_serial FROM logs_dispositivo_zk WHERE ip_origen = ? ORDER BY id DESC LIMIT 1");
+            $stmt->execute([$this->ip]);
+            $row = $stmt->fetch();
+            
+            if ($row && !empty($row['dispositivo_serial'])) {
+                return $row['dispositivo_serial'];
+            }
+        } catch (Exception $e) {
+            // Fall through to default
+        }
+        
+        // Default serial based on IP
+        return 'MB360_' . str_replace('.', '_', $this->ip);
     }
     
     /**
@@ -395,6 +549,97 @@ class ZKTecoMB360 {
             'serial' => $this->getDeviceSerial(),
             'connected' => $this->connected
         ];
+    }
+    
+    /**
+     * Probar conexión al dispositivo
+     * @return array Resultado de la prueba
+     */
+    public function testConnection() {
+        $result = [
+            'exitoso' => false,
+            'mensaje' => '',
+            'dispositivo' => null,
+            'tiempo_respuesta' => 0
+        ];
+        
+        $inicio = microtime(true);
+        
+        try {
+            // Try to connect
+            $conectado = $this->connect();
+            
+            if ($conectado) {
+                $tiempoRespuesta = round((microtime(true) - $inicio) * 1000, 2);
+                
+                $result['exitoso'] = true;
+                $result['mensaje'] = "Conexión exitosa en {$tiempoRespuesta}ms";
+                $result['dispositivo'] = $this->getDeviceInfo();
+                $result['tiempo_respuesta'] = $tiempoRespuesta;
+                
+                // Try to get device info
+                try {
+                    $usuarios = $this->getUsers();
+                    $result['usuarios_encontrados'] = count($usuarios);
+                } catch (Exception $e) {
+                    $result['usuarios_encontrados'] = 0;
+                    $result['nota'] = "Conectado pero no se pudieron leer usuarios";
+                }
+                
+                // Disconnect after test
+                $this->disconnect();
+            } else {
+                $result['mensaje'] = "No se pudo conectar al dispositivo {$this->ip}:{$this->port}";
+            }
+            
+        } catch (Exception $e) {
+            $result['mensaje'] = "Error: " . $e->getMessage();
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Obtener estado del dispositivo
+     * @return array Estado detallado
+     */
+    public function getDeviceStatus() {
+        $status = [
+            'ip' => $this->ip,
+            'port' => $this->port,
+            'conectado' => $this->connected,
+            'serial' => $this->getDeviceSerial(),
+            'timestamp' => date('Y-m-d H:i:s')
+        ];
+        
+        if ($this->connected) {
+            try {
+                // Get user count
+                $usuarios = $this->getUsers();
+                $status['usuarios_registrados'] = count($usuarios);
+                $status['estado'] = 'operativo';
+            } catch (Exception $e) {
+                $status['estado'] = 'error_lectura';
+                $status['error'] = $e->getMessage();
+            }
+        } else {
+            $status['estado'] = 'desconectado';
+        }
+        
+        return $status;
+    }
+    
+    /**
+     * Verificar si el dispositivo está respondiendo (ping test)
+     * @return bool True si responde
+     */
+    public function ping() {
+        $fp = @fsockopen($this->ip, $this->port, $errno, $errstr, 2);
+        if ($fp) {
+            fclose($fp);
+            return true;
+        }
+        return false;
     }
 }
 ?>

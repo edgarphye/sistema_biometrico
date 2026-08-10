@@ -1,8 +1,8 @@
 <?php
-require_once 'models/HorarioLaboral.php';
-require_once 'models/EmpleadoHorarios.php';
-require_once 'models/DispositivoBiometrico.php';
-require_once 'models/Ciclo.php';
+require_once __DIR__ . '/../models/HorarioLaboral.php';
+require_once __DIR__ . '/../models/EmpleadoHorarios.php';
+require_once __DIR__ . '/../models/DispositivoBiometrico.php';
+require_once __DIR__ . '/../models/Ciclo.php';
 require_once __DIR__ . '/BaseController.php';
 
 class HorariosController extends BaseController {

@@ -1,5 +1,5 @@
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="<?php echo rtrim(BASE_URL, '/'); ?>/assets/js/three.min.js"></script>
+<script src="<?php echo rtrim(BASE_URL, '/'); ?>/assets/js/OrbitControls.js"></script>
 <div class="ai-dashboard">
     <!-- Hero Header -->
     <div class="hero-header mb-4">

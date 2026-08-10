@@ -1126,8 +1126,9 @@ function mostrarDetallesHistorial(id) {
                 return;
             }
 
-            // 1. Eliminar retardos existentes en el período para evitar duplicados
-            $stmtDel = $conn->prepare("DELETE FROM retardos WHERE fecha BETWEEN ? AND ?");
+            // 1. Eliminar SOLO retardos NO justificados en el período para evitar duplicados
+            // IMPORTANTE: Preserva los retardos que ya están justificados
+            $stmtDel = $conn->prepare("DELETE FROM retardos WHERE fecha BETWEEN ? AND ? AND justificado = 0");
             $stmtDel->execute([$fecha_inicio, $fecha_fin]);
             $eliminados = $stmtDel->rowCount();
 
@@ -1269,12 +1270,13 @@ function mostrarDetallesHistorial(id) {
             // Esta parte es más compleja, la dejaremos para una futura mejora si se requiere.
 
             // 4. Obtener estadísticas finales
-            $stmtStats = $conn->query("
+            $stmtStats = $conn->prepare("
                 SELECT tipo_retraso, COUNT(*) as total 
                 FROM retardos 
-                WHERE fecha BETWEEN '$fecha_inicio' AND '$fecha_fin'
+                WHERE fecha BETWEEN ? AND ?
                 GROUP BY tipo_retraso
             ");
+            $stmtStats->execute([$fecha_inicio, $fecha_fin]);
             $stats = $stmtStats->fetchAll(PDO::FETCH_ASSOC);
 
             // Contar sanciones creadas por faltas
@@ -1771,7 +1773,8 @@ function mostrarDetallesHistorial(id) {
             // =============================================
             $tarea3Inicio = microtime(true);
 
-            $stmtDel = $conn->prepare("DELETE FROM retardos WHERE fecha BETWEEN ? AND ?");
+            // IMPORTANTE: Solo eliminar retardos NO justificados para preservar justificaciones existentes
+            $stmtDel = $conn->prepare("DELETE FROM retardos WHERE fecha BETWEEN ? AND ? AND justificado = 0");
             $stmtDel->execute([$fecha_inicio, $fecha_fin]);
             $eliminados = $stmtDel->rowCount();
 

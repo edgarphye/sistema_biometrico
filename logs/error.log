@@ -1,7 +1,0 @@
-2026/03/02 09:34:35 [emerg] 28100#24036: CreateFile() "C:\tools\nginx\html\sistema_biometrico/conf/nginx.conf" failed (3: The system cannot find the path specified)
-2026/03/02 09:34:40 [emerg] 39360#6728: CreateDirectory() "C:\tools\nginx\html\sistema_biometrico/temp/client_body_temp" failed (3: The system cannot find the path specified)
-2026/03/02 09:34:49 [emerg] 17176#23812: CreateDirectory() "C:\tools\nginx\html\sistema_biometrico/temp/client_body_temp" failed (3: The system cannot find the path specified)
-2026/03/02 09:35:18 [notice] 20912#18908: signal process started
-2026/03/02 09:35:18 [error] 20912#18908: invalid PID number "" in "C:\tools\nginx\html\sistema_biometrico/logs/nginx.pid"
-2026/03/02 10:00:47 [emerg] 26136#17248: "include" directive is not allowed here in C:/tools/nginx/conf/sites-enabled/sistema_biometrico.conf:27
-2026/03/02 10:01:00 [emerg] 13392#37884: "include" directive is not allowed here in C:/tools/nginx/conf/sites-enabled/sistema_biometrico.conf:27

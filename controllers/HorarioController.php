@@ -271,49 +271,32 @@ public function delete($id) {
                 require_once 'models/Database.php';
                 $db = Database::getInstance()->getConnection();
                 
-                // Obtener ciclo anterior antes de asignar el nuevo
-                $cicloCerrado = null;
-                $stmt = $db->prepare("
-                    SELECT c.nombre, eh.fecha_fin 
+                // Verificar si hay un ciclo activo para informar al usuario
+                $stmtCheck = $db->prepare("
+                    SELECT c.nombre 
                     FROM empleado_horarios eh
                     LEFT JOIN ciclos c ON eh.ciclo_id = c.id
                     WHERE eh.empleado_id = ? AND eh.ciclo_id IS NOT NULL AND eh.fecha_fin IS NULL 
                     ORDER BY eh.fecha_inicio DESC LIMIT 1
                 ");
-                $stmt->execute([$empleado_id]);
-                $cicloAnterior = $stmt->fetch(PDO::FETCH_ASSOC);
-                if($cicloAnterior) {
-                    $cicloCerrado = date('d/m/Y', strtotime($fecha_inicio . ' -1 day'));
-                    
-                    // Actualizar fecha_fin del ciclo anterior (un día antes del nuevo inicio)
-                    $stmtUpdate = $db->prepare("
-                        UPDATE empleado_horarios 
-                        SET fecha_fin = DATE(?) 
-                        WHERE empleado_id = ? AND ciclo_id IS NOT NULL AND fecha_fin IS NULL
-                        ORDER BY fecha_inicio DESC LIMIT 1
-                    ");
-                    $fechaFinAnterior = date('Y-m-d', strtotime($fecha_inicio . ' -1 day'));
-                    $stmtUpdate->execute([$fechaFinAnterior, $empleado_id]);
-                    
-                    // También actualizar en empleados_ciclos
-                    $stmtUpdate2 = $db->prepare("
-                        UPDATE empleados_ciclos 
-                        SET fecha_fin = DATE(?) 
-                        WHERE empleado_id = ? AND activo = 1
-                    ");
-                    $stmtUpdate2->execute([$fechaFinAnterior, $empleado_id]);
-                }
+                $stmtCheck->execute([$empleado_id]);
+                $cicloAnterior = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+                $cicloCerrado = $cicloAnterior ? date('d/m/Y', strtotime($fecha_inicio . ' -1 day')) : null;
                 
-                // Guardar en empleado_horarios (historial de asignaciones)
+                // El modelo se encarga de cerrar el ciclo anterior en empleado_horarios
+                // y crear el nuevo registro (con fecha_fin abierta si no se especifica)
                 $this->empleadoHorariosModel->asignarCicloEmpleado($empleado_id, $ciclo_id, $fecha_inicio, $fecha_fin);
                 
-                // Guardar en empleados_ciclos (relación directa empleado-ciclo)
-                // Primero desactivar ciclos anteriores del empleado
-                $stmt = $db->prepare("UPDATE empleados_ciclos SET activo = 0 WHERE empleado_id = ?");
-                $stmt->execute([$empleado_id]);
+                // En empleados_ciclos: cerrar ciclo anterior e insertar nuevo
+                // Cerrar ciclo anterior con fecha_fin
+                $stmtCerrar = $db->prepare("
+                    UPDATE empleados_ciclos 
+                    SET fecha_fin = DATE(?), activo = 0 
+                    WHERE empleado_id = ? AND activo = 1
+                ");
+                $stmtCerrar->execute([date('Y-m-d', strtotime($fecha_inicio . ' -1 day')), $empleado_id]);
                 
                 // Determinar automáticamente el tipo de ciclo (Fijo vs Combinado)
-                // basándose en los horarios definidos en bloques_ciclo
                 $stmtTipo = $db->prepare("
                     SELECT COUNT(DISTINCT CONCAT(hora_inicio, hora_fin)) as rangos_distintos
                     FROM bloques_ciclo
@@ -323,21 +306,29 @@ public function delete($id) {
                 $tipoData = $stmtTipo->fetch(PDO::FETCH_ASSOC);
                 $tipoCiclo = ($tipoData && $tipoData['rangos_distintos'] > 1) ? 'Combinado' : 'Fijo';
                 
-                // Insertar nuevo ciclo asignado con el tipo determinado
+                // Insertar nuevo ciclo (con fecha_fin NULL = abierta)
                 $stmt = $db->prepare("
-                    INSERT INTO empleados_ciclos (empleado_id, ciclo_id, fecha_inicio, activo, tipo_ciclo)
-                    VALUES (?, ?, ?, 1, ?)
+                    INSERT INTO empleados_ciclos (empleado_id, ciclo_id, fecha_inicio, fecha_fin, activo, tipo_ciclo)
+                    VALUES (?, ?, ?, ?, 1, ?)
                 ");
-                $stmt->execute([$empleado_id, $ciclo_id, $fecha_inicio, $tipoCiclo]);
+                $stmt->execute([$empleado_id, $ciclo_id, $fecha_inicio, $fecha_fin, $tipoCiclo]);
                 
                 // Obtener información del ciclo para responder
                 $stmt = $db->prepare("SELECT nombre, num_ciclo FROM ciclos WHERE id = ?");
                 $stmt->execute([$ciclo_id]);
                 $cicloInfo = $stmt->fetch(PDO::FETCH_ASSOC);
                 
+                // Construir mensaje detallado
+                $mensaje = 'Ciclo asignado correctamente';
+                if ($cicloCerrado) {
+                    $mensaje .= '. El ciclo anterior se cerró el ' . $cicloCerrado;
+                } else {
+                    $mensaje .= '. Este ciclo queda abierto (sin fecha fin) hasta que RH asigne otro ciclo.';
+                }
+                
                 $this->jsonResponse([
                     'success' => true, 
-                    'message' => 'Ciclo asignado correctamente',
+                    'message' => $mensaje,
                     'ciclo_cerrado' => $cicloCerrado,
                     'ciclo_asignado' => $cicloInfo['nombre'] ?? 'Ciclo #' . $ciclo_id,
                     'tipo_ciclo' => $tipoCiclo

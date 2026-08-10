@@ -182,8 +182,7 @@ class DispositivoBiometrico
      */
     public function updateLastSync($id)
     {
-        $stmt = $this->db->getConnection()->prepare("
-            UPDATE dispositivos_biometricos 
+        $stmt = $this->db->getConnection()->prepare("UPDATE dispositivos_biometricos 
             SET ultima_sincronizacion = NOW() 
             WHERE id = ?
         ");
@@ -233,8 +232,7 @@ class DispositivoBiometrico
      */
     public function countBySede()
     {
-        $stmt = $this->db->getConnection()->prepare("
-            SELECT sede, COUNT(*) as total, 
+        $stmt = $this->db->getConnection()->prepare("SELECT sede, COUNT(*) as total, 
                    SUM(CASE WHEN activo = 1 THEN 1 ELSE 0 END) as activos
             FROM dispositivos_biometricos 
             GROUP BY sede 
@@ -250,15 +248,13 @@ class DispositivoBiometrico
     public function ipExists($ip_address, $exclude_id = null)
     {
         if ($exclude_id) {
-            $stmt = $this->db->getConnection()->prepare("
-                SELECT COUNT(*) as count 
+            $stmt = $this->db->getConnection()->prepare("SELECT COUNT(*) as count 
                 FROM dispositivos_biometricos 
                 WHERE ip_address = ? AND id != ?
             ");
             $stmt->execute([$ip_address, $exclude_id]);
         } else {
-            $stmt = $this->db->getConnection()->prepare("
-                SELECT COUNT(*) as count 
+            $stmt = $this->db->getConnection()->prepare("SELECT COUNT(*) as count 
                 FROM dispositivos_biometricos 
                 WHERE ip_address = ?
             ");

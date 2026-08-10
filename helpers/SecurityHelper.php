@@ -284,6 +284,25 @@ class SecurityHelper {
     }
     
     /**
+     * Obtiene el nonce CSP de la sesión para usarlo en atributos de etiquetas
+     * @return string Nonce CSP
+     */
+    public static function cspNonce(): string
+    {
+        return $_SESSION['csp_nonce'] ?? '';
+    }
+
+    /**
+     * Genera el atributo nonce para etiquetas script/style
+     * @return string Atributo nonce (ej: ' nonce="abc123"')
+     */
+    public static function nonceAttr(): string
+    {
+        $nonce = self::cspNonce();
+        return $nonce ? ' nonce="' . $nonce . '"' : '';
+    }
+
+    /**
      * Genera un código 2FA de 6 dígitos
      * @return string Código 2FA
      */
@@ -319,15 +338,17 @@ class SecurityHelper {
         // Habilitar XSS protection
         header('X-XSS-Protection: 1; mode=block');
         
-        // Content Security Policy (básico)
-        header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';");
+        // Content Security Policy (nonce para scripts, unsafe-inline para estilos/eventos legacy)
+        $nonce = base64_encode(random_bytes(16));
+        $_SESSION['csp_nonce'] = $nonce;
+        header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none';");
         
         // Referrer Policy
         header('Referrer-Policy: strict-origin-when-cross-origin');
     }
     
     /**
-     * Encripta datos usando AES-256-CBC
+     * Encripta datos usando AES-256-GCM (autenticado)
      * @param string $data Datos a encriptar
      * @param string $key Clave de encriptación
      * @return string Datos encriptados en base64
@@ -337,10 +358,11 @@ class SecurityHelper {
             return '';
         }
         
-        $iv = random_bytes(openssl_cipher_iv_length('aes-256-cbc'));
-        $encrypted = openssl_encrypt($data, 'aes-256-cbc', $key, 0, $iv);
+        $iv = random_bytes(openssl_cipher_iv_length('aes-256-gcm'));
+        $tag = '';
+        $encrypted = openssl_encrypt($data, 'aes-256-gcm', $key, 0, $iv, $tag);
         
-        return base64_encode($iv . $encrypted);
+        return base64_encode($iv . $tag . $encrypted);
     }
     
     /**
@@ -359,15 +381,17 @@ class SecurityHelper {
             return '';
         }
         
-        $ivLength = openssl_cipher_iv_length('aes-256-cbc');
-        if (strlen($data) < $ivLength) {
+        $ivLength = openssl_cipher_iv_length('aes-256-gcm');
+        $tagLength = 16;
+        if (strlen($data) < $ivLength + $tagLength) {
             return '';
         }
         
         $iv = substr($data, 0, $ivLength);
-        $encrypted = substr($data, $ivLength);
+        $tag = substr($data, $ivLength, $tagLength);
+        $encrypted = substr($data, $ivLength + $tagLength);
         
-        $decrypted = openssl_decrypt($encrypted, 'aes-256-cbc', $key, 0, $iv);
+        $decrypted = openssl_decrypt($encrypted, 'aes-256-gcm', $key, 0, $iv, $tag);
         
         return $decrypted !== false ? $decrypted : '';
     }

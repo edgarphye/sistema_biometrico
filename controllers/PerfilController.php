@@ -21,16 +21,20 @@ class PerfilController extends BaseController {
         $username = htmlspecialchars($usuario['username'] ?? '');
         $rol = htmlspecialchars($usuario['rol'] ?? 'usuario');
         
+        $empleadoId = '';
         $empleadoNombre = '';
         $empleadoClave = '';
         $empleadoArea = '';
         $empleadoDepartamento = '';
+        $empleadoJefeDirectoId = '';
         
         if ($empleado) {
+            $empleadoId = htmlspecialchars($empleado['id'] ?? '');
             $empleadoNombre = htmlspecialchars(($empleado['nombre'] ?? '') . ' ' . ($empleado['apellido'] ?? ''));
             $empleadoClave = htmlspecialchars($empleado['clave'] ?? '');
             $empleadoArea = htmlspecialchars($empleado['area'] ?? '');
             $empleadoDepartamento = htmlspecialchars($empleado['clave_depto'] ?? '');
+            $empleadoJefeDirectoId = htmlspecialchars($empleado['jefe_directo_id'] ?? '');
         }
 
         $rolLabel = match(strtolower($rol)) {
@@ -99,24 +103,32 @@ class PerfilController extends BaseController {
                         <hr>
                         
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">ID Empleado</label>
+                                <input type="text" class="form-control" value="' . $empleadoId . '" disabled>
+                            </div>
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Nombre del Empleado</label>
                                 <input type="text" class="form-control" value="' . $empleadoNombre . '" disabled>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Clave de Empleado</label>
                                 <input type="text" class="form-control" value="' . $empleadoClave . '" disabled>
                             </div>
                         </div>
                         
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Área</label>
                                 <input type="text" class="form-control" value="' . $empleadoArea . '" disabled>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Departamento</label>
                                 <input type="text" class="form-control" value="' . $empleadoDepartamento . '" disabled>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">ID Jefe Directo</label>
+                                <input type="text" class="form-control" value="' . $empleadoJefeDirectoId . '" disabled>
                             </div>
                         </div>
                         

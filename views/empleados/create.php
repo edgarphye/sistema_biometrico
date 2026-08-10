@@ -284,6 +284,25 @@ ob_start();
                     </div>
                     <?php unset($_SESSION['form_errors']); ?>
                 <?php endif; ?>
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-key me-2"></i>Claves Presupuestales</h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="clavesContainer">
+                            <div class="row clave-row mb-2">
+                                <div class="col-md-10">
+                                    <input type="text" class="form-control" name="claves_presupuestales[]" placeholder="Ej. 071152E0220000000371">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-outline-danger btn-sm btn-quitar-clave" disabled><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnAgregarClave"><i class="fas fa-plus me-1"></i>Agregar clave</button>
+                        <div class="form-text">Se muestran unidas con " / " en los oficios oficiales. Opcional.</div>
+                    </div>
+                </div>
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> Guardar Empleado
                 </button>
@@ -649,8 +668,47 @@ document.getElementById('generarCodigosBtn').addEventListener('click', function(
     });
 });
 
+// Claves presupuestales dinámicas
+(function() {
+    const container = document.getElementById('clavesContainer');
+    const btnAgregar = document.getElementById('btnAgregarClave');
+    if (!container || !btnAgregar) return;
 
+    function actualizarBotones() {
+        const filas = container.querySelectorAll('.clave-row');
+        filas.forEach((fila) => {
+            const btn = fila.querySelector('.btn-quitar-clave');
+            if (btn) btn.disabled = filas.length <= 1;
+        });
+    }
 
+    function agregarFila(valor) {
+        const div = document.createElement('div');
+        div.className = 'row clave-row mb-2';
+        div.innerHTML = `
+            <div class="col-md-10">
+                <input type="text" class="form-control" name="claves_presupuestales[]" placeholder="Ej. 071152E0220000000371" value="${(valor || '').replace(/"/g, '&quot;')}">
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-outline-danger btn-sm btn-quitar-clave"><i class="fas fa-times"></i></button>
+            </div>
+        `;
+        container.appendChild(div);
+        actualizarBotones();
+    }
+
+    btnAgregar.addEventListener('click', () => agregarFila(''));
+    container.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-quitar-clave')) {
+            const fila = e.target.closest('.clave-row');
+            if (container.querySelectorAll('.clave-row').length > 1) {
+                fila.remove();
+                actualizarBotones();
+            }
+        }
+    });
+    actualizarBotones();
+})();
 
 </script>
 <?php

@@ -1,6 +1,9 @@
 <?php  
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @group functional
+ */
 class EmployeesEndpointsTest extends TestCase
 {
     private $baseUrl;
@@ -8,8 +11,34 @@ class EmployeesEndpointsTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->baseUrl = "http://localhost/sistema_biometrico";
+        $this->baseUrl = "http://localhost";
         $this->cookieFile = tempnam(sys_get_temp_dir(), 'cookie');
+        $this->login();
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->cookieFile && file_exists($this->cookieFile)) {
+            unlink($this->cookieFile);
+        }
+    }
+
+    private function login(): void
+    {
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $this->baseUrl . '/login',
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => http_build_query(['username' => 'admin', 'password' => 'admin123']),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_COOKIEJAR => $this->cookieFile,
+            CURLOPT_COOKIEFILE => $this->cookieFile,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
+        curl_exec($ch);
+        curl_close($ch);
     }
 
     private function sendRequest(string $endpoint, array $postData = [], string $method = 'GET'): array
@@ -45,14 +74,14 @@ class EmployeesEndpointsTest extends TestCase
     {
         $response = $this->sendRequest('/empleados', [], 'GET');
         $this->assertEquals(200, $response['info']['http_code'], "Employees index page should return 200");
-        $this->assertStringContainsString('Lista de Empleados', $response['body']);
+        $this->assertStringContainsString('Directorio de Empleados', $response['body']);
     }
 
     public function testCreateEmployeePage()
     {
         $response = $this->sendRequest('/empleados/create', [], 'GET');
         $this->assertEquals(200, $response['info']['http_code'], "Create employee page should return 200");
-        $this->assertStringContainsString('Registrar Empleado', $response['body']);
+        $this->assertStringContainsString('Nuevo Empleado', $response['body']);
     }
 
     // Further POST tests for creation, editing, deletion can be added with proper test data and cleanup

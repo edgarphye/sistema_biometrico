@@ -29,6 +29,32 @@ try {
     $stmtRetardos = $pdo->query("\n        SELECT id, empleado_id, fecha, tipo_retraso\n        FROM retardos\n        WHERE justificado = 1\n          AND tipo_retraso IN ('retardo_menor', 'retardo_mayor')\n        ORDER BY empleado_id ASC, fecha ASC, id ASC\n    ");
     $registros = $stmtRetardos->fetchAll(PDO::FETCH_ASSOC);
 
+    $stmtExisteNota = $pdo->prepare("SELECT COUNT(*) AS total FROM notas_malas WHERE retardo_id = ?");
+    $stmtInsNota = $pdo->prepare("\n        INSERT INTO notas_malas (empleado_id, retardo_id, tipo, cantidad, periodo, motivo)\n        VALUES (?, ?, ?, ?, ?, ?)\n    ");
+
+    $notasInsertadas = 0;
+
+    $crearNotaSiAplica = function ($empleadoId, $retardoId, $tipo, $grupo, &$menoresPendientes) use (&$notasInsertadas, $stmtExisteNota, $stmtInsNota) {
+        $stmtExisteNota->execute([$retardoId]);
+        if (((int)($stmtExisteNota->fetch(PDO::FETCH_ASSOC)['total'] ?? 0)) > 0) {
+            return;
+        }
+        if ($tipo === 'retardo_mayor') {
+            $motivo = "Retardo mayor no justificado en quincena {$grupo['inicio']} a {$grupo['fin']}.";
+            $stmtInsNota->execute([(int)$empleadoId, (int)$retardoId, 'retardo_mayor', 1, $grupo['inicio'], $motivo]);
+            $notasInsertadas += $stmtInsNota->rowCount();
+            return;
+        }
+        // retardo_menor: cada 2 = 1 nota mala
+        $menoresPendientes++;
+        if ($menoresPendientes % 2 === 0) {
+            $motivo = "Par de retardos menores no justificados en quincena {$grupo['inicio']} a {$grupo['fin']}.";
+            $stmtInsNota->execute([(int)$empleadoId, (int)$retardoId, 'retardo_menor', 1, $grupo['inicio'], $motivo]);
+            $notasInsertadas += $stmtInsNota->rowCount();
+        }
+    };
+
+    // 2a) Retardos justificados: se permiten 2 por quincena; el exceso genera notas.
     $porGrupo = [];
     foreach ($registros as $r) {
         [$inicio, $fin, $q] = rangoQuincena($r['fecha']);
@@ -39,43 +65,39 @@ try {
         $porGrupo[$key]['items'][] = $r;
     }
 
-    $stmtExisteNota = $pdo->prepare("SELECT COUNT(*) AS total FROM notas_malas WHERE retardo_id = ?");
-    $stmtInsNota = $pdo->prepare("\n        INSERT INTO notas_malas (empleado_id, retardo_id, tipo, cantidad, periodo, motivo)\n        VALUES (?, ?, ?, ?, ?, ?)\n    ");
-
-    $notasInsertadas = 0;
+    $gruposJustificados = count($porGrupo);
 
     foreach ($porGrupo as $grupo) {
         $items = $grupo['items'];
         if (count($items) <= 2) {
             continue;
         }
+        $menoresPendientes = 0;
+        foreach (array_slice($items, 2) as $item) {
+            $crearNotaSiAplica($item['empleado_id'], $item['id'], $item['tipo_retraso'], $grupo, $menoresPendientes);
+        }
+    }
 
-        $exceso = array_slice($items, 2);
-        $menoresExceso = 0;
+    // 2b) Retardos NO justificados: emparejamiento por quincena (2 menores = 1 nota, cada mayor = 1 nota).
+    $stmtRetardosNoJust = $pdo->query("\n        SELECT id, empleado_id, fecha, tipo_retraso\n        FROM retardos\n        WHERE justificado = 0\n          AND tipo_retraso IN ('retardo_menor', 'retardo_mayor')\n        ORDER BY empleado_id ASC, fecha ASC, id ASC\n    ");
+    $registrosNoJust = $stmtRetardosNoJust->fetchAll(PDO::FETCH_ASSOC);
 
-        foreach ($exceso as $item) {
-            $retardoId = (int)$item['id'];
-            $tipo = $item['tipo_retraso'];
+    $porGrupoNoJust = [];
+    foreach ($registrosNoJust as $r) {
+        [$inicio, $fin, $q] = rangoQuincena($r['fecha']);
+        $key = $r['empleado_id'] . '|' . $inicio . '|' . $fin . '|' . $q;
+        if (!isset($porGrupoNoJust[$key])) {
+            $porGrupoNoJust[$key] = ['inicio' => $inicio, 'fin' => $fin, 'q' => $q, 'items' => []];
+        }
+        $porGrupoNoJust[$key]['items'][] = $r;
+    }
 
-            $stmtExisteNota->execute([$retardoId]);
-            if (((int)($stmtExisteNota->fetch(PDO::FETCH_ASSOC)['total'] ?? 0)) > 0) {
-                continue;
-            }
+    $gruposNoJustificados = count($porGrupoNoJust);
 
-            if ($tipo === 'retardo_mayor') {
-                $motivo = "Retardo mayor justificado excedente en quincena {$grupo['inicio']} a {$grupo['fin']}.";
-                $stmtInsNota->execute([(int)$item['empleado_id'], $retardoId, 'retardo_mayor', 1, $grupo['inicio'], $motivo]);
-                $notasInsertadas += $stmtInsNota->rowCount();
-                continue;
-            }
-
-            // retardo_menor: cada 2 en exceso = 1 nota mala
-            $menoresExceso++;
-            if ($menoresExceso % 2 === 0) {
-                $motivo = "Par de retardos menores justificados excedentes en quincena {$grupo['inicio']} a {$grupo['fin']}.";
-                $stmtInsNota->execute([(int)$item['empleado_id'], $retardoId, 'retardo_menor', 1, $grupo['inicio'], $motivo]);
-                $notasInsertadas += $stmtInsNota->rowCount();
-            }
+    foreach ($porGrupoNoJust as $grupo) {
+        $menoresPendientes = 0;
+        foreach ($grupo['items'] as $item) {
+            $crearNotaSiAplica($item['empleado_id'], $item['id'], $item['tipo_retraso'], $grupo, $menoresPendientes);
         }
     }
 
@@ -85,7 +107,8 @@ try {
         'ok' => true,
         'sanciones_faltas_insertadas' => $sancionesInsertadas,
         'notas_malas_insertadas' => $notasInsertadas,
-        'grupos_procesados' => count($porGrupo)
+        'grupos_justificados_procesados' => $gruposJustificados,
+        'grupos_no_justificados_procesados' => $gruposNoJustificados
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . PHP_EOL;
 } catch (Throwable $e) {
     if ($pdo->inTransaction()) {

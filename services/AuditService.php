@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/../models/Database.php';
 
 class AuditService {
     private static $instance = null;
@@ -100,9 +100,9 @@ class AuditService {
             SELECT * FROM audit_logs 
             WHERE empleado_id = ?
             ORDER BY fecha DESC
-            LIMIT ?
+            LIMIT " . (int)$limite . "
         ");
-        $stmt->execute([$empleadoId, $limite]);
+        $stmt->execute([$empleadoId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
@@ -114,9 +114,9 @@ class AuditService {
             SELECT * FROM audit_logs 
             WHERE modulo = ? AND registro_id = ?
             ORDER BY fecha DESC
-            LIMIT ?
+            LIMIT " . (int)$limite . "
         ");
-        $stmt->execute([$modulo, $registroId, $limite]);
+        $stmt->execute([$modulo, $registroId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

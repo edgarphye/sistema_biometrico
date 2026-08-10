@@ -17,6 +17,11 @@ class LogsController extends BaseController
         $fecha = $_GET['fecha'] ?? date('Y-m-d');
         $tipo = $_GET['tipo'] ?? '';
         
+        // Validar formato de fecha para prevenir path traversal
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) {
+            $fecha = date('Y-m-d');
+        }
+        
         $logs = [];
         
         // Leer logs de JavaScript

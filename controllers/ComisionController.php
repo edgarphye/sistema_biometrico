@@ -1,8 +1,8 @@
 <?php
-require_once 'models/Comision.php';
-require_once 'models/Empleado.php';
-require_once 'helpers/RequestValidator.php';
-require_once 'helpers/SecurityHelper.php';
+require_once __DIR__ . '/../models/Comision.php';
+require_once __DIR__ . '/../models/Empleado.php';
+require_once __DIR__ . '/../helpers/RequestValidator.php';
+require_once __DIR__ . '/../helpers/SecurityHelper.php';
 require_once __DIR__ . '/BaseController.php';
 
 class ComisionController extends BaseController {
@@ -38,7 +38,10 @@ public function create() {
                 ];
                 
                 // Validar datos de entrada
-                $errors = RequestValidator::validateAsistenciaData($data);
+                $errors = [];
+                if (empty($data['empleado_id'])) $errors[] = 'Empleado es requerido';
+                if (empty($data['descripcion'])) $errors[] = 'Descripción es requerida';
+                if (empty($data['fecha_inicio'])) $errors[] = 'Fecha de inicio es requerida';
                 if (!empty($errors)) {
                     $_SESSION['form_errors'] = $errors;
                     $_SESSION['form_data'] = $data;
@@ -105,6 +108,115 @@ public function getByEmpleado() {
 
         $comisiones = $this->comisionModel->getByEmpleado($empleado_id);
         $this->jsonResponse($comisiones);
+    }
+
+public function actualizar() {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'error' => 'Método no permitido']);
+            return;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (!$input) {
+            echo json_encode(['success' => false, 'error' => 'Datos inválidos']);
+            return;
+        }
+        $rol = strtolower((string)($_SESSION['rol'] ?? ''));
+        if (!in_array($rol, ['admin', 'superadmin'], true)) {
+            echo json_encode(['success' => false, 'error' => 'Acceso denegado. Solo administradores pueden editar registros.']);
+            return;
+        }
+        $id = intval($input['id'] ?? 0);
+        $empleado_id = intval($input['empleado_id'] ?? 0);
+        $descripcion = trim($input['descripcion'] ?? '');
+        $fecha_inicio = $input['fecha_inicio'] ?? '';
+        $fecha_fin = $input['fecha_fin'] ?? $fecha_inicio;
+        $tipo = $input['tipo'] ?? 'comision_todo_dia';
+
+        if (!$id || !$empleado_id) {
+            echo json_encode(['success' => false, 'error' => 'ID de comisión o empleado inválido']);
+            return;
+        }
+        if (empty($descripcion)) {
+            echo json_encode(['success' => false, 'error' => 'La descripción es requerida']);
+            return;
+        }
+        if (empty($fecha_inicio)) {
+            echo json_encode(['success' => false, 'error' => 'La fecha de inicio es requerida']);
+            return;
+        }
+        if (strtotime($fecha_fin) < strtotime($fecha_inicio)) {
+            echo json_encode(['success' => false, 'error' => 'La fecha fin no puede ser menor a la fecha inicio']);
+            return;
+        }
+
+        try {
+            $db = Database::getInstance()->getConnection();
+            $db->beginTransaction();
+
+            // Obtener datos actuales de la comisión para comparar
+            $stmt = $db->prepare("SELECT * FROM comisiones WHERE id = ?");
+            $stmt->execute([$id]);
+            $oldData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$oldData) {
+                echo json_encode(['success' => false, 'error' => 'Comisión no encontrada']);
+                return;
+            }
+
+            $oldFechaInicio = $oldData['fecha_inicio'];
+            $oldFechaFin = $oldData['fecha_fin'];
+
+            // 1. Actualizar registro en comisiones
+            $stmt = $db->prepare("UPDATE comisiones SET descripcion = ?, fecha_inicio = ?, fecha_fin = ?, tipo_comision = ? WHERE id = ?");
+            $stmt->execute([$descripcion, $fecha_inicio, $fecha_fin, $tipo, $id]);
+
+            // 2. Sincronizar registros de asistencia
+            $tiposComisionAsistencia = ['comision_entrada', 'comision_salida', 'comision_todo_dia'];
+            $tipoAsistencia = in_array($tipo, $tiposComisionAsistencia) ? $tipo : 'comision_todo_dia';
+
+            // 2a. Eliminar registros de asistencia antiguos para las fechas viejas (solo comisiones)
+            $fechaOld = new DateTime($oldFechaInicio);
+            $fechaOldFin = new DateTime($oldFechaFin);
+            while ($fechaOld <= $fechaOldFin) {
+                $fechaStr = $fechaOld->format('Y-m-d');
+                $stmt = $db->prepare("DELETE FROM asistencia WHERE empleado_id = ? AND fecha = ? AND tipo_asistencia LIKE 'comision_%'");
+                $stmt->execute([$empleado_id, $fechaStr]);
+                $fechaOld->modify('+1 day');
+            }
+
+            // 2b. Crear/actualizar registros para las nuevas fechas
+            $fechaNew = new DateTime($fecha_inicio);
+            $fechaNewFin = new DateTime($fecha_fin);
+            while ($fechaNew <= $fechaNewFin) {
+                $fechaStr = $fechaNew->format('Y-m-d');
+
+                $stmt = $db->prepare("SELECT id FROM asistencia WHERE empleado_id = ? AND fecha = ?");
+                $stmt->execute([$empleado_id, $fechaStr]);
+                $existente = $stmt->fetch();
+
+                if (!$existente) {
+                    $stmt = $db->prepare("INSERT INTO asistencia (empleado_id, fecha, tipo_asistencia, observaciones, created_at) VALUES (?, ?, ?, ?, NOW())");
+                    $stmt->execute([$empleado_id, $fechaStr, $tipoAsistencia, $descripcion]);
+                } else {
+                    $stmt = $db->prepare("UPDATE asistencia SET tipo_asistencia = ?, observaciones = ? WHERE id = ?");
+                    $stmt->execute([$tipoAsistencia, $descripcion, $existente['id']]);
+                }
+
+                $fechaNew->modify('+1 day');
+            }
+
+            $db->commit();
+            echo json_encode(['success' => true]);
+        } catch (Exception $e) {
+            if (isset($db) && $db->inTransaction()) {
+                $db->rollBack();
+            }
+            $this->logException($e, ['action' => 'actualizar', 'comision_id' => $id]);
+            echo json_encode(['success' => false, 'error' => 'Error al actualizar: ' . $e->getMessage()]);
+        }
     }
 
 public function validarLimite() {

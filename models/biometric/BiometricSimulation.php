@@ -443,6 +443,80 @@ class BiometricSimulation implements BiometricInterface
     }
 
     /**
+     * Actualiza los datos de un empleado en el dispositivo (simulado)
+     */
+    public function updateEmployeeOnDevice(int $deviceId, int $employeeId): bool
+    {
+        usleep(rand(500000, 1500000));
+
+        $stmt = $this->db->getConnection()->prepare("SELECT id, nombre, apellido FROM empleados WHERE id = ?");
+        $stmt->execute([$employeeId]);
+        $empleado = $stmt->fetch();
+
+        if (!$empleado) {
+            return false;
+        }
+
+        $this->logEvent(
+            $deviceId,
+            'actualizacion',
+            'exitoso',
+            "Empleado {$empleado['nombre']} {$empleado['apellido']} actualizado en dispositivo",
+            ['employee_id' => $employeeId],
+            $employeeId
+        );
+
+        return true;
+    }
+
+    /**
+     * Descarga asistencias del dispositivo (simulado)
+     */
+    public function downloadAttendanceFromDevice(int $deviceId): array
+    {
+        usleep(rand(1000000, 3000000));
+
+        $total = rand(5, 50);
+        $imported = rand(3, $total);
+        $duplicates = rand(0, 5);
+        $errors = $total - $imported - $duplicates;
+        if ($errors < 0) $errors = 0;
+
+        if ($imported > 0) {
+            $stmt = $this->db->getConnection()->prepare("
+                INSERT INTO asistencia (empleado_id, fecha, hora_entrada, dispositivo_id, tipo_marcacion, created_at)
+                VALUES (?, CURDATE(), TIME(NOW()), ?, 'entrada', NOW())
+            ");
+            $empleados = $this->db->getConnection()->query(
+                "SELECT id FROM empleados WHERE activo = 1 ORDER BY RAND() LIMIT $imported"
+            )->fetchAll();
+
+            foreach ($empleados as $emp) {
+                try {
+                    $stmt->execute([$emp['id'], $deviceId]);
+                } catch (Exception $e) {
+                }
+            }
+        }
+
+        $this->logEvent(
+            $deviceId,
+            'descarga_asistencias',
+            'exitoso',
+            "Descarga completada: $imported importados, $duplicates duplicados, $errors errores",
+            ['imported' => $imported, 'duplicates' => $duplicates, 'errors' => $errors, 'total' => $total],
+            null
+        );
+
+        return [
+            'imported' => $imported,
+            'duplicates' => $duplicates,
+            'errors' => $errors,
+            'total' => $total
+        ];
+    }
+
+    /**
      * Sincroniza empleados con el dispositivo
      */
     public function syncEmployees(int $deviceId, array $employees): bool

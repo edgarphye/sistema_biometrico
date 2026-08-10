@@ -22,7 +22,6 @@
         
         <!-- Tests de Integración -->
         <testsuite name="Integration">
-            <directory>tests/Unit/Integration</directory>
             <directory>tests/Integration</directory>
         </testsuite>
         
@@ -46,6 +45,11 @@
             <directory>tests/Performance</directory>
         </testsuite>
         
+        <!-- Tests Funcionales -->
+        <testsuite name="Functional">
+            <directory>tests/Functional</directory>
+        </testsuite>
+
         <!-- Tests E2E -->
         <testsuite name="E2E">
             <directory>tests/E2E</directory>
@@ -88,8 +92,8 @@
         <env name="APP_DEBUG" value="true"/>
         <env name="DB_HOST" value="localhost"/>
         <env name="DB_NAME" value="sistema_biometrico_test"/>
-        <env name="DB_USER" value="test_user"/>
-        <env name="DB_PASSWORD" value="test_password"/>
+        <env name="DB_USER" value="root"/>
+        <env name="DB_PASSWORD" value="root"/>
         <env name="CACHE_DRIVER" value="array"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="MAIL_DRIVER" value="array"/>
@@ -103,10 +107,13 @@
     <!-- Filtros y grupos -->
     <groups>
         <include>
-            <group>default</group>
             <group>unit</group>
             <group>integration</group>
             <group>api</group>
+            <group>database</group>
+            <group>security</group>
+            <group>performance</group>
+            <group>functional</group>
         </include>
         <exclude>
             <group>slow</group>

@@ -177,6 +177,22 @@ function inicializarComponentes() {
     // Event listeners para modal
     document.getElementById('btnGuardarDecision')?.addEventListener('click', guardarDecisionModal);
     
+    // Event delegation para botones de validación en tablas dinámicas (aprobados/rechazados)
+    document.getElementById('tablaAprobadosBody')?.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-validar');
+        if (btn) {
+            console.log('✅ Delegación: clic en btn-validar de Aprobados', btn.dataset);
+            abrirModalValidacion({ currentTarget: btn });
+        }
+    });
+    document.getElementById('tablaRechazadosBody')?.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-validar');
+        if (btn) {
+            console.log('✅ Delegación: clic en btn-validar de Rechazados', btn.dataset);
+            abrirModalValidacion({ currentTarget: btn });
+        }
+    });
+    
     // Event listeners para radio buttons en modal
     document.querySelectorAll('input[name="estadoValidacion"]').forEach(radio => {
         radio.addEventListener('change', mostrarOcultarCamposModal);
@@ -945,7 +961,16 @@ function llenarModalValidacion(data) {
     document.getElementById('modalDuracion').textContent = duracion;
     
     // Tipo de Incidencia - Mostrar catálogo para selección
-    const tipoRetraso = detalles?.tipo_retraso || validacion.tipo_incidencia;
+    let tipoRetraso = detalles?.tipo_retraso || validacion.tipo_incidencia || '';
+    
+    // Normalizar: validaciones_jefe usa valores planos (comision, retardo, justificacion, ausencia)
+    // mientras que el <select> usa subtipos (comision_entrada, retardo_menor, etc.)
+    const tipoNormalized = {
+        'retardo': 'retardo_menor',
+        'comision': 'comision_entrada',
+        'justificacion': 'ausencia',
+    };
+    tipoRetraso = tipoNormalized[tipoRetraso] || tipoRetraso;
     
     // Si es sin solicitud, mostrar mensaje especial en lugar del select
     if (esSinSolicitud) {
@@ -1038,6 +1063,66 @@ function llenarModalValidacion(data) {
     
     // Mostrar/ocultar campos según corresponda
     mostrarOcultarCamposModal();
+
+    // Cargar conversación
+    cargarConversacionJefe(validacion);
+}
+
+/**
+ * Cargar conversación en el modal del jefe
+ */
+async function cargarConversacionJefe(validacion) {
+    const idValidacion = validacion.id || validacion.incidencia_id || 0;
+    const cardConv = document.getElementById('cardConversacionJefe');
+    const container = document.getElementById('conversacionJefe');
+    const badge = document.getElementById('mensajesCountBadge');
+
+    if (!idValidacion || !cardConv || !container) return;
+
+    try {
+        const response = await fetch(`${window.BASE_URL}/validaciones/mensajes/${idValidacion}`);
+        const result = await response.json();
+
+        if (result.success && result.mensajes && result.mensajes.length > 0) {
+            cardConv.style.display = 'block';
+            badge.textContent = result.mensajes.length;
+
+            container.innerHTML = result.mensajes.map(msg => {
+                const esJefe = msg.remitente_tipo === 'jefe';
+                const esSistema = msg.remitente_tipo === 'sistema';
+                const avatar = esJefe ? 'fa-user-tie' : (esSistema ? 'fa-robot' : 'fa-user');
+                const color = esJefe ? '#9F2241' : (esSistema ? '#6c757d' : '#235B4E');
+                const alineacion = esJefe ? '' : 'flex-row-reverse';
+                const bgColor = esJefe ? '#f8f0f2' : (esSistema ? '#f8f9fa' : '#f0f4f3');
+
+                return `
+                    <div class="d-flex ${alineacion} align-items-start gap-2 mb-3">
+                        <div class="rounded-circle p-2" style="background: ${color}20;">
+                            <i class="fas ${avatar}" style="color: ${color};"></i>
+                        </div>
+                        <div class="rounded p-3 flex-fill" style="background: ${bgColor}; max-width: 80%;">
+                            <small class="fw-bold" style="color: ${color};">${msg.remitente_nombre || msg.remitente_tipo}</small>
+                            <p class="mb-1">${escapeHtml(msg.mensaje || '')}</p>
+                            ${msg.tiene_adjuntos ? '<small class="text-muted"><i class="fas fa-paperclip me-1"></i>Tiene adjunto(s)</small>' : ''}
+                            <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">${formatearFechaHora(msg.created_at)}</small>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            cardConv.style.display = 'none';
+        }
+    } catch (e) {
+        console.warn('Error al cargar conversación:', e);
+        cardConv.style.display = 'none';
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
 
 /**
@@ -1255,6 +1340,18 @@ function formatearFecha(fechaString) {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
+    });
+}
+
+function formatearFechaHora(fechaString) {
+    if (!fechaString) return 'N/A';
+    const fecha = new Date(fechaString);
+    return fecha.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
     });
 }
 

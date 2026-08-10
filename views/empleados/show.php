@@ -39,9 +39,11 @@ $esUsuario = ($rolActual === 'usuario' || $rolActual === 'usuarios');
                             </div>
                         </div>
                         <div class="col-md-3 text-end">
+                            <?php if (empty($soloLectura)): ?>
                             <a href="<?php echo rtrim(BASE_URL, '/') . '/empleados/' . ($empleado['id'] ?? '') . '/edit'; ?>" class="btn btn-outline-primary mb-2 w-100">
                                 <i class="fas fa-edit me-1"></i> Editar Perfil
                             </a>
+                            <?php endif; ?>
                             <a href="<?php echo rtrim(BASE_URL, '/') . '/empleados'; ?>" class="btn btn-outline-secondary w-100">
                                 <i class="fas fa-arrow-left me-1"></i> Volver
                             </a>

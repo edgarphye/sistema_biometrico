@@ -118,7 +118,7 @@ function generarReporte() {
     const formData = new FormData(document.getElementById("reporteForm"));
     const params = new URLSearchParams(formData);
 
-    document.getElementById("reporte-resultados").innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Generando reporte...</div>';
+    document.getElementById("reporte-resultados").innerHTML = "<div class=\"text-center\"><i class=\"fas fa-spinner fa-spin\"></i> Generando reporte...</div>";
 
     fetch("/sistema_biometrico/api/reportes.php?" + params.toString())
         .then(response => {
@@ -129,15 +129,14 @@ function generarReporte() {
         })
         .then(data => {
             if (data.success === false) {
-                document.getElementById("reporte-resultados").innerHTML = '<div class="alert alert-danger">' + (data.error || 'Error desconocido') + '</div>';
+                document.getElementById("reporte-resultados").innerHTML = "<div class=\"alert alert-danger\">" + (data.error || "Error desconocido") + "</div>";
                 return;
             }
             mostrarResultados(data);
         })
         .catch(error => {
             console.error("Error:", error);
-            document.getElementById("reporte-resultados").innerHTML =
-                \'<div class="alert alert-danger">Error al generar el reporte: \' + error.message + \'</div>';
+            document.getElementById("reporte-resultados").innerHTML = "<div class=\"alert alert-danger\">Error al generar el reporte: " + error.message + "</div>";
         });
 }
 
@@ -149,7 +148,7 @@ function mostrarResultados(data) {
     } else if (data.datos && data.datos.length > 0) {
         html = generarTabla(data.datos, data.tipo);
     } else {
-        html = \'<div class="alert alert-info">No se encontraron registros con los filtros seleccionados.</div>\';
+        html = "<div class=\"alert alert-info\">No se encontraron registros con los filtros seleccionados.</div>";
     }
 
     document.getElementById("reporte-resultados").innerHTML = html;
@@ -157,24 +156,20 @@ function mostrarResultados(data) {
 }
 
 function generarResumen(datos) {
-    let html = \'<table class="table table-bordered table-striped"><thead><tr>\';
-    html += \'<th>Tipo</th><th>Total</th><th>Porcentaje</th>\';
-    html += \'</tr></thead><tbody>\';
+    let html = "<table class=\"table table-bordered table-striped\"><thead><tr>";
+    html += "<th>Tipo</th><th>Total</th><th>Porcentaje</th>";
+    html += "</tr></thead><tbody>";
     
     const total = datos.reduce((sum, item) => sum + item.total, 0);
     
     datos.forEach(item => {
         const pct = total > 0 ? ((item.total / total) * 100).toFixed(1) : 0;
         const badgeClass = item.tipo === "falta" ? "bg-danger" : (item.tipo === "retardos" ? "bg-warning" : "bg-success");
-        html += `<tr>
-            <td><span class="badge ${badgeClass}">${item.tipo}</span></td>
-            <td>${item.total.toLocaleString()}</td>
-            <td>${pct}%</td>
-        </tr>`;
+        html += "<tr><td><span class=\"badge " + badgeClass + "\">" + item.tipo + "</span></td><td>" + item.total.toLocaleString() + "</td><td>" + pct + "%</td></tr>";
     });
     
-    html += \'<tr class="table-primary"><td><strong>Total</strong></td><td><strong>\' + total.toLocaleString() + \'</strong></td><td>100%</td></tr>\';
-    html += \'</tbody></table>\';
+    html += "<tr class=\"table-primary\"><td><strong>Total</strong></td><td><strong>" + total.toLocaleString() + "</strong></td><td>100%</td></tr>";
+    html += "</tbody></table>";
     return html;
 }
 
@@ -195,24 +190,24 @@ function generarTabla(datos, tipo) {
     
     const cols = columns[tipo] || columns["falta"];
     
-    let html = \'<div class="table-responsive"><table class="table table-striped table-hover"><thead><tr>\';
-    cols.forEach(col => html += \'<th>\' + col + \'</th>\');
-    html += \'</tr></thead><tbody>\';
+    let html = "<div class=\"table-responsive\"><table class=\"table table-striped table-hover\"><thead><tr>";
+    cols.forEach(col => html += "<th>" + col + "</th>");
+    html += "</tr></thead><tbody>";
     
     datos.forEach(item => {
-        html += \'<tr>\';
-        html += \'<td>\' + item.empleado + \'</td>\';
-        html += \'<td>\' + item.empleado_id + \'</td>\';
-        html += \'<td>\' + item.fecha + \'</td>\';
-        html += \'<td>\' + (item.hora_entrada || "-") + \'</td>\';
-        html += \'<td>\' + (item.hora_salida || "-") + \'</td>\';
+        html += "<tr>";
+        html += "<td>" + item.empleado + "</td>";
+        html += "<td>" + item.empleado_id + "</td>";
+        html += "<td>" + item.fecha + "</td>";
+        html += "<td>" + (item.hora_entrada || "-") + "</td>";
+        html += "<td>" + (item.hora_salida || "-") + "</td>";
         if (tipo === "retardos" && item.minutos_retardo) {
-            html += \'<td><span class="badge bg-warning">\' + item.minutos_retardo + \' min</span></td>\';
+            html += "<td><span class=\"badge bg-warning\">" + item.minutos_retardo + " min</span></td>";
         }
-        html += \'</tr>\';
+        html += "</tr>";
     });
     
-    html += \'</tbody></table></div>\';
+    html += "</tbody></table></div>";
     return html;
 }
 
@@ -230,4 +225,3 @@ function imprimirReporte() {
 ';
 
 include __DIR__ . '/../layout.php';
-?>

@@ -180,11 +180,11 @@ class GeneradorDocumentosService {
             $i++;
             $html .= "<tr>";
             $html .= "<td>{$i}</td>";
-            $html .= "<td>{$r['nombre']} {$r['apellido']}</td>";
-            $html .= "<td>{$r['area']}</td>";
-            $html .= "<td>{$r['fecha']}</td>";
-            $html .= "<td>{$r['minutos_retardo']}</td>";
-            $html .= "<td>{$r['tipo_retraso']}</td>";
+            $html .= "<td>" . htmlspecialchars($r['nombre'] . ' ' . ($r['apellido'] ?? '')) . "</td>";
+            $html .= "<td>" . htmlspecialchars($r['area'] ?? '') . "</td>";
+            $html .= "<td>" . htmlspecialchars($r['fecha'] ?? '') . "</td>";
+            $html .= "<td>" . htmlspecialchars((string)($r['minutos_retardo'] ?? '')) . "</td>";
+            $html .= "<td>" . htmlspecialchars($r['tipo_retraso'] ?? '') . "</td>";
             $html .= "</tr>";
         }
         

@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/BaseController.php';
+require_once __DIR__ . '/../models/Database.php';
+require_once __DIR__ . '/../models/DiasEconomicos.php';
 
 /**
  * Controller for Días Económicos (Economic Days)
@@ -15,7 +17,7 @@ class DiasEconomicosController extends BaseController
     {
         parent::__construct();
         $this->requireAuth();
-        $this->db = new Database();
+        $this->db = Database::getInstance();
         $this->diasEconomicosModel = new DiasEconomicos();
     }
     
@@ -214,7 +216,7 @@ class DiasEconomicosController extends BaseController
             }
             
         } catch (Exception $e) {
-            $this->logException($e, ['action' => 'aprobar', 'solicitud_id' => $solicitud_id ?? null]);
+            $this->logException($e, ['action' => 'aprobar', 'solicitud_id' => $id ?? null]);
             error_log("Error en DiasEconomicosController::aprobar: " . $e->getMessage());
             $this->jsonResponse(['success' => false, 'message' => 'Error del servidor']);
         }
@@ -258,12 +260,68 @@ class DiasEconomicosController extends BaseController
             }
             
         } catch (Exception $e) {
-            $this->logException($e, ['action' => 'rechazar', 'solicitud_id' => $solicitud_id ?? null]);
+            $this->logException($e, ['action' => 'rechazar', 'solicitud_id' => $id ?? null]);
             error_log("Error en DiasEconomicosController::rechazar: " . $e->getMessage());
             $this->jsonResponse(['success' => false, 'message' => 'Error del servidor']);
         }
     }
     
+    /**
+     * Actualizar un día económico desde el modal del empleado
+     */
+    public function actualizar() {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'error' => 'Método no permitido']);
+            return;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (!$input) {
+            echo json_encode(['success' => false, 'error' => 'Datos inválidos']);
+            return;
+        }
+        $rol = strtolower((string)($_SESSION['rol'] ?? ''));
+        if (!in_array($rol, ['admin', 'superadmin'], true)) {
+            echo json_encode(['success' => false, 'error' => 'Acceso denegado. Solo administradores pueden editar registros.']);
+            return;
+        }
+        $id = intval($input['id'] ?? 0);
+        $empleado_id = intval($input['empleado_id'] ?? 0);
+        $fecha = $input['fecha'] ?? '';
+        $dias_solicitados = intval($input['dias_solicitados'] ?? 1);
+        $modalidad = $input['modalidad'] ?? 'A';
+        $motivo = trim($input['motivo'] ?? '');
+
+        if (!$id || !$empleado_id) {
+            echo json_encode(['success' => false, 'error' => 'ID inválido']);
+            return;
+        }
+        if (empty($fecha)) {
+            echo json_encode(['success' => false, 'error' => 'La fecha es requerida']);
+            return;
+        }
+        if (empty($motivo)) {
+            echo json_encode(['success' => false, 'error' => 'El motivo es requerido']);
+            return;
+        }
+
+        try {
+            $this->diasEconomicosModel->update($id, [
+                'fecha' => $fecha,
+                'dias_solicitados' => $dias_solicitados,
+                'modalidad' => $modalidad,
+                'motivo' => $motivo
+            ]);
+
+            echo json_encode(['success' => true]);
+        } catch (Exception $e) {
+            $this->logException($e, ['action' => 'actualizar', 'dia_economico_id' => $id]);
+            echo json_encode(['success' => false, 'error' => 'Error al actualizar: ' . $e->getMessage()]);
+        }
+    }
+
     /**
      * Obtener días económicos de un empleado (AJAX)
      */

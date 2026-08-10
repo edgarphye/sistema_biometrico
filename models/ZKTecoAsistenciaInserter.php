@@ -566,14 +566,16 @@ class ZKTecoAsistenciaInserter {
                 $valores[] = $datosBase['hora_salida'];
             }
         
-        // Recalcular tipo_asistencia
+        // Recalcular tipo_asistencia basándose en el ciclo del empleado
         $nuevaEntrada = $datosBase['hora_entrada'] ?: $existente['hora_entrada'];
         $nuevaSalida = $datosBase['hora_salida'] ?: $existente['hora_salida'];
         
-        $nuevoTipo = 'normal';
-        if (!$nuevaEntrada && !$nuevaSalida) $nuevoTipo = 'por_definir';
-        elseif (!$nuevaEntrada) $nuevoTipo = 'por_definir';
-        elseif (!$nuevaSalida) $nuevoTipo = 'por_definir';
+        // Obtener horario del empleado desde su ciclo
+        $horarioEmpleado = $this->obtenerHorarioEmpleado($datosBase['empleado_id'], $datosBase['fecha']);
+        $horaProgramada = $horarioEmpleado['hora_entrada'] ?? '09:00:00';
+        $tolerancia = $horarioEmpleado['tolerancia'] ?? 10;
+        
+        $nuevoTipo = $this->determinarTipoAsistencia($nuevaEntrada, $nuevaSalida, $horaProgramada, $tolerancia);
         
         $actualizaciones[] = "tipo_asistencia = ?";
         $valores[] = $nuevoTipo;
@@ -615,17 +617,18 @@ class ZKTecoAsistenciaInserter {
      */
     private function insertarEnAsistencia($datosBase) {
         try {
-            // Determinar tipo de asistencia
-            $tipoAsistencia = 'normal';
-            if (!empty($datosBase['hora_entrada']) && !empty($datosBase['hora_salida'])) {
-                $tipoAsistencia = 'normal';
-            } elseif (!empty($datosBase['hora_entrada']) && empty($datosBase['hora_salida'])) {
-                $tipoAsistencia = 'por_definir';
-            } elseif (empty($datosBase['hora_entrada']) && !empty($datosBase['hora_salida'])) {
-                $tipoAsistencia = 'por_definir';
-            } elseif (empty($datosBase['hora_entrada']) && empty($datosBase['hora_salida'])) {
-                $tipoAsistencia = 'por_definir'; // Sin entrada ni salida
-            }
+            // Obtener el horario del empleado para determinar tipo_asistencia correcto
+            $horarioEmpleado = $this->obtenerHorarioEmpleado($datosBase['empleado_id']);
+            $horaProgramada = $horarioEmpleado['hora_entrada'] ?? '09:00:00';
+            $tolerancia = $horarioEmpleado['tolerancia'] ?? 10;
+            
+            // Determinar tipo de asistencia basándose en horario del empleado
+            $tipoAsistencia = $this->determinarTipoAsistencia(
+                $datosBase['hora_entrada'], 
+                $datosBase['hora_salida'], 
+                $horaProgramada, 
+                $tolerancia
+            );
 
             // Preparar metadata con información original del dispositivo
             $metadata = json_encode([
@@ -678,6 +681,57 @@ class ZKTecoAsistenciaInserter {
             error_log("ERROR INSERT ASISTENCIA: " . $e->getMessage());
             return false;
         }
+    }
+    
+    /**
+     * Determina el tipo de asistencia basándose en hora de entrada/salida vs horario del empleado
+     * 
+     * @param string|null $horaEntrada Hora de entrada registrada
+     * @param string|null $horaSalida Hora de salida registrada
+     * @param string $horaProgramada Hora de entrada programada del empleado
+     * @param int $tolerancia Tolerancia en minutos
+     * @return string Tipo de asistencia: 'normal', 'con_retardo', 'retardo_menor', 'retardo_mayor', 'falta', 'por_definir'
+     */
+    private function determinarTipoAsistencia($horaEntrada, $horaSalida, $horaProgramada, $tolerancia) {
+        // Sin entrada ni salida
+        if (empty($horaEntrada) && empty($horaSalida)) {
+            return 'por_definir';
+        }
+        
+        // Solo salida (sin entrada)
+        if (empty($horaEntrada) && !empty($horaSalida)) {
+            return 'por_definir';
+        }
+        
+        // Si hay hora de entrada, verificar si es retardo
+        if (!empty($horaEntrada)) {
+            $timestampProgramado = strtotime($horaProgramada);
+            $timestampLimite = $timestampProgramado + ($tolerancia * 60);
+            $timestampEntrada = strtotime($horaEntrada);
+            
+            // Calcular minutos de retardo desde hora programada (no desde tolerancia)
+            $minutosRetraso = 0;
+            if ($timestampEntrada > $timestampProgramado) {
+                $minutosRetraso = floor(($timestampEntrada - $timestampProgramado) / 60);
+            }
+            
+            // Clasificar según minutos de retardo
+            // Tolerancia: 0-10 min = normal (sin retardo)
+            // Retardo menor: 11-20 min
+            // Retardo mayor: 21-30 min
+            // Falta: 31+ min
+            if ($minutosRetraso <= $tolerancia) {
+                return 'normal';
+            } elseif ($minutosRetraso >= 11 && $minutosRetraso <= 20) {
+                return 'retardo_menor';
+            } elseif ($minutosRetraso >= 21 && $minutosRetraso <= 30) {
+                return 'retardo_mayor';
+            } else {
+                return 'falta';
+            }
+        }
+        
+        return 'por_definir';
     }
     
     /**
@@ -740,8 +794,8 @@ class ZKTecoAsistenciaInserter {
      */
     private function insertarEnRetardos($datosBase, $idAsistencia) {
         try {
-            // Obtener el horario real del empleado
-            $horarioEmpleado = $this->obtenerHorarioEmpleado($datosBase['empleado_id']);
+            // Obtener el horario del ciclo del empleado para la fecha específica
+            $horarioEmpleado = $this->obtenerHorarioEmpleado($datosBase['empleado_id'], $datosBase['fecha']);
             $horaEntradaProgramada = $horarioEmpleado['hora_entrada'] ?? '09:00:00';
             $tolerancia = $horarioEmpleado['tolerancia'] ?? 10;
             
@@ -826,23 +880,93 @@ class ZKTecoAsistenciaInserter {
     }
     
     /**
-     * Obtiene el horario de un empleado
+     * Obtiene el horario de un empleado basado en su ciclo asignado
+     * Prioriza: ciclo -> empleado_horarios -> horarios_laborales por defecto
      */
-    private function obtenerHorarioEmpleado($empleadoId) {
-        $stmt = $this->db->getConnection()->prepare("
-            SELECT h.hora_entrada, h.tolerancia_minutos as tolerancia
-            FROM horarios_empleados he
-            JOIN horarios_laborales h ON he.horario_id = h.id
-            WHERE he.empleado_id = ? AND he.activo = 1
-            ORDER BY he.dia_semana ASC
-            LIMIT 1
-        ");
-        $stmt->execute([$empleadoId]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    private function obtenerHorarioEmpleado($empleadoId, $fecha = null) {
+        $fecha = $fecha ?: date('Y-m-d');
+        $diaSemana = date('N', strtotime($fecha)); // 1=Lunes, 7=Domingo
         
+        try {
+            // Paso 1: Obtener el ciclo activo del empleado
+            $stmtCiclo = $this->db->getConnection()->prepare("
+                SELECT ec.ciclo_id, c.nombre as ciclo_nombre
+                FROM empleados_ciclos ec
+                JOIN ciclos c ON ec.ciclo_id = c.id
+                WHERE ec.empleado_id = ? 
+                  AND ec.activo = 1
+                  AND c.activo = 1
+                  AND ec.fecha_inicio <= ?
+                ORDER BY ec.fecha_inicio DESC
+                LIMIT 1
+            ");
+            $stmtCiclo->execute([$empleadoId, $fecha]);
+            $cicloEmpleado = $stmtCiclo->fetch(PDO::FETCH_ASSOC);
+            
+            if ($cicloEmpleado) {
+                // Paso 2: Obtener el bloque del ciclo para este día de la semana
+                $stmtBloque = $this->db->getConnection()->prepare("
+                    SELECT bc.hora_inicio, bc.hora_fin, bc.horario_id,
+                           hl.tolerancia_minutos as tolerancia
+                    FROM bloques_ciclo bc
+                    JOIN horarios_laborales hl ON bc.horario_id = hl.id
+                    WHERE bc.ciclo_id = ?
+                      AND bc.dia_semana = ?
+                      AND bc.activo = 1
+                      AND hl.activo = 1
+                    ORDER BY bc.semana_numero DESC
+                    LIMIT 1
+                ");
+                $stmtBloque->execute([$cicloEmpleado['ciclo_id'], $diaSemana]);
+                $bloque = $stmtBloque->fetch(PDO::FETCH_ASSOC);
+                
+                if ($bloque) {
+                    return [
+                        'hora_entrada' => $bloque['hora_inicio'],
+                        'hora_salida' => $bloque['hora_fin'],
+                        'tolerancia' => $bloque['tolerancia'] ?? 10,
+                        'horario_id' => $bloque['horario_id'],
+                        'fuente' => 'ciclo',
+                        'ciclo_id' => $cicloEmpleado['ciclo_id'],
+                        'ciclo_nombre' => $cicloEmpleado['ciclo_nombre']
+                    ];
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Error obtenerHorarioEmpleado (ciclo): " . $e->getMessage());
+        }
+        
+        // Paso 3: Si no hay ciclo, usar horarios_empleados
+        try {
+            $stmt = $this->db->getConnection()->prepare("
+                SELECT h.hora_entrada, h.hora_salida, h.tolerancia_minutos as tolerancia
+                FROM horarios_empleados he
+                JOIN horarios_laborales h ON he.horario_id = h.id
+                WHERE he.empleado_id = ? AND he.activo = 1 AND h.activo = 1
+                ORDER BY he.dia_semana ASC
+                LIMIT 1
+            ");
+            $stmt->execute([$empleadoId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($result) {
+                return [
+                    'hora_entrada' => $result['hora_entrada'],
+                    'hora_salida' => $result['hora_salida'],
+                    'tolerancia' => $result['tolerancia'] ?? 10,
+                    'fuente' => 'horario_empleado'
+                ];
+            }
+        } catch (Exception $e) {
+            error_log("Error obtenerHorarioEmpleado (horario): " . $e->getMessage());
+        }
+        
+        // Paso 4: Horario por defecto
         return [
-            'hora_entrada' => $result['hora_entrada'] ?? '09:00:00',
-            'tolerancia' => $result['tolerancia'] ?? 10
+            'hora_entrada' => '09:00:00',
+            'hora_salida' => '16:00:00',
+            'tolerancia' => 10,
+            'fuente' => 'defecto'
         ];
     }
     

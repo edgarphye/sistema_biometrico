@@ -181,6 +181,8 @@ class Usuario {
             'validaciones_ver' => 'Ver Validaciones',
             'validaciones_aprobar' => 'Aprobar Validaciones',
             'validaciones_rechazar' => 'Rechazar Validaciones',
+            'mis_validaciones' => 'Mis Validaciones',
+            'marcaciones' => 'Marcaciones',  // <-- Added
             'reportes' => 'Reportes',
             'reportes_ver' => 'Ver Reportes',
             'reportes_exportar' => 'Exportar Reportes',
@@ -190,6 +192,7 @@ class Usuario {
             'biometricos_ver' => 'Ver Dispositivos',
             'biometricos_agregar' => 'Agregar Dispositivos',
             'biometricos_configurar' => 'Configurar Dispositivos',
+            'biometricos_gestionar' => 'Gestionar Dispositivos Biométricos',
             'database' => 'Base de Datos',
             'database_backup' => 'Crear Backup',
             'database_restore' => 'Restaurar Backup',
@@ -204,6 +207,7 @@ class Usuario {
             'usuarios_editar' => 'Editar Usuarios',
             'usuarios_eliminar' => 'Eliminar Usuarios',
             'usuarios_permisos' => 'Administrar Permisos',
+            'configurar_menu' => 'Configurar Menú',
         ];
     }
 
@@ -213,30 +217,34 @@ class Usuario {
             'admin' => [
                 'dashboard', 'inicio', 
                 'empleados', 'empleados_ver', 'empleados_crear', 'empleados_editar', 'empleados_eliminar',
-                'asistencia',
+                'asistencia', 'marcaciones',
                 'horarios', 'horarios_ver', 'horarios_crear', 'horarios_editar', 'horarios_eliminar',
                 'ciclos', 'ciclos_ver', 'ciclos_crear', 'ciclos_editar', 'ciclos_eliminar',
                 'validaciones', 'validaciones_ver', 'validaciones_aprobar', 'validaciones_rechazar',
                 'reportes', 'reportes_ver', 'reportes_exportar', 'reportes_excel',
                 'analisis_predictivo',
-                'biometricos', 'biometricos_ver', 'biometricos_agregar', 'biometricos_configurar',
+                'biometricos', 'biometricos_ver', 'biometricos_agregar', 'biometricos_configurar', 'biometricos_gestionar',
                 'database', 'database_backup', 'database_restore', 'database_export',
                 'catalogos', 'catalogos_ver', 'catalogos_editar',
                 'configuracion',
                 'usuarios', 'usuarios_ver', 'usuarios_crear', 'usuarios_editar', 'usuarios_eliminar', 'usuarios_permisos',
+                'configurar_menu',
                 'logs'
             ],
             'jefe' => [
                 'dashboard', 'inicio', 
                 'empleados', 'empleados_ver',
                 'validaciones', 'validaciones_ver', 'validaciones_aprobar', 'validaciones_rechazar',
-                'reportes', 'reportes_ver'
+                'marcaciones',
+                'reportes', 'reportes_ver',
+                'mis_validaciones'
             ],
             'usuario' => [
-                'dashboard', 'inicio', 
+                'dashboard', 'inicio',
                 'empleados', 'empleados_ver',
-                'asistencia',
-                'reportes', 'reportes_ver', 'reportes_exportar'
+                'asistencia', 'marcaciones',
+                'reportes', 'reportes_ver', 'reportes_exportar',
+                'mis_validaciones'
             ],
         ];
         return $permisosBase[$rol] ?? [];

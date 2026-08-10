@@ -1,5 +1,5 @@
 <?php
-require_once 'layout.php';
+require_once __DIR__ . '/../layout.php';
 
 // Verificar si viene de login o es setup directo
 $setupMode = isset($_GET['mode']) ? $_GET['mode'] : 'email';
@@ -259,7 +259,7 @@ if ($setupMode === 'totp' && isset($_SESSION['totp_setup_secret'])) {
     </div>
 </div>
 
-<script>
+<script<?= SecurityHelper::nonceAttr() ?>>
 // Auto-submit TOTP generation
 document.addEventListener('DOMContentLoaded', function() {
     const tabButtons = document.querySelectorAll('[data-bs-toggle="pill"]');
@@ -290,4 +290,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php include 'footer.php'; ?>
+<?php include __DIR__ . '/../footer.php'; ?>

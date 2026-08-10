@@ -45,10 +45,11 @@ $content = '
     }
     .dashboard-biometrico .metric-card.metric-1 { background: linear-gradient(135deg, var(--pantone-primary) 0%, var(--pantone-primary-dark) 100%); }
     .dashboard-biometrico .metric-card.metric-2 { background: linear-gradient(135deg, var(--pantone-secondary) 0%, var(--pantone-secondary-dark) 100%); }
-    .dashboard-biometrico .metric-card.metric-3 { background: linear-gradient(135deg, var(--pantone-accent-dark) 0%, #a67c4a 100%); }
-    .dashboard-biometrico .metric-card.metric-4 { background: linear-gradient(135deg, #555555 0%, #333333 100%); }
+    .dashboard-biometrico .metric-card.metric-3 { background: linear-gradient(135deg, var(--pantone-primary-dark) 0%, #4a1325 100%); }
+    .dashboard-biometrico .metric-card.metric-4 { background: linear-gradient(135deg, var(--pantone-secondary-dark) 0%, #081a16 100%); }
     
     .dashboard-biometrico .metric-card .card-body {
+        background: transparent;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -288,6 +289,50 @@ $content = '
     body.dark-theme .dashboard-biometrico .empty-state i {
         color: #555555 !important;
     }
+
+    body.dark-theme .table-empleados th {
+        background: #501526;
+    }
+    body.dark-theme .table-empleados td {
+        color: #e0e0e0;
+        background: #1e1e32;
+    }
+    body.dark-theme .table-empleados tr:hover td {
+        background: #2a2a40;
+    }
+    body.dark-theme .search-empleado {
+        background: #252538;
+        border-color: #3a3a50;
+        color: #e0e0e0;
+    }
+    body.dark-theme .search-empleado:focus {
+        border-color: #9F2241;
+        background: #1e1e32;
+        color: #ffffff;
+    }
+    body.dark-theme #empleadosCount {
+        background: #3a3a50 !important;
+        color: #e0e0e0 !important;
+    }
+
+    .table-empleados th {
+        background: var(--pantone-primary);
+        color: white;
+        font-weight: 500;
+    }
+    .table-empleados td {
+        vertical-align: middle;
+    }
+    .search-empleado {
+        border-radius: 25px;
+        border: 2px solid #e0e0e0;
+        padding: 8px 16px;
+        transition: border-color 0.3s;
+    }
+    .search-empleado:focus {
+        border-color: var(--pantone-primary);
+        box-shadow: 0 0 0 0.2rem rgba(159, 34, 65, 0.15);
+    }
 </style>
 
 <div class="dashboard-biometrico">
@@ -302,7 +347,7 @@ $content = '
             <div class="card metric-card metric-1">
                 <div class="card-body text-center py-4">
                     <i class="fas fa-server fa-2x mb-3"></i>
-                    <h3>' . count($dispositivos) . '</h3>
+                    <h3>' . (is_array($dispositivos) ? count($dispositivos) : 0) . '</h3>
                     <p><i class="fas fa-server me-2"></i>Dispositivos Activos</p>
                 </div>
             </div>
@@ -311,7 +356,7 @@ $content = '
             <div class="card metric-card metric-2">
                 <div class="card-body text-center py-4">
                     <i class="fas fa-check-circle fa-2x mb-3"></i>
-                    <h3>' . array_sum(array_column($estadisticasBiometricas, 'total_verificaciones')) . '</h3>
+                    <h3>' . (is_array($estadisticasBiometricas) ? array_sum(array_column($estadisticasBiometricas, 'total_verificaciones')) : 0) . '</h3>
                     <p><i class="fas fa-check-circle me-2"></i>Verificaciones Hoy</p>
                 </div>
             </div>
@@ -437,6 +482,71 @@ $content .= '
     </div>
 </div>
 
+<!-- Empleados con registro biométrico -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #691C32 0%, #501526 100%);">
+                <h5 class="mb-0"><i class="fas fa-users me-2"></i>Empleados con Registro Biométrico</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="text" id="searchEmpleadoBio" class="form-control search-empleado" placeholder="Buscar por nombre, apellido o área...">
+                    </div>
+                    <div class="col-md-2">
+                        <select id="filterAreaBio" class="form-select">
+                            <option value="">Todas las áreas</option>
+                            ' . (!empty($empleadosConHuella) ? implode('', array_map(function($a) { return '<option value="' . htmlspecialchars($a) . '">' . htmlspecialchars($a) . '</option>'; }, array_unique(array_filter(array_column($empleadosConHuella, 'area'))))) : '') . '
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select id="filterJerarquiaBio" class="form-select">
+                            <option value="">Todas las jerarquías</option>
+                            ' . (!empty($empleadosConHuella) ? implode('', array_map(function($a) { return '<option value="' . htmlspecialchars($a) . '">' . htmlspecialchars($a) . '</option>'; }, array_unique(array_filter(array_column($empleadosConHuella, 'jerarquia'))))) : '') . '
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <span class="badge bg-secondary p-2 mt-1 float-end" id="empleadosCount">' . count($empleadosConHuella ?? []) . ' empleados</span>
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-hover table-empleados mb-0" id="tablaEmpleadosBio">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>Área</th>
+                                <th>Puesto</th>
+                                <th>Jerarquía</th>
+                                <th style="width: 100px;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ' . (!empty($empleadosConHuella) ? implode('', array_map(function($e) {
+                                return '<tr data-search="' . strtolower(htmlspecialchars($e['nombre'] . ' ' . $e['apellido'] . ' ' . ($e['area'] ?? '') . ' ' . ($e['puesto'] ?? ''))) . '" data-area="' . htmlspecialchars($e['area'] ?? '') . '" data-jerarquia="' . htmlspecialchars($e['jerarquia'] ?? '') . '">
+                                    <td>' . $e['id'] . '</td>
+                                    <td>' . htmlspecialchars($e['nombre']) . '</td>
+                                    <td>' . htmlspecialchars($e['apellido']) . '</td>
+                                    <td>' . htmlspecialchars($e['area'] ?? '') . '</td>
+                                    <td>' . htmlspecialchars($e['puesto'] ?? '') . '</td>
+                                    <td><span class="badge bg-secondary">' . htmlspecialchars($e['jerarquia'] ?? '') . '</span></td>
+                                    <td>
+                                        <button class="btn btn-pantone-primary btn-sm" onclick="editarEmpleadoBio(' . $e['id'] . ')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>';
+                            }, $empleadosConHuella)) : '<tr><td colspan="7" class="text-center py-4 text-muted">No hay empleados con registro biométrico</td></tr>') . '
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="modalDetalles" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content" style="border-radius: 16px; overflow: hidden;">
@@ -482,8 +592,67 @@ $content .= '
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Modal para editar empleado desde el dashboard biométrico -->
+<div class="modal fade" id="modalEditEmpleadoBio" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #691C32 0%, #501526 100%); color: white;">
+                <h5 class="modal-title"><i class="fas fa-user-edit me-2"></i>Editar Empleado</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formEditEmpleadoBio" onsubmit="return guardarEmpleadoBio(event)">
+                <input type="hidden" name="id" id="editEmpleadoId">
+                <input type="hidden" name="csrf_token" id="editCsrfToken">
+                <div class="modal-body">
+                    <div id="editEmpleadoError" class="alert alert-danger d-none"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="editNombre" class="form-label">Nombre(s)</label>
+                            <input type="text" class="form-control" id="editNombre" name="nombre" maxlength="100" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editApellido" class="form-label">Apellido</label>
+                            <input type="text" class="form-control" id="editApellido" name="apellido" maxlength="100" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editArea" class="form-label">Área</label>
+                            <input type="text" class="form-control" id="editArea" name="area" maxlength="100">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editPuesto" class="form-label">Puesto</label>
+                            <input type="text" class="form-control" id="editPuesto" name="puesto" maxlength="100">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editJerarquia" class="form-label">Jerarquía</label>
+                            <select class="form-select" id="editJerarquia" name="jerarquia">
+                                <option value="Empleado">Empleado</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Gerente">Gerente</option>
+                                <option value="Director">Director</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editClaveDepto" class="form-label">Clave Depto</label>
+                            <input type="text" class="form-control" id="editClaveDepto" name="clave_depto" maxlength="50">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="border-radius: 25px;" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-pantone-primary" id="btnGuardarEmpleadoBio">
+                        <i class="fas fa-save me-1"></i> Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="' . rtrim(BASE_URL, '/') . '/assets/js/chart.umd.min.js"></script>
 <script>
+    const csrfToken = ' . '\'' . Csrf::token() . '\'' . ';
+    document.getElementById(\'editCsrfToken\') && (document.getElementById(\'editCsrfToken\').value = csrfToken);
+    
     const ctx = document.getElementById("biometricChart").getContext("2d");
     const chart = new Chart(ctx, {
         type: "doughnut",
@@ -586,7 +755,123 @@ $content .= '
         modal.show();
     }
 
-    setInterval(() => {
+    // Empleados - b\xc3\xbasqueda y filtros
+    document.addEventListener("DOMContentLoaded", function() {
+        var searchInput = document.getElementById("searchEmpleadoBio");
+        var filterArea = document.getElementById("filterAreaBio");
+        var filterJerarquia = document.getElementById("filterJerarquiaBio");
+        var table = document.getElementById("tablaEmpleadosBio");
+        if (!table) return;
+        var rows = table.querySelectorAll("tbody tr");
+
+        function filtrarEmpleados() {
+            var term = searchInput ? searchInput.value.toLowerCase() : "";
+            var area = filterArea ? filterArea.value : "";
+            var jerarquia = filterJerarquia ? filterJerarquia.value : "";
+            var visible = 0;
+
+            rows.forEach(function(row) {
+                if (row.cells.length < 7) return;
+                var search = row.getAttribute("data-search") || "";
+                var rowArea = row.getAttribute("data-area") || "";
+                var rowJer = row.getAttribute("data-jerarquia") || "";
+                var matchTerm = !term || search.indexOf(term) !== -1;
+                var matchArea = !area || rowArea === area;
+                var matchJer = !jerarquia || rowJer === jerarquia;
+                row.style.display = (matchTerm && matchArea && matchJer) ? "" : "none";
+                if (matchTerm && matchArea && matchJer) visible++;
+            });
+
+            var countEl = document.getElementById("empleadosCount");
+            if (countEl) countEl.textContent = visible + " empleados";
+        }
+
+        if (searchInput) searchInput.addEventListener("input", filtrarEmpleados);
+        if (filterArea) filterArea.addEventListener("change", filtrarEmpleados);
+        if (filterJerarquia) filterJerarquia.addEventListener("change", filtrarEmpleados);
+    });
+
+    // Editar empleado desde dashboard biom\xc3\xa9trico
+    function editarEmpleadoBio(id) {
+        document.getElementById("editEmpleadoError").classList.add("d-none");
+        var btn = document.getElementById("btnGuardarEmpleadoBio");
+        btn.disabled = true;
+        btn.innerHTML = "<span class=\\"spinner-border spinner-border-sm me-1\\"></span> Cargando...";
+
+        fetch(BASE_URL + "/empleados/" + id, {
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.success && data.empleado) {
+                document.getElementById("editEmpleadoId").value = data.empleado.id;
+                document.getElementById("editNombre").value = data.empleado.nombre || "";
+                document.getElementById("editApellido").value = data.empleado.apellido || "";
+                document.getElementById("editArea").value = data.empleado.area || "";
+                document.getElementById("editPuesto").value = data.empleado.puesto || "";
+                document.getElementById("editJerarquia").value = data.empleado.jerarquia || "Empleado";
+                document.getElementById("editClaveDepto").value = data.empleado.clave_depto || "";
+
+                var modal = new bootstrap.Modal(document.getElementById("modalEditEmpleadoBio"));
+                modal.show();
+            } else {
+                mostrarErrorEdit(data.error || "Error al cargar datos del empleado");
+            }
+        })
+        .catch(function(err) {
+            mostrarErrorEdit("Error de red: " + err.message);
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerHTML = "<i class=\\"fas fa-save me-1\\"></i> Guardar";
+        });
+    }
+
+    function guardarEmpleadoBio(event) {
+        event.preventDefault();
+        document.getElementById("editEmpleadoError").classList.add("d-none");
+        var btn = document.getElementById("btnGuardarEmpleadoBio");
+        btn.disabled = true;
+        btn.innerHTML = "<span class=\\"spinner-border spinner-border-sm me-1\\"></span> Guardando...";
+
+        var formData = new URLSearchParams(new FormData(document.getElementById("formEditEmpleadoBio")));
+
+        fetch(BASE_URL + "/empleados/edit", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: formData.toString()
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.success) {
+                var modal = bootstrap.Modal.getInstance(document.getElementById("modalEditEmpleadoBio"));
+                if (modal) modal.hide();
+                location.reload();
+            } else {
+                mostrarErrorEdit(data.error || "Error al guardar");
+            }
+        })
+        .catch(function(err) {
+            mostrarErrorEdit("Error de red: " + err.message);
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerHTML = "<i class=\\"fas fa-save me-1\\"></i> Guardar";
+        });
+
+        return false;
+    }
+
+    function mostrarErrorEdit(msg) {
+        var el = document.getElementById("editEmpleadoError");
+        el.textContent = msg;
+        el.classList.remove("d-none");
+    }
+
+    setInterval(function() {
         location.reload();
     }, 30000);
 </script>

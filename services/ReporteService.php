@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/../models/Asistencia.php';
-require_once __DIR__ . '/../vendor/autoload.php';
+
+if (!class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+    require_once __DIR__ . '/../vendor/autoload.php';
+}
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -15,27 +18,22 @@ class ReporteService {
     }
 
     public function exportarExcel($filtros, $area = null) {
-        // Obtener registros de asistencia filtrados
-        $registros = $this->asistenciaModel->getAsistenciaFiltrada($filtros);
+        $registros = $this->asistenciaModel->getAsistenciaConRetardos($filtros);
 
-        // Si hay filtro de área, filtrar adicionalmente
         if ($area) {
             $registros = array_filter($registros, function($registro) use ($area) {
                 return $registro['area'] === $area;
             });
         }
 
-        // Crear nuevo documento Excel
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Título
         $sheet->setCellValue('A1', 'Sistema Biométrico - Reporte de Asistencia');
-        $sheet->mergeCells('A1:J1');
+        $sheet->mergeCells('A1:L1');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-        // Filtros aplicados
         $sheet->setCellValue('A3', 'Filtros Aplicados:');
         $sheet->getStyle('A3')->getFont()->setBold(true);
         $sheet->setCellValue('B3', 'Fecha Inicio: ' . $filtros['fecha_inicio']);
@@ -53,8 +51,7 @@ class ReporteService {
             $sheet->setCellValue('G3', 'Tipo: ' . $filtros['tipo_asistencia']);
         }
 
-        // Encabezados de la tabla
-        $headers = ['ID', 'Empleado', 'Área', 'Fecha', 'Hora', 'Tipo', 'Dispositivo', 'Biometría', 'Calidad', 'Tiempo Proc.'];
+        $headers = ['ID', 'Empleado', 'Área', 'Fecha', 'Hora Entrada', 'Hora Salida', 'Tipo', 'Dispositivo', 'Biometría', 'Calidad', 'Minutos Retardo', 'Justificado'];
         $col = 'A';
         foreach ($headers as $header) {
             $sheet->setCellValue($col . '5', $header);
@@ -63,28 +60,33 @@ class ReporteService {
             $col++;
         }
 
-        // Datos
         $row = 6;
         foreach ($registros as $registro) {
             $sheet->setCellValue('A' . $row, $registro['id']);
             $sheet->setCellValue('B' . $row, $registro['nombre'] . ' ' . $registro['apellido']);
             $sheet->setCellValue('C' . $row, $registro['area'] ?? 'Sin Área');
-            $sheet->setCellValue('D' . $row, date('d/m/Y', strtotime($registro['timestamp'])));
-            $sheet->setCellValue('E' . $row, date('H:i:s', strtotime($registro['timestamp'])));
-            $sheet->setCellValue('F' . $row, ucfirst($registro['tipo']));
-            $sheet->setCellValue('G' . $row, 'Dispositivo ' . $registro['dispositivo_id']);
-            $sheet->setCellValue('H' . $row, $registro['tipo_biometria'] ?? 'N/A');
-            $sheet->setCellValue('I' . $row, $registro['calidad_verificacion'] ? $registro['calidad_verificacion'] . '%' : 'N/A');
-            $sheet->setCellValue('J' . $row, $registro['tiempo_procesamiento'] ? round($registro['tiempo_procesamiento'], 3) . 's' : 'N/A');
+            $fecha = $registro['timestamp'] ?? null;
+            if ($fecha) {
+                $sheet->setCellValue('D' . $row, date('d/m/Y', strtotime($fecha)));
+                $sheet->setCellValue('E' . $row, $registro['hora_entrada'] ?? '');
+            } else {
+                $sheet->setCellValue('D' . $row, '');
+                $sheet->setCellValue('E' . $row, '');
+            }
+            $sheet->setCellValue('F' . $row, $registro['hora_salida'] ?? '');
+            $sheet->setCellValue('G' . $row, ucfirst($registro['tipo'] ?? ''));
+            $sheet->setCellValue('H' . $row, 'Dispositivo ' . $registro['dispositivo_id']);
+            $sheet->setCellValue('I' . $row, $registro['tipo_biometria'] ?? 'N/A');
+            $sheet->setCellValue('J' . $row, ($registro['calidad_verificacion'] ?? '') ? $registro['calidad_verificacion'] . '%' : 'N/A');
+            $sheet->setCellValue('K' . $row, $registro['minutos_retardo'] ?? '');
+            $sheet->setCellValue('L' . $row, ($registro['justificado'] ?? 0) ? 'Sí' : 'No');
             $row++;
         }
 
-        // Autoajustar columnas
-        foreach (range('A', 'J') as $columnID) {
+        foreach (range('A', 'L') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
 
-        // Crear archivo temporal
         $filename = 'reporte_asistencia_' . date('Y-m-d_H-i-s') . '.xlsx';
         $filepath = sys_get_temp_dir() . '/' . $filename;
 
@@ -163,13 +165,13 @@ class ReporteService {
             $html .= '<p><strong>Área:</strong> ' . htmlspecialchars($area) . '</p>';
         }
         if (isset($filtros['dispositivo_id'])) {
-            $html .= '<p><strong>Dispositivo:</strong> ' . $filtros['dispositivo_id'] . '</p>';
+            $html .= '<p><strong>Dispositivo:</strong> ' . htmlspecialchars((string)$filtros['dispositivo_id']) . '</p>';
         }
         if (isset($filtros['tipo_biometria'])) {
-            $html .= '<p><strong>Biometría:</strong> ' . ucfirst($filtros['tipo_biometria']) . '</p>';
+            $html .= '<p><strong>Biometría:</strong> ' . htmlspecialchars(ucfirst($filtros['tipo_biometria'])) . '</p>';
         }
         if (isset($filtros['tipo_asistencia'])) {
-            $html .= '<p><strong>Tipo:</strong> ' . ucfirst($filtros['tipo_asistencia']) . '</p>';
+            $html .= '<p><strong>Tipo:</strong> ' . htmlspecialchars(ucfirst($filtros['tipo_asistencia'])) . '</p>';
         }
 
         $html .= '<p><strong>Total de Registros:</strong> ' . count($registros) . '</p>

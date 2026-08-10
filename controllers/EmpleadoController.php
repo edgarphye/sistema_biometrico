@@ -1,14 +1,15 @@
 <?php
-require_once 'models/Empleado.php';
-require_once 'models/Asistencia.php';
-require_once 'models/Retardo.php';
-require_once 'models/Comision.php';
-require_once 'models/Ausencia.php';
-require_once 'models/Sancion.php';
-require_once 'models/DiasEconomicos.php';
-require_once 'helpers/RfcCurpHelper.php';
-require_once 'helpers/RequestValidator.php';
-require_once 'helpers/Csrf.php';
+require_once __DIR__ . '/../models/Empleado.php';
+require_once __DIR__ . '/../models/Asistencia.php';
+require_once __DIR__ . '/../models/Retardo.php';
+require_once __DIR__ . '/../models/Comision.php';
+require_once __DIR__ . '/../models/Ausencia.php';
+require_once __DIR__ . '/../models/Sancion.php';
+require_once __DIR__ . '/../models/DiasEconomicos.php';
+require_once __DIR__ . '/../helpers/RfcCurpHelper.php';
+require_once __DIR__ . '/../helpers/RequestValidator.php';
+require_once __DIR__ . '/../helpers/Csrf.php';
+require_once __DIR__ . '/../helpers/SecurityHelper.php';
 require_once __DIR__ . '/BaseController.php';
 
 class EmpleadoController extends BaseController {
@@ -39,10 +40,10 @@ class EmpleadoController extends BaseController {
         $this->requireAuth();
         
         // Verificar si es petición AJAX
-        $isAjax = isset($_GET['ajax']) && $_GET['ajax'] === '1';
+        $isAjax = isset($_GET['ajax']) && SecurityHelper::sanitizeString($_GET['ajax'], 'numeric') === '1';
         
         // Capturar término de búsqueda
-        $search = $_GET['search'] ?? $_GET['q'] ?? '';
+        $search = SecurityHelper::sanitizeString($_GET['search'] ?? $_GET['q'] ?? '');
         
         // Obtener datos del usuario logueado
         $rolActual = strtolower($_SESSION['rol'] ?? '');
@@ -86,14 +87,31 @@ class EmpleadoController extends BaseController {
             $empleados = $allEmpleados;
         }
         
-        // Enriquecer datos para las cards (Estado de asistencia hoy)
+        // Enriquecer datos para las cards (Estado de asistencia hoy) - batch query
         $fechaHoy = date('Y-m-d');
-        foreach ($empleados as &$emp) {
-            $asistencias = $this->asistenciaModel->getByEmpleado($emp['id'], $fechaHoy, $fechaHoy);
-            $emp['status_asistencia'] = 'ausente';
-            $emp['hora_entrada'] = '';
-            
-            if (!empty($asistencias)) {
+        $empleadosPorId = [];
+        foreach ($empleados as $emp) {
+            $empleadosPorId[$emp['id']] = $emp;
+        }
+        if (!empty($empleadosPorId)) {
+            $ids = array_keys($empleadosPorId);
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $db = Database::getInstance()->getConnection();
+            $stmt = $db->prepare("SELECT empleado_id, hora_entrada, hora_salida FROM asistencia WHERE DATE(fecha) = ? AND empleado_id IN ($placeholders) ORDER BY empleado_id, hora_entrada");
+            $stmt->execute(array_merge([$fechaHoy], $ids));
+            $asistenciasHoy = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $asistenciaPorEmpleado = [];
+            foreach ($asistenciasHoy as $a) {
+                $eid = $a['empleado_id'];
+                if (!isset($asistenciaPorEmpleado[$eid])) {
+                    $asistenciaPorEmpleado[$eid] = [];
+                }
+                $asistenciaPorEmpleado[$eid][] = $a;
+            }
+            foreach ($empleadosPorId as $eid => &$emp) {
+                $emp['status_asistencia'] = 'ausente';
+                $emp['hora_entrada'] = '';
+                $asistencias = $asistenciaPorEmpleado[$eid] ?? [];
                 foreach ($asistencias as $asis) {
                     if (!empty($asis['hora_entrada'])) {
                         $emp['status_asistencia'] = !empty($asis['hora_salida']) ? 'salida' : 'presente';
@@ -102,8 +120,9 @@ class EmpleadoController extends BaseController {
                     }
                 }
             }
+            unset($emp);
+            $empleados = array_values($empleadosPorId);
         }
-        unset($emp);
         
         // Si es petición AJAX, devolver JSON
         if ($isAjax) {
@@ -139,14 +158,97 @@ class EmpleadoController extends BaseController {
         $this->resumenCompleto($id);
     }
     
+    /**
+     * Ver perfil de empleado en modo solo lectura
+     */
+    public function verPerfil($id) {
+        $empleado = $this->empleadoModel->getById($id);
+        if (!$empleado) {
+            $this->redirect(BASE_URL . '/empleados?error=not_found');
+        }
+
+        $asistencias = $this->asistenciaModel->getByEmpleado($id);
+        $retardos = $this->retardoModel->getRetardosByEmpleado($id);
+        $incidencias = $this->retardoModel->getIncidenciasByEmpleado($id);
+        
+        // Combinar historial
+        $historialCompleto = [];
+        foreach ($asistencias as $a) {
+            $historialCompleto[] = [
+                'id' => $a['id'], 'fecha' => $a['fecha'],
+                'hora_entrada' => $a['hora_entrada'] ?? null,
+                'hora_salida' => $a['hora_salida'] ?? null,
+                'tipo' => $a['tipo_asistencia'] ?? 'normal',
+                'fuente' => 'asistencia', 'justificado' => 1, 'minutos' => null
+            ];
+        }
+        foreach ($retardos as $r) {
+            $tipoRetardo = $r['tipo_incidencia'] ?? $r['tipo_retraso'] ?? 'retardo_menor';
+            $historialCompleto[] = [
+                'id' => $r['id'], 'fecha' => $r['fecha'],
+                'hora_entrada' => $r['hora_entrada'] ?? null,
+                'hora_salida' => $r['hora_salida'] ?? null,
+                'tipo' => $tipoRetardo, 'fuente' => 'retardos',
+                'justificado' => $r['justificado'] ?? 0, 'minutos' => $r['minutos_retardo'] ?? 0
+            ];
+        }
+        foreach ($incidencias as $i) {
+            $historialCompleto[] = [
+                'id' => $i['id'], 'fecha' => $i['fecha'],
+                'hora_entrada' => $i['hora_entrada'] ?? null,
+                'hora_salida' => $i['hora_salida'] ?? null,
+                'tipo' => $i['tipo_incidencia'] ?? 'normal', 'fuente' => 'incidencias',
+                'justificado' => $i['justificado'] ?? 0, 'minutos' => $i['minutos_retardo'] ?? 0
+            ];
+        }
+        usort($historialCompleto, fn($a, $b) => strtotime($b['fecha']) - strtotime($a['fecha']));
+        
+        $asistenciasPorDefinir = $this->asistenciaModel->getByEmpleadoPorDefinir($id);
+        $ausencias = $this->ausenciaModel->getByEmpleado($id);
+        $sanciones = $this->sancionModel->getByEmpleado($id);
+        
+        require_once 'models/DiasEconomicos.php';
+        $diasEcoModel = new DiasEconomicos();
+        $diasEcoInfo = $diasEcoModel->getDiasDisponiblesDetallado($id);
+
+        $soloLectura = true;
+        require 'views/empleados/show.php';
+    }
+    
     public function show($id) {
         $empleado = $this->empleadoModel->getById($id);
         if (!$empleado) {
             $this->redirect(BASE_URL . '/empleados?error=not_found');
         }
 
+        // Si es AJAX, devolver JSON con datos básicos del empleado
+        $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
+        if ($isAjax) {
+            $this->jsonResponse([
+                'success' => true,
+                'empleado' => [
+                    'id' => $empleado['id'],
+                    'nombre' => $empleado['nombre'],
+                    'apellido' => $empleado['apellido'],
+                    'area' => $empleado['area'] ?? '',
+                    'puesto' => $empleado['puesto'] ?? '',
+                    'jerarquia' => $empleado['jerarquia'] ?? '',
+                    'clave_depto' => $empleado['clave_depto'] ?? ''
+                ]
+            ]);
+            return;
+        }
+
         $fecha_inicio = $_GET['fecha_inicio'] ?? null;
         $fecha_fin = $_GET['fecha_fin'] ?? null;
+        
+        // Validate date formats if provided
+        if ($fecha_inicio !== null && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_inicio)) {
+            $fecha_inicio = null;
+        }
+        if ($fecha_fin !== null && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_fin)) {
+            $fecha_fin = null;
+        }
         
         $asistencias = $this->asistenciaModel->getByEmpleado($id, $fecha_inicio, $fecha_fin);
         
@@ -244,19 +346,19 @@ class EmpleadoController extends BaseController {
             
             // Validar datos del formulario
             $data = [
-                'nombre' => trim(mb_substr($_POST['nombres'] ?? $_POST['nombre_completo'] ?? '', 0, 100)),
-                'apellido' => trim(mb_substr(($_POST['primer_apellido'] ?? '') . ' ' . ($_POST['segundo_apellido'] ?? ''), 0, 100)),
-                'rfc' => trim($_POST['rfc'] ?? ''),
-                'curp' => trim($_POST['curp'] ?? ''),
-                'area' => trim(mb_substr($_POST['area'] ?? '', 0, 100)),
-                'area_fisica' => trim(mb_substr($_POST['area_fisica'] ?? '', 0, 100)),
-                'jerarquia' => trim($_POST['jerarquia'] ?? ''),
-                'sexo' => trim($_POST['sexo'] ?? ''),
-                'fecha_nacimiento' => trim($_POST['fecha_nacimiento'] ?? ''),
-                'entidad_federativa' => trim($_POST['entidad_federativa'] ?? ''),
-                'clave_depto' => trim(mb_substr($_POST['clave_depto'] ?? '', 0, 50)),
-                'jefe_directo_id' => trim($_POST['jefe_directo_id'] ?? ''),
-                'jefe_directo_clave' => trim($_POST['jefe_directo_id'] ?? '')
+                'nombre' => SecurityHelper::sanitizeString(mb_substr($_POST['nombres'] ?? $_POST['nombre_completo'] ?? '', 0, 100)),
+                'apellido' => SecurityHelper::sanitizeString(trim(mb_substr(($_POST['primer_apellido'] ?? '') . ' ' . ($_POST['segundo_apellido'] ?? ''), 0, 100))),
+                'rfc' => SecurityHelper::sanitizeString(trim($_POST['rfc'] ?? ''), 'alphanum'),
+                'curp' => SecurityHelper::sanitizeString(trim($_POST['curp'] ?? ''), 'alphanum'),
+                'area' => SecurityHelper::sanitizeString(mb_substr($_POST['area'] ?? '', 0, 100)),
+                'area_fisica' => SecurityHelper::sanitizeString(mb_substr($_POST['area_fisica'] ?? '', 0, 100)),
+                'jerarquia' => SecurityHelper::sanitizeString(trim($_POST['jerarquia'] ?? ''), 'alpha'),
+                'sexo' => SecurityHelper::sanitizeString(trim($_POST['sexo'] ?? ''), 'alpha'),
+                'fecha_nacimiento' => SecurityHelper::sanitizeString(trim($_POST['fecha_nacimiento'] ?? '')),
+                'entidad_federativa' => SecurityHelper::sanitizeString(trim($_POST['entidad_federativa'] ?? '')),
+                'clave_depto' => SecurityHelper::sanitizeString(mb_substr($_POST['clave_depto'] ?? '', 0, 50), 'alphanum'),
+                'jefe_directo_id' => SecurityHelper::sanitizeString($_POST['jefe_directo_id'] ?? '', 'alphanum'),
+                'jefe_directo_clave' => SecurityHelper::sanitizeString($_POST['jefe_directo_id'] ?? '', 'alphanum')
             ];
             
             // Validar usando RequestValidator
@@ -275,14 +377,13 @@ class EmpleadoController extends BaseController {
 
             // Subir foto si existe
             if (isset($_FILES['foto_cara']) && $_FILES['foto_cara']['error'] == 0) {
-                $target_dir = "uploads/fotos_empleados/";
-                if (!is_dir($target_dir)) {
-                    mkdir($target_dir, 0777, true);
-                }
-                $file_extension = strtolower(pathinfo($_FILES["foto_cara"]["name"], PATHINFO_EXTENSION));
-                $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
-                
-                if (in_array($file_extension, $allowed_extensions)) {
+                $allowedMimes = ['image/jpeg', 'image/png', 'image/gif'];
+                if ($this->validateMime($_FILES['foto_cara'], $allowedMimes)) {
+                    $target_dir = "uploads/fotos_empleados/";
+                    if (!is_dir($target_dir)) {
+                        mkdir($target_dir, 0777, true);
+                    }
+                    $file_extension = strtolower(pathinfo($_FILES["foto_cara"]["name"], PATHINFO_EXTENSION));
                     $new_filename = 'empleado_' . time() . '.' . $file_extension;
                     $target_file = $target_dir . $new_filename;
                     
@@ -294,6 +395,13 @@ class EmpleadoController extends BaseController {
 
             // Crear empleado
             if ($empleadoId = $this->empleadoModel->create($data)) {
+                // Guardar claves presupuestales
+                require_once 'models/ClavePresupuestal.php';
+                $claves = $_POST['claves_presupuestales'] ?? [];
+                if (is_array($claves)) {
+                    (new ClavePresupuestal())->guardar($empleadoId, $claves);
+                }
+                
                 // Procesar registro biométrico si se solicitó
                 if (isset($_POST['registrar_huella']) && $_POST['registrar_huella'] == '1') {
                     $this->procesarRegistroBiometrico($empleadoId, $_POST);
@@ -327,7 +435,7 @@ class EmpleadoController extends BaseController {
         
         // Si no viene ID de la ruta, obtenerlo del POST
         if ($id === null && isset($_POST['id'])) {
-            $id = (int)$_POST['id'];
+            $id = SecurityHelper::sanitizeInt($_POST['id'], 1);
         }
         
         if (!$id) {
@@ -357,27 +465,22 @@ class EmpleadoController extends BaseController {
             
             // Mapear campos del formulario a la base de datos
             $data = [
-                'nombre' => trim(mb_substr($_POST['nombre'] ?? '', 0, 100)),
-                'apellido' => trim(mb_substr($_POST['apellido'] ?? '', 0, 100)),
-                'rfc' => trim($_POST['rfc'] ?? ''),
-                'curp' => trim($_POST['curp'] ?? ''),
-                'area' => trim(mb_substr($_POST['area'] ?? '', 0, 100)),
-                'area_fisica' => trim(mb_substr($_POST['area_fisica'] ?? '', 0, 100)),
-                'jerarquia' => trim($_POST['jerarquia'] ?? ''),
-                'sexo' => trim($_POST['sexo'] ?? ''),
-                'fecha_nacimiento' => trim($_POST['fecha_nacimiento'] ?? ''),
-                'entidad_federativa' => trim($_POST['entidad_federativa'] ?? ''),
-                'puesto' => trim(mb_substr($_POST['puesto'] ?? '', 0, 100)),
-                'clave_depto' => trim(mb_substr($_POST['clave_depto'] ?? '', 0, 50)),
-                'jefe_directo_id' => null,
-                'jefe_directo_clave' => ''
+                'nombre' => SecurityHelper::sanitizeString(mb_substr($_POST['nombre'] ?? '', 0, 100)),
+                'apellido' => SecurityHelper::sanitizeString(mb_substr($_POST['apellido'] ?? '', 0, 100)),
+                'rfc' => SecurityHelper::sanitizeString(trim($_POST['rfc'] ?? ''), 'alphanum'),
+                'curp' => SecurityHelper::sanitizeString(trim($_POST['curp'] ?? ''), 'alphanum'),
+                'area' => SecurityHelper::sanitizeString(mb_substr($_POST['area'] ?? '', 0, 100)),
+                'area_fisica' => SecurityHelper::sanitizeString(mb_substr($_POST['area_fisica'] ?? '', 0, 100)),
+                'jerarquia' => SecurityHelper::sanitizeString(trim($_POST['jerarquia'] ?? ''), 'alpha'),
+                'sexo' => SecurityHelper::sanitizeString(trim($_POST['sexo'] ?? ''), 'alpha'),
+                'fecha_nacimiento' => SecurityHelper::sanitizeString(trim($_POST['fecha_nacimiento'] ?? '')),
+                'entidad_federativa' => SecurityHelper::sanitizeString(trim($_POST['entidad_federativa'] ?? '')),
+                'puesto' => SecurityHelper::sanitizeString(mb_substr($_POST['puesto'] ?? '', 0, 100)),
+                'clave_depto' => SecurityHelper::sanitizeString(mb_substr($_POST['clave_depto'] ?? '', 0, 50), 'alphanum'),
+                'jefe_directo_clave' => SecurityHelper::sanitizeString($_POST['jefe_directo_id'] ?? '', 'alphanum')
             ];
             
-            // Si se seleccionó un jefe directo, guardar la clave en ambos campos
-            if (!empty($_POST['jefe_directo_id'])) {
-                $data['jefe_directo_id'] = trim($_POST['jefe_directo_id']);
-                $data['jefe_directo_clave'] = trim($_POST['jefe_directo_id']);
-            }
+            // El modelo usará jefe_directo_clave para buscar el ID correspondiente
             
             // Validar que area no exceda el límite
             if (strlen($data['area']) > 100) {
@@ -409,14 +512,13 @@ class EmpleadoController extends BaseController {
 
             // Subir foto si existe
             if (isset($_FILES['foto_cara']) && $_FILES['foto_cara']['error'] == 0) {
-                $target_dir = "uploads/fotos_empleados/";
-                if (!is_dir($target_dir)) {
-                    mkdir($target_dir, 0777, true);
-                }
-                $file_extension = strtolower(pathinfo($_FILES["foto_cara"]["name"], PATHINFO_EXTENSION));
-                $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
-                
-                if (in_array($file_extension, $allowed_extensions)) {
+                $allowedMimes = ['image/jpeg', 'image/png', 'image/gif'];
+                if ($this->validateMime($_FILES['foto_cara'], $allowedMimes)) {
+                    $target_dir = "uploads/fotos_empleados/";
+                    if (!is_dir($target_dir)) {
+                        mkdir($target_dir, 0777, true);
+                    }
+                    $file_extension = strtolower(pathinfo($_FILES["foto_cara"]["name"], PATHINFO_EXTENSION));
                     $new_filename = 'empleado_' . $id . '_' . time() . '.' . $file_extension;
                     $target_file = $target_dir . $new_filename;
                     
@@ -428,6 +530,12 @@ class EmpleadoController extends BaseController {
 
             try {
                 if ($this->empleadoModel->update($id, $data)) {
+                    // Guardar claves presupuestales
+                    require_once 'models/ClavePresupuestal.php';
+                    $claves = $_POST['claves_presupuestales'] ?? [];
+                    if (is_array($claves)) {
+                        (new ClavePresupuestal())->guardar($id, $claves);
+                    }
                     if ($isAjax) {
                         $this->jsonResponse(['success' => true, 'message' => 'Empleado actualizado correctamente']);
                         return;
@@ -452,6 +560,8 @@ class EmpleadoController extends BaseController {
             if (!$empleado) {
                 $this->redirect(BASE_URL . '/empleados?error=not_found');
             }
+            require_once 'models/ClavePresupuestal.php';
+            $claves = (new ClavePresupuestal())->getClavesPorEmpleado($id);
             require 'views/empleados/edit.php';
         }
     }
@@ -475,10 +585,10 @@ class EmpleadoController extends BaseController {
 
     public function generate_rfc() {
         header('Content-Type: application/json');
-        $nombre = $_POST['nombres'] ?? '';
-        $apellidoPaterno = $_POST['primer_apellido'] ?? '';
-        $apellidoMaterno = $_POST['segundo_apellido'] ?? '';
-        $fecha_nacimiento = $_POST['fecha_nacimiento'] ?? '';
+        $nombre = SecurityHelper::sanitizeString($_POST['nombres'] ?? '');
+        $apellidoPaterno = SecurityHelper::sanitizeString($_POST['primer_apellido'] ?? '');
+        $apellidoMaterno = SecurityHelper::sanitizeString($_POST['segundo_apellido'] ?? '');
+        $fecha_nacimiento = SecurityHelper::sanitizeString($_POST['fecha_nacimiento'] ?? '');
 
         if (empty($nombre) || empty($apellidoPaterno) || empty($fecha_nacimiento)) {
             echo json_encode(['error' => 'Datos incompletos. Se requiere nombre, apellido paterno y fecha de nacimiento.']);
@@ -496,12 +606,12 @@ class EmpleadoController extends BaseController {
 
     public function generate_curp() {
         header('Content-Type: application/json');
-        $nombre = $_POST['nombres'] ?? '';
-        $apellidoPaterno = $_POST['primer_apellido'] ?? '';
-        $apellidoMaterno = $_POST['segundo_apellido'] ?? '';
-        $fecha_nacimiento = $_POST['fecha_nacimiento'] ?? '';
-        $sexo = $_POST['sexo'] ?? '';
-        $estadoNacimiento = $_POST['entidad_federativa'] ?? '';
+        $nombre = SecurityHelper::sanitizeString($_POST['nombres'] ?? '');
+        $apellidoPaterno = SecurityHelper::sanitizeString($_POST['primer_apellido'] ?? '');
+        $apellidoMaterno = SecurityHelper::sanitizeString($_POST['segundo_apellido'] ?? '');
+        $fecha_nacimiento = SecurityHelper::sanitizeString($_POST['fecha_nacimiento'] ?? '');
+        $sexo = SecurityHelper::sanitizeString($_POST['sexo'] ?? '', 'alpha');
+        $estadoNacimiento = SecurityHelper::sanitizeString($_POST['entidad_federativa'] ?? '');
 
         if (empty($nombre) || empty($apellidoPaterno) || empty($fecha_nacimiento) || empty($sexo) || empty($estadoNacimiento)) {
             echo json_encode(['success' => false, 'error' => 'Datos incompletos para generar CURP. Se requiere nombre, apellido paterno, fecha de nacimiento, sexo y estado.']);
@@ -531,10 +641,18 @@ class EmpleadoController extends BaseController {
         $fecha_inicio = $_GET['fecha_inicio'] ?? null;
         $fecha_fin = $_GET['fecha_fin'] ?? null;
         
+        // Validate date formats if provided
+        if ($fecha_inicio !== null && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_inicio)) {
+            $fecha_inicio = null;
+        }
+        if ($fecha_fin !== null && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_fin)) {
+            $fecha_fin = null;
+        }
+        
         $asistencias = $this->asistenciaModel->getByEmpleado($id, $fecha_inicio, $fecha_fin);
-        $retardos = $this->retardoModel->getByEmpleado($id);
-        $comisiones = $this->asistenciaModel->getByEmpleadoPorDefinir($id); // Incidencias "por definir"
-        $incidencias = $comisiones; // Alias para compatibilidad
+        $retardos = $this->retardoModel->getByEmpleado($id, $fecha_inicio, $fecha_fin);
+        $comisiones = $this->asistenciaModel->getByEmpleadoPorDefinir($id);
+        $incidencias = $this->retardoModel->getIncidenciasByEmpleado($id);
         
         // Cargar comisiones reales de la tabla comisiones
         $comisionesReales = [];
@@ -576,7 +694,7 @@ class EmpleadoController extends BaseController {
             $justificacionesAsistencia = [];
         }
         
-        $ausencias = $this->ausenciaModel->getByEmpleado($id);
+        $ausencias = $this->ausenciaModel->getByEmpleado($id, $fecha_inicio, $fecha_fin);
         $sanciones = $this->sancionModel->getByEmpleadoYear($id, date('Y'));
         
         // Cargar días económicos del empleado
@@ -924,8 +1042,9 @@ class EmpleadoController extends BaseController {
                 $ciclosError = $e->getMessage();
             }
 
-        $retardosJustificados = array_filter($retardos, function($r) { return $r['justificado']; });
-        $retardosSinJustificar = array_filter($retardos, function($r) { return !$r['justificado']; });
+        $retardosPeriodo = $retardos;
+        $retardosJustificados = array_filter($retardosPeriodo, function($r) { return $r['justificado']; });
+        $retardosSinJustificar = array_filter($retardosPeriodo, function($r) { return !$r['justificado']; });
 
         $fecha_actual = date('Y-m-d');
         $acumuladosQuincena = $this->retardoModel->getRetardosAcumuladosQuincena($id, $fecha_actual);
@@ -984,7 +1103,7 @@ class EmpleadoController extends BaseController {
             ],
             'estadisticas' => [
                 'total_asistencias' => count($asistencias),
-                'retardos_mes' => count($retardos),
+                'retardos_mes' => count($retardosPeriodo),
                 'retardos_justificados' => count($retardosJustificados),
                 'retardos_sin_justificar' => count($retardosSinJustificar),
                 'incidencias_pendientes' => count($incidencias),
@@ -1013,6 +1132,7 @@ class EmpleadoController extends BaseController {
             'constancias_tiempo' => array_values($constanciasTiempo),
             'control_licencias' => $controlLicencias,
             'asistencias' => array_values($asistencias),
+            'tipos_justificacion' => $this->getTiposJustificacion(),
             'horarios' => $puedeGestionarCiclos ? $horarios : [],
             'historial_horarios' => $puedeGestionarCiclos ? $historialHorarios : [],
             'ciclos' => $puedeGestionarCiclos ? $ciclos : [],
@@ -1022,6 +1142,121 @@ class EmpleadoController extends BaseController {
         ];
 
         $this->jsonResponse($result);
+    }
+
+    public function actualizarRegistroTab() {
+        header('Content-Type: application/json');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'error' => 'Método no permitido']);
+            return;
+        }
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (!$input) {
+            echo json_encode(['success' => false, 'error' => 'Datos inválidos']);
+            return;
+        }
+        $rol = strtolower((string)($_SESSION['rol'] ?? ''));
+        if (!in_array($rol, ['admin', 'superadmin'], true)) {
+            echo json_encode(['success' => false, 'error' => 'Acceso denegado. Solo administradores pueden editar registros.']);
+            return;
+        }
+        $id = intval($input['id'] ?? 0);
+        $empleado_id = intval($input['empleado_id'] ?? 0);
+        $tabla = $input['tabla'] ?? '';
+        $fecha_inicio = $input['fecha_inicio'] ?? '';
+        $fecha_fin = $input['fecha_fin'] ?? $fecha_inicio;
+        $dias = intval($input['dias'] ?? 0);
+        $motivo = trim($input['motivo'] ?? '');
+        if (!$id || !$empleado_id || !$tabla) {
+            echo json_encode(['success' => false, 'error' => 'Datos incompletos']);
+            return;
+        }
+        if (empty($fecha_inicio)) {
+            echo json_encode(['success' => false, 'error' => 'La fecha de inicio es requerida']);
+            return;
+        }
+        if (strtotime($fecha_fin) < strtotime($fecha_inicio)) {
+            echo json_encode(['success' => false, 'error' => 'La fecha fin no puede ser menor a la fecha inicio']);
+            return;
+        }
+        try {
+            $db = Database::getInstance()->getConnection();
+            $db->beginTransaction();
+
+            if ($tabla === 'vacaciones') {
+                $stmt = $db->prepare("SELECT fecha_inicio, fecha_fin FROM vacaciones WHERE id = ? AND empleado_id = ?");
+                $stmt->execute([$id, $empleado_id]);
+                $old = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (!$old) { throw new Exception('Registro no encontrado'); }
+                $stmt = $db->prepare("UPDATE vacaciones SET fecha_inicio = ?, fecha_fin = ?, dias_solicitados = ?, motivo = ? WHERE id = ?");
+                $stmt->execute([$fecha_inicio, $fecha_fin, $dias, $motivo, $id]);
+                $this->sincronizarAsistenciaPorRango($db, $empleado_id, $old['fecha_inicio'], $old['fecha_fin'], $fecha_inicio, $fecha_fin, 'vacaciones', "Vacaciones: $motivo");
+            } elseif ($tabla === 'cuidados_maternos' || $tabla === 'cuidados_paternos') {
+                $stmt = $db->prepare("SELECT fecha_inicio, fecha_fin FROM $tabla WHERE id = ? AND empleado_id = ?");
+                $stmt->execute([$id, $empleado_id]);
+                $old = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (!$old) { throw new Exception('Registro no encontrado'); }
+                $stmt = $db->prepare("UPDATE $tabla SET fecha_inicio = ?, fecha_fin = ?, dias_solicitados = ?, motivo = ? WHERE id = ?");
+                $stmt->execute([$fecha_inicio, $fecha_fin, $dias, $motivo, $id]);
+                $tipoAsistencia = $tabla; // 'cuidados_maternos' or 'cuidados_paternos'
+                $this->sincronizarAsistenciaPorRango($db, $empleado_id, $old['fecha_inicio'], $old['fecha_fin'], $fecha_inicio, $fecha_fin, $tipoAsistencia, "Permiso de cuidados: $motivo");
+            } elseif ($tabla === 'licencias_medicas') {
+                $diagnostico = trim($input['diagnostico'] ?? '');
+                $dias_full = intval($input['dias_full'] ?? 0);
+                $dias_half = intval($input['dias_half'] ?? 0);
+                $stmt = $db->prepare("SELECT fecha_inicio, fecha_fin FROM licencias_medicas WHERE id = ? AND empleado_id = ?");
+                $stmt->execute([$id, $empleado_id]);
+                $old = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (!$old) { throw new Exception('Registro no encontrado'); }
+                $stmt = $db->prepare("UPDATE licencias_medicas SET fecha_inicio = ?, fecha_fin = ?, dias_otorgados = ?, diagnostico = ?, dias_full = ?, dias_half = ? WHERE id = ?");
+                $stmt->execute([$fecha_inicio, $fecha_fin, $dias, $diagnostico, $dias_full, $dias_half, $id]);
+                $this->sincronizarAsistenciaPorRango($db, $empleado_id, $old['fecha_inicio'], $old['fecha_fin'], $fecha_inicio, $fecha_fin, 'licencia_medica', "Licencia médica: $diagnostico");
+            } elseif ($tabla === 'constancias_tiempo') {
+                $tipo = $input['tipo'] ?? 'medica';
+                $stmt = $db->prepare("UPDATE constancias_tiempo SET fecha_inicio = ?, fecha_fin = ?, dias_solicitados = ?, tipo_constancia = ?, motivo = ? WHERE id = ? AND empleado_id = ?");
+                $stmt->execute([$fecha_inicio, $fecha_fin, $dias, $tipo, $motivo, $id, $empleado_id]);
+            } elseif ($tabla === 'sanciones') {
+                $tipo = $input['tipo'] ?? 'amonestacion';
+                $stmt = $db->prepare("UPDATE sanciones SET fecha_inicio = ?, dias = ?, tipo_sancion = ?, motivo = ? WHERE id = ? AND empleado_id = ?");
+                $stmt->execute([$fecha_inicio, $dias, $tipo, $motivo, $id, $empleado_id]);
+            } else {
+                throw new Exception('Tabla no soportada: ' . $tabla);
+            }
+            $db->commit();
+            echo json_encode(['success' => true]);
+        } catch (Exception $e) {
+            if (isset($db) && $db->inTransaction()) { $db->rollBack(); }
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function sincronizarAsistenciaPorRango($db, $empleado_id, $oldInicio, $oldFin, $newInicio, $newFin, $tipoAsistencia, $observaciones) {
+        // Eliminar registros antiguos en el rango viejo
+        $fecha = new DateTime($oldInicio);
+        $fechaFin = new DateTime($oldFin);
+        while ($fecha <= $fechaFin) {
+            $fechaStr = $fecha->format('Y-m-d');
+            $stmt = $db->prepare("DELETE FROM asistencia WHERE empleado_id = ? AND fecha = ? AND tipo_asistencia = ?");
+            $stmt->execute([$empleado_id, $fechaStr, $tipoAsistencia]);
+            $fecha->modify('+1 day');
+        }
+        // Crear registros nuevos en el rango nuevo
+        $fecha = new DateTime($newInicio);
+        $fechaFin = new DateTime($newFin);
+        while ($fecha <= $fechaFin) {
+            $fechaStr = $fecha->format('Y-m-d');
+            $stmt = $db->prepare("SELECT id FROM asistencia WHERE empleado_id = ? AND fecha = ?");
+            $stmt->execute([$empleado_id, $fechaStr]);
+            $existente = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($existente) {
+                $stmt = $db->prepare("UPDATE asistencia SET tipo_asistencia = ?, observaciones = CONCAT(COALESCE(observaciones, ''), ' | ', ?) WHERE id = ?");
+                $stmt->execute([$tipoAsistencia, $observaciones, $existente['id']]);
+            } else {
+                $stmt = $db->prepare("INSERT INTO asistencia (empleado_id, fecha, tipo_asistencia, hora_entrada, hora_salida, requerio_validacion, observaciones, created_at) VALUES (?, ?, ?, NULL, NULL, 0, ?, NOW())");
+                $stmt->execute([$empleado_id, $fechaStr, $tipoAsistencia, $observaciones]);
+            }
+            $fecha->modify('+1 day');
+        }
     }
 
     /**
@@ -1159,7 +1394,7 @@ class EmpleadoController extends BaseController {
             return;
         }
         
-        $dispositivoId = (int)($_POST['dispositivo_id'] ?? 1);
+        $dispositivoId = SecurityHelper::sanitizeInt($_POST['dispositivo_id'] ?? 1, 1);
         
         try {
             require_once 'models/biometric/ZKTecoSDK.php';
@@ -1196,7 +1431,7 @@ class EmpleadoController extends BaseController {
     }
 
     public function search() {
-        $term = $_GET['q'] ?? $_GET['search'] ?? '';
+        $term = SecurityHelper::sanitizeString($_GET['q'] ?? $_GET['search'] ?? '');
         
         if (empty($term) || strlen($term) < 2) {
             $this->jsonResponse(['results' => []]);
@@ -1481,5 +1716,16 @@ class EmpleadoController extends BaseController {
             'mensual' => $mensual,
             'diario' => $diario
         ];
+    }
+    
+    private function getTiposJustificacion() {
+        try {
+            $db = Database::getInstance()->getConnection();
+            $stmt = $db->prepare("SELECT id, nombre, descripcion, tipo_incidencia, requiere_aprobacion, requiere_documento FROM tipos_justificacion WHERE activo = 1 ORDER BY nombre");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
     }
 }

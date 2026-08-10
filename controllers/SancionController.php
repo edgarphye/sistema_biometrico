@@ -220,5 +220,59 @@ class SancionController extends BaseController {
             $this->redirect(BASE_URL . '/sanciones?error=delete_failed');
         }
     }
+    
+    /**
+     * Borrar todas las sanciones (para reiniciar el sistema de justificación)
+     */
+    public function borrarTodas() {
+        try {
+            // Verificar autenticación y rol
+            if (empty($_SESSION['user_id'])) {
+                if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'error' => 'No autenticado']);
+                    return;
+                }
+                $this->redirect(BASE_URL . '/login');
+            }
+
+            $usuarioModel = new Usuario();
+            $user = $usuarioModel->getById($_SESSION['user_id']);
+
+            if (empty($user['rol']) || !in_array($user['rol'], ['admin', 'superadmin', 'rh'])) {
+                if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'error' => 'No autorizado']);
+                    return;
+                }
+                $_SESSION['error'] = 'No autorizado para borrar sanciones';
+                $this->redirect(BASE_URL . '/dashboard');
+            }
+
+            // Ejecutar DELETE
+            $db = Database::getInstance()->getConnection();
+            $stmt = $db->prepare("DELETE FROM sanciones");
+            $stmt->execute();
+            $eliminadas = $stmt->rowCount();
+
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'message' => "Se eliminaron $eliminadas sanciones"]);
+                return;
+            }
+
+            $_SESSION['success'] = "Se eliminaron $eliminadas sanciones";
+            $this->redirect(BASE_URL . '/sanciones');
+        } catch (Exception $e) {
+            $this->logException($e, ['action' => 'borrar_todas']);
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+                return;
+            }
+            $_SESSION['error'] = $e->getMessage();
+            $this->redirect(BASE_URL . '/sanciones');
+        }
+    }
 }
 ?>

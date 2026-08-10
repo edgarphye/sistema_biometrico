@@ -35,29 +35,46 @@ class ValidacionJefe {
                             (SELECT CONCAT('Retardo de ', r.minutos_retardo, ' minutos - ', COALESCE(r.motivo_justificacion, 'Sin motivo'))
                              FROM retardos r WHERE r.id = v.incidencia_id)
                         WHEN v.tipo_incidencia = 'comision' THEN 
-                            (SELECT CONCAT(
-                                CASE r.tipo_retraso 
-                                    WHEN 'comision_entrada' THEN 'Comisión de entrada'
-                                    WHEN 'comision_salida' THEN 'Comisión de salida'
-                                    WHEN 'comision_todo_dia' THEN 'Comisión todo el día'
-                                    ELSE 'Comisión'
-                                END,
-                                ': ',
-                                COALESCE(r.motivo_justificacion, 'Sin especificar lugar/motivo')
+                            COALESCE(
+                                (SELECT CONCAT('Comisión: ', c.descripcion) FROM comisiones c WHERE c.id = v.incidencia_id),
+                                (SELECT CONCAT(
+                                    CASE r.tipo_retraso 
+                                        WHEN 'comision_entrada' THEN 'Comisión de entrada'
+                                        WHEN 'comision_salida' THEN 'Comisión de salida'
+                                        WHEN 'comision_todo_dia' THEN 'Comisión todo el día'
+                                        ELSE 'Comisión'
+                                    END,
+                                    ': ',
+                                    COALESCE(r.motivo_justificacion, 'Sin especificar lugar/motivo')
+                                ) FROM retardos r WHERE r.id = v.incidencia_id)
                             )
-                             FROM retardos r WHERE r.id = v.incidencia_id)
                         WHEN v.tipo_incidencia = 'dia_economico' THEN 
                             (SELECT CONCAT('Día económico: ', de.motivo) 
                              FROM dias_economicos de WHERE de.id = v.incidencia_id)
                         WHEN v.tipo_incidencia = 'ausencia' THEN 
                             (SELECT CONCAT('Ausencia: ', a.motivo) 
                              FROM ausencias a WHERE a.id = v.incidencia_id)
+                        WHEN v.tipo_incidencia = 'constancia_tiempo' THEN 
+                            (SELECT CONCAT('Constancia de tiempo: ', ct.motivo) 
+                             FROM constancias_tiempo ct WHERE ct.id = v.incidencia_id)
+                        WHEN v.tipo_incidencia = 'licencia_medica' THEN 
+                            (SELECT CONCAT('Licencia médica: ', COALESCE(lm.diagnostico, 'Sin diagnóstico')) 
+                             FROM licencias_medicas lm WHERE lm.id = v.incidencia_id)
+                        WHEN v.tipo_incidencia = 'justificacion' THEN 
+                            (SELECT CONCAT('Justificación: ', j.motivo) 
+                             FROM justificaciones j WHERE j.id = v.incidencia_id)
                     END as descripcion_incidencia,
                     CASE v.tipo_incidencia
                         WHEN 'retardo' THEN (SELECT fecha FROM retardos WHERE id = v.incidencia_id)
-                        WHEN 'comision' THEN (SELECT fecha FROM retardos WHERE id = v.incidencia_id)
+                        WHEN 'comision' THEN COALESCE(
+                            (SELECT fecha_inicio FROM comisiones WHERE id = v.incidencia_id),
+                            (SELECT fecha FROM retardos WHERE id = v.incidencia_id)
+                        )
                         WHEN 'dia_economico' THEN (SELECT fecha FROM dias_economicos WHERE id = v.incidencia_id)
                         WHEN 'ausencia' THEN (SELECT fecha_inicio FROM ausencias WHERE id = v.incidencia_id)
+                        WHEN 'constancia_tiempo' THEN (SELECT fecha_inicio FROM constancias_tiempo WHERE id = v.incidencia_id)
+                        WHEN 'licencia_medica' THEN (SELECT fecha_inicio FROM licencias_medicas WHERE id = v.incidencia_id)
+                        WHEN 'justificacion' THEN (SELECT fecha_inicio FROM justificaciones WHERE id = v.incidencia_id)
                     END as fecha_incidencia
                 FROM validaciones_jefe v
                 INNER JOIN empleados e ON v.empleado_id = e.id
@@ -85,6 +102,11 @@ class ValidacionJefe {
         if (!empty($filters['fecha_fin'])) {
             $sql .= " AND v.fecha_solicitud <= ?";
             $params[] = $filters['fecha_fin'];
+        }
+        
+        if (!empty($filters['tipo_incidencia'])) {
+            $sql .= " AND v.tipo_incidencia = ?";
+            $params[] = $filters['tipo_incidencia'];
         }
         
         $sql .= " ORDER BY v.fecha_solicitud ASC";
@@ -178,15 +200,31 @@ class ValidacionJefe {
             switch ($validacion['tipo_incidencia']) {
                 case 'retardo':
                     $this->actualizarRetardo($validacion['incidencia_id'], $decision);
+                    $this->actualizarAsistenciaPorValidacion($validacion, $decision);
                     break;
                 case 'comision':
                     $this->actualizarComision($validacion['incidencia_id'], $decision);
+                    $this->actualizarAsistenciaPorValidacion($validacion, $decision);
                     break;
                 case 'dia_economico':
                     $this->actualizarDiaEconomico($validacion['incidencia_id'], $decision);
+                    $this->actualizarAsistenciaPorValidacion($validacion, $decision);
                     break;
                 case 'ausencia':
                     $this->actualizarAusencia($validacion['incidencia_id'], $decision);
+                    $this->actualizarAsistenciaPorValidacion($validacion, $decision);
+                    break;
+                case 'constancia_tiempo':
+                    $this->actualizarConstanciaTiempo($validacion['incidencia_id'], $decision);
+                    $this->actualizarAsistenciaPorValidacion($validacion, $decision);
+                    break;
+                case 'licencia_medica':
+                    $this->actualizarLicenciaMedica($validacion['incidencia_id'], $decision);
+                    $this->actualizarAsistenciaPorValidacion($validacion, $decision);
+                    break;
+                case 'justificacion':
+                    $this->actualizarJustificacion($validacion['incidencia_id'], $decision);
+                    $this->actualizarAsistenciaPorValidacion($validacion, $decision);
                     break;
             }
             
@@ -205,14 +243,21 @@ class ValidacionJefe {
     private function actualizarTipoIncidencia($incidenciaId, $validacionId, $nuevoTipo) {
         $pdo = $this->db->getConnection();
         
-        // 1. Actualizar tabla retardos (donde se almacenan estos tipos)
-        $sql = "UPDATE retardos SET tipo_retraso = ? WHERE id = ?";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$nuevoTipo, $incidenciaId]);
-        
-        // 2. Actualizar tipo_incidencia en validaciones_jefe para consistencia
-        // Si es comisión (entrada/salida/todo_dia) el tipo general es 'comision', si no 'retardo'
-        $nuevoTipoGeneral = (strpos($nuevoTipo, 'comision') !== false) ? 'comision' : 'retardo';
+        // Actualizar tipo_incidencia en validaciones_jefe
+        // Determinar el tipo general basado en el subtipo
+        if (strpos($nuevoTipo, 'comision') !== false) {
+            $nuevoTipoGeneral = 'comision';
+        } elseif (strpos($nuevoTipo, 'vacaciones') !== false) {
+            $nuevoTipoGeneral = 'vacaciones';
+        } elseif (strpos($nuevoTipo, 'ausencia') !== false) {
+            $nuevoTipoGeneral = 'ausencia';
+        } elseif (strpos($nuevoTipo, 'justificacion') !== false) {
+            $nuevoTipoGeneral = 'justificacion';
+        } elseif (strpos($nuevoTipo, 'licencia') !== false || strpos($nuevoTipo, 'medica') !== false) {
+            $nuevoTipoGeneral = 'licencia_medica';
+        } else {
+            $nuevoTipoGeneral = 'retardo';
+        }
         
         $sqlVal = "UPDATE validaciones_jefe SET tipo_incidencia = ? WHERE id = ?";
         $stmtVal = $pdo->prepare($sqlVal);
@@ -250,15 +295,43 @@ class ValidacionJefe {
         
         $jefeEmpleadoId = $usuario['empleado_id'];
         
+        // Obtener IDs de subordinados (directos + catalogos_mandos)
+        $subordinadoIds = [];
+        
+        $stmtD = $pdo->prepare("SELECT id FROM empleados WHERE jefe_directo_id = ? AND activo = 1");
+        $stmtD->execute([$jefeEmpleadoId]);
+        $subordinadoIds = $stmtD->fetchAll(PDO::FETCH_COLUMN);
+        
+        $stmtU = $pdo->prepare("SELECT username FROM usuarios WHERE empleado_id = ?");
+        $stmtU->execute([$jefeEmpleadoId]);
+        $username = $stmtU->fetchColumn();
+        if ($username) {
+            $stmtM = $pdo->prepare("
+                SELECT id FROM catalogos_mandos 
+                WHERE LOWER(nombre_mando) LIKE LOWER(CONCAT('%', ?, '%')) AND activo = 1
+            ");
+            $stmtM->execute([$username]);
+            $mandoIds = $stmtM->fetchAll(PDO::FETCH_COLUMN);
+            if (!empty($mandoIds)) {
+                $ph = implode(',', array_fill(0, count($mandoIds), '?'));
+                $stmtME = $pdo->prepare("SELECT id FROM empleados WHERE jefe_directo_clave IN ($ph) AND activo = 1");
+                $stmtME->execute($mandoIds);
+                $subordinadoIds = array_merge($subordinadoIds, $stmtME->fetchAll(PDO::FETCH_COLUMN));
+                $subordinadoIds = array_values(array_unique($subordinadoIds));
+            }
+        }
+        
+        $inPlaceholders = $subordinadoIds ? implode(',', array_fill(0, count($subordinadoIds), '?')) : '0';
+        
         // Estadísticas de RETARDOS - incluye todos los estados
         $sqlRetardos = "SELECT 
                     estado_validacion,
                     COUNT(*) as total
                 FROM retardos r
                 INNER JOIN empleados e ON r.empleado_id = e.id
-                WHERE e.jefe_directo_id = ?";
+                WHERE e.id IN ($inPlaceholders)";
         
-        $paramsRetardos = [$jefeEmpleadoId];
+        $paramsRetardos = $subordinadoIds;
         
         // Estadísticas de INCIDENCIAS (asistencia)
         $sqlAsistencia = "SELECT 
@@ -266,10 +339,10 @@ class ValidacionJefe {
                     COUNT(*) as total
                 FROM asistencia a
                 INNER JOIN empleados e ON a.empleado_id = e.id
-                WHERE e.jefe_directo_id = ? 
+                WHERE e.id IN ($inPlaceholders)
                 AND a.tipo_asistencia NOT IN ('normal', 'por_definir')";
         
-        $paramsAsistencia = [$jefeEmpleadoId];
+        $paramsAsistencia = $subordinadoIds;
         
         // Filtro por período si se especifica
         if (!empty($periodo['mes']) && !empty($periodo['anio'])) {
@@ -361,10 +434,10 @@ class ValidacionJefe {
                 INNER JOIN usuarios u ON v.jefe_id = u.id
                 WHERE v.empleado_id = ?
                 ORDER BY v.fecha_solicitud DESC
-                LIMIT ?";
+                LIMIT " . (int)$limit . "";
         
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$empleadoId, $limit]);
+        $stmt->execute([$empleadoId]);
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -378,9 +451,16 @@ class ValidacionJefe {
         $sql = "SELECT v.*, 
                     e.nombre as empleado_nombre, e.apellido as empleado_apellido,
                     e.area as empleado_area,
-                    COALESCE(e.jerarquia, e.puesto, '') as empleado_jerarquia
+                    COALESCE(e.jerarquia, e.puesto, '') as empleado_jerarquia,
+                    COALESCE(
+                        (SELECT cm.nombre_mando FROM catalogos_mandos cm 
+                         INNER JOIN usuarios u ON cm.nombre_mando LIKE CONCAT('%', u.username, '%') 
+                         WHERE u.empleado_id = v.jefe_id AND cm.activo = 1 LIMIT 1),
+                        CONCAT(je.nombre, ' ', je.apellido)
+                    ) as jefe_nombre
                 FROM validaciones_jefe v
                 INNER JOIN empleados e ON v.empleado_id = e.id
+                LEFT JOIN empleados je ON v.jefe_id = je.id
                 WHERE v.id = ?";
         
         $stmt = $pdo->prepare($sql);
@@ -973,12 +1053,10 @@ class ValidacionJefe {
                 // Actualizar asistencia como FALTA por rechazo
                 $stmtUpdateAsistencia = $pdo->prepare("
                     UPDATE asistencia 
-                    SET tipo_asistencia = 'falta', 
-                        observaciones = CONCAT(COALESCE(observaciones, ''), ' | COMISIÓN RECHAZADA. Motivo: ', ?)
+                    SET tipo_asistencia = 'falta'
                     WHERE empleado_id = ? AND fecha = ?
                 ");
                 $stmtUpdateAsistencia->execute([
-                    $motivoSancion,
                     $retardo['empleado_id'],
                     $retardo['fecha']
                 ]);
@@ -1054,13 +1132,11 @@ class ValidacionJefe {
                     UPDATE asistencia 
                     SET tipo_asistencia = ?, 
                         hora_entrada = NULL, 
-                        hora_salida = NULL,
-                        observaciones = CONCAT(COALESCE(observaciones, ''), ' | Comisión validada por jefe: ', ?)
+                        hora_salida = NULL
                     WHERE empleado_id = ? AND fecha = ?
                 ");
                 $stmtUpdateAsistencia->execute([
                     $tipoAsistencia,
-                    $comentarioValidacion,
                     $empleadoId,
                     $fechaRetardo
                 ]);
@@ -1103,28 +1179,23 @@ class ValidacionJefe {
                     UPDATE asistencia 
                     SET tipo_asistencia = ?, 
                         hora_entrada = NULL, 
-                        hora_salida = NULL,
-                        observaciones = CONCAT(COALESCE(observaciones, ''), ' | Comisión APROBADA por jefe: ', ?)
+                        hora_salida = NULL
                     WHERE empleado_id = ? AND fecha BETWEEN ? AND ?
                 ");
                 $stmtUpdateAsistencia->execute([
                     $tipoComision,
-                    $comentarioValidacion,
                     $empleadoId,
                     $fechaInicio,
                     $fechaFin
                 ]);
-                error_log("COMISION APROBADA: ID $comisionId - Asistencia actualizada a tipo: $tipoComision");
             } elseif ($estado === 'rechazado') {
                 // Actualizar a tipo falta por rechazo
                 $stmtUpdateAsistencia = $pdo->prepare("
                     UPDATE asistencia 
-                    SET tipo_asistencia = 'falta', 
-                        observaciones = CONCAT(COALESCE(observaciones, ''), ' | Comisión RECHAZADA por jefe. Motivo: ', ?)
+                    SET tipo_asistencia = 'falta'
                     WHERE empleado_id = ? AND fecha BETWEEN ? AND ?
                 ");
                 $stmtUpdateAsistencia->execute([
-                    $decision['motivo'] ?? 'Sin motivo especificado',
                     $empleadoId,
                     $fechaInicio,
                     $fechaFin
@@ -1194,6 +1265,164 @@ class ValidacionJefe {
     }
     
     /**
+     * Actualizar incidencia de constancia de tiempo
+     */
+    private function actualizarConstanciaTiempo($constanciaId, $decision) {
+        $pdo = $this->db->getConnection();
+
+        $estatus = match($decision['estado']) {
+            'aprobado' => 'aprobada',
+            'rechazado' => 'rechazada',
+            'requiere_info' => 'pendiente',
+            default => 'pendiente'
+        };
+
+        $sql = "UPDATE constancias_tiempo
+                SET estatus = ?, aprobado_por = ?, fecha_aprobacion = CURRENT_TIMESTAMP,
+                    motivo = TRIM(CONCAT(COALESCE(motivo, ''), '\n[Validación jefe: ', ?, ']'))
+                WHERE id = ?";
+
+        $stmt = $pdo->prepare($sql);
+        $nota = $estatus . (!empty($decision['comentarios']) ? ' - ' . $decision['comentarios'] : '');
+        return $stmt->execute([$estatus, $decision['aprobado_por'], $nota, $constanciaId]);
+    }
+
+    private function actualizarLicenciaMedica($licenciaId, $decision) {
+        $pdo = $this->db->getConnection();
+
+        $estatus = match($decision['estado']) {
+            'aprobado' => 'aprobada',
+            'rechazado' => 'rechazada',
+            'requiere_info' => 'pendiente',
+            default => 'pendiente'
+        };
+
+        $sql = "UPDATE licencias_medicas
+                SET estatus = ?
+                WHERE id = ?";
+
+        $stmt = $pdo->prepare($sql);
+        return $stmt->execute([$estatus, $licenciaId]);
+    }
+
+    private function actualizarJustificacion($justificacionId, $decision) {
+        $pdo = $this->db->getConnection();
+
+        $estatus = match($decision['estado']) {
+            'aprobado' => 'aprobada',
+            'rechazado' => 'rechazada',
+            'requiere_info' => 'pendiente',
+            default => 'pendiente'
+        };
+
+        $sql = "UPDATE justificaciones
+                SET estatus = ?, aprobado_por = ?
+                WHERE id = ?";
+
+        $stmt = $pdo->prepare($sql);
+        return $stmt->execute([$estatus, $decision['aprobado_por'], $justificacionId]);
+    }
+
+    /**
+     * Actualizar la tabla asistencia con el resultado de la validación
+     * para todos los tipos de incidencia incluyendo retardos
+     */
+    private function actualizarAsistenciaPorValidacion($validacion, $decision) {
+        $pdo = $this->db->getConnection();
+        $tipo = $validacion['tipo_incidencia'];
+        $empleadoId = $validacion['empleado_id'];
+        $incidenciaId = $validacion['incidencia_id'];
+
+        $estadoTexto = $decision['estado'] === 'aprobado' ? 'aprobado' : ($decision['estado'] === 'rechazado' ? 'rechazado' : 'pendiente');
+
+        $fechaInicio = null;
+        $fechaFin = null;
+
+        switch ($tipo) {
+            case 'retardo':
+                $stmt = $pdo->prepare("SELECT fecha, empleado_id FROM retardos WHERE id = ?");
+                $stmt->execute([$incidenciaId]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($row) {
+                    $fechaInicio = $row['fecha'];
+                    $fechaFin = $row['fecha'];
+                }
+                break;
+
+            case 'comision':
+                $stmt = $pdo->prepare("SELECT fecha_inicio, fecha_fin FROM comisiones WHERE id = ?");
+                $stmt->execute([$incidenciaId]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($row) {
+                    $fechaInicio = $row['fecha_inicio'];
+                    $fechaFin = $row['fecha_fin'];
+                }
+                break;
+
+            case 'dia_economico':
+                $stmt = $pdo->prepare("SELECT fecha FROM dias_economicos WHERE id = ?");
+                $stmt->execute([$incidenciaId]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($row) {
+                    $fechaInicio = $row['fecha'];
+                    $fechaFin = $row['fecha'];
+                }
+                break;
+
+            case 'ausencia':
+                $stmt = $pdo->prepare("SELECT fecha_inicio, fecha_fin FROM ausencias WHERE id = ?");
+                $stmt->execute([$incidenciaId]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($row) {
+                    $fechaInicio = $row['fecha_inicio'];
+                    $fechaFin = $row['fecha_fin'];
+                }
+                break;
+
+            case 'constancia_tiempo':
+                $stmt = $pdo->prepare("SELECT fecha_inicio, fecha_fin FROM constancias_tiempo WHERE id = ?");
+                $stmt->execute([$incidenciaId]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($row) {
+                    $fechaInicio = $row['fecha_inicio'];
+                    $fechaFin = $row['fecha_fin'];
+                }
+                break;
+
+            case 'licencia_medica':
+                $stmt = $pdo->prepare("SELECT fecha_inicio, fecha_fin FROM licencias_medicas WHERE id = ?");
+                $stmt->execute([$incidenciaId]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($row) {
+                    $fechaInicio = $row['fecha_inicio'];
+                    $fechaFin = $row['fecha_fin'];
+                }
+                break;
+
+            case 'justificacion':
+                $stmt = $pdo->prepare("SELECT fecha_inicio, fecha_fin FROM justificaciones WHERE id = ?");
+                $stmt->execute([$incidenciaId]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($row) {
+                    $fechaInicio = $row['fecha_inicio'];
+                    $fechaFin = $row['fecha_fin'];
+                }
+                break;
+        }
+
+        if ($fechaInicio && $fechaFin) {
+            $sql = "UPDATE asistencia
+                    SET estado_validacion = ?,
+                        validado_por_jefe = ?,
+                        fecha_aprobacion = NOW()
+                    WHERE empleado_id = ?
+                    AND fecha BETWEEN ? AND ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$estadoTexto, $decision['aprobado_por'], $empleadoId, $fechaInicio, $fechaFin]);
+        }
+    }
+
+    /**
      * Validar datos para creación de validación
      */
     private function validarDatosCreacion($data) {
@@ -1205,7 +1434,7 @@ class ValidacionJefe {
         
         if (empty($data['tipo_incidencia'])) {
             $errors[] = 'El tipo de incidencia es obligatorio';
-        } elseif (!in_array($data['tipo_incidencia'], ['retardo', 'comision', 'dia_economico', 'ausencia'])) {
+        } elseif (!in_array($data['tipo_incidencia'], ['retardo', 'comision', 'dia_economico', 'ausencia', 'constancia_tiempo', 'licencia_medica', 'vacaciones', 'justificacion'])) {
             $errors[] = 'Tipo de incidencia no válido';
         }
         
@@ -1269,20 +1498,20 @@ class ValidacionJefe {
         $stmt->execute();
         $incidencias = array_merge($incidencias, $stmt->fetchAll(PDO::FETCH_ASSOC));
         
-        // Días económicos que requieren validación
-        $sqlDiasEconomicos = "SELECT de.id as incidencia_id, 'dia_economico' as tipo_incidencia,
-                                  de.empleado_id, e.jefe_directo_id as jefe_id,
-                                  CONCAT('Día económico: ', de.motivo) as motivo_validacion,
-                                  TRUE as evidencia_requerida
-                               FROM dias_economicos de
-                               INNER JOIN empleados e ON de.empleado_id = e.id
-                               WHERE de.estatus = 'solicitado'
-                               AND de.id NOT IN (
+        // Justificaciones que requieren validación
+        $sqlJustificaciones = "SELECT j.id as incidencia_id, 'justificacion' as tipo_incidencia,
+                                  j.empleado_id, e.jefe_directo_id as jefe_id,
+                                  CONCAT('Justificación: ', j.motivo) as motivo_validacion,
+                                  CASE WHEN j.tipo_justificacion_id IS NOT NULL THEN TRUE ELSE FALSE END as evidencia_requerida
+                               FROM justificaciones j
+                               INNER JOIN empleados e ON j.empleado_id = e.id
+                               WHERE j.estatus = 'pendiente'
+                               AND j.id NOT IN (
                                    SELECT incidencia_id FROM validaciones_jefe 
-                                   WHERE tipo_incidencia = 'dia_economico'
+                                   WHERE tipo_incidencia = 'justificacion'
                                )";
         
-        $stmt = $pdo->prepare($sqlDiasEconomicos);
+        $stmt = $pdo->prepare($sqlJustificaciones);
         $stmt->execute();
         $incidencias = array_merge($incidencias, $stmt->fetchAll(PDO::FETCH_ASSOC));
         
@@ -1330,6 +1559,502 @@ class ValidacionJefe {
             'total_incidencias' => count($incidencias),
             'procesadas' => $procesadas,
             'errores' => $errores
+        ];
+    }
+
+    // ========================================================================
+    // SISTEMA DE CONVERSACIÓN BIDIRECCIONAL (JEFE ↔ EMPLEADO)
+    // ========================================================================
+
+    /**
+     * Agregar un mensaje a una validación
+     * @param int $validacionId ID de la validación
+     * @param string $remitenteTipo jefe|empleado|sistema
+     * @param int $remitenteId ID del usuario que envía
+     * @param string $mensaje Contenido del mensaje
+     * @param string $tipoMensaje info_request|info_response|decision|notificacion|sistema
+     * @param string|null $archivoAdjunto Ruta del archivo adjunto
+     * @return int ID del mensaje creado
+     */
+    public function agregarMensaje($validacionId, $remitenteTipo, $remitenteId, $mensaje, $tipoMensaje = 'info_response', $archivoAdjunto = null) {
+        $pdo = $this->db->getConnection();
+        
+        // Obtener nombre del remitente
+        $nombre = '';
+        if ($remitenteTipo === 'jefe' || $remitenteTipo === 'empleado') {
+            $stmt = $pdo->prepare("
+                SELECT COALESCE(u.nombre_completo, CONCAT(e.nombre, ' ', e.apellido), 'Usuario') as nombre
+                FROM usuarios u
+                LEFT JOIN empleados e ON u.empleado_id = e.id
+                WHERE u.id = ?
+            ");
+            $stmt->execute([$remitenteId]);
+            $nombre = $stmt->fetchColumn() ?: 'Usuario';
+        } elseif ($remitenteTipo === 'sistema') {
+            $nombre = 'Sistema';
+        }
+        
+        $sql = "INSERT INTO validacion_mensajes 
+                (validacion_id, remitente_tipo, remitente_id, remitente_nombre, mensaje, tipo_mensaje, archivo_adjunto, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$validacionId, $remitenteTipo, $remitenteId, $nombre, $mensaje, $tipoMensaje, $archivoAdjunto]);
+        $msgId = $pdo->lastInsertId();
+        
+        // Actualizar la validación con el último mensaje
+        $esperandoRespuesta = ($remitenteTipo === 'jefe' && $tipoMensaje === 'info_request') ? 'empleado'
+                            : (($remitenteTipo === 'empleado' && $tipoMensaje === 'info_response') ? 'jefe' : null);
+        
+        $stmtUpd = $pdo->prepare("
+            UPDATE validaciones_jefe 
+            SET ultimo_mensaje_id = ?,
+                esperando_respuesta_de = ?,
+                notificacion_leida_empleado = ?,
+                notificacion_leida_jefe = ?
+            WHERE id = ?
+        ");
+        $stmtUpd->execute([
+            $msgId,
+            $esperandoRespuesta,
+            ($remitenteTipo === 'empleado' || $remitenteTipo === 'sistema') ? 1 : 0,
+            ($remitenteTipo === 'jefe' || $remitenteTipo === 'sistema') ? 1 : 0,
+            $validacionId
+        ]);
+        
+        return $msgId;
+    }
+    
+    /**
+     * Obtener todos los mensajes de una validación
+     * @param int $validacionId ID de la validación
+     * @return array Lista de mensajes ordenados por fecha
+     */
+    public function obtenerMensajes($validacionId) {
+        $pdo = $this->db->getConnection();
+        
+        $sql = "SELECT vm.*, 
+                       COALESCE(vm.remitente_nombre, 'Usuario') as nombre_remitente
+                FROM validacion_mensajes vm
+                WHERE vm.validacion_id = ?
+                ORDER BY vm.created_at ASC";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$validacionId]);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    /**
+     * Obtener validaciones para un empleado (panel del empleado)
+     * @param int $empleadoId ID del empleado
+     * @param array $filters Filtros (estado, fecha_inicio, fecha_fin)
+     * @return array Lista de validaciones
+     */
+    public function getValidacionesEmpleado($empleadoId, $filters = []) {
+        $pdo = $this->db->getConnection();
+        
+        $empleadoId = (int)$empleadoId;
+        
+        // 1. Obtener registros de validaciones_jefe (solo retroardos hasta ahora)
+        $sql = "SELECT v.*, 
+                    u.nombre_completo as jefe_nombre,
+                    CONCAT(e.nombre, ' ', e.apellido) as empleado_nombre_completo,
+                    e.area as empleado_area,
+                    e.jerarquia as empleado_jerarquia,
+                    v.ultimo_mensaje_id,
+                    v.esperando_respuesta_de,
+                    v.notificacion_leida_empleado,
+                    vm.mensaje as ultimo_mensaje_texto,
+                    vm.remitente_tipo as ultimo_mensaje_remitente,
+                    vm.remitente_nombre as ultimo_mensaje_remitente_nombre,
+                    vm.created_at as ultimo_mensaje_fecha,
+                    CASE 
+                        WHEN v.tipo_incidencia = 'retardo' THEN 
+                            (SELECT CONCAT('Retardo de ', r.minutos_retardo, ' minutos - ', COALESCE(r.motivo_justificacion, 'Sin motivo'))
+                             FROM retardos r WHERE r.id = v.incidencia_id)
+                        WHEN v.tipo_incidencia = 'comision' THEN 
+                            COALESCE(
+                                (SELECT CONCAT('Comisión: ', c.descripcion) FROM comisiones c WHERE c.id = v.incidencia_id),
+                                (SELECT CONCAT('Comisión: ', COALESCE(r.motivo_justificacion, 'Sin especificar')) FROM retardos r WHERE r.id = v.incidencia_id)
+                            )
+                        WHEN v.tipo_incidencia = 'dia_economico' THEN 
+                            (SELECT CONCAT('Día económico: ', de.motivo) 
+                             FROM dias_economicos de WHERE de.id = v.incidencia_id)
+                        WHEN v.tipo_incidencia = 'ausencia' THEN 
+                            (SELECT CONCAT('Ausencia: ', a.motivo) 
+                             FROM ausencias a WHERE a.id = v.incidencia_id)
+                        WHEN v.tipo_incidencia = 'constancia_tiempo' THEN 
+                            (SELECT CONCAT('Constancia de tiempo: ', ct.motivo) 
+                             FROM constancias_tiempo ct WHERE ct.id = v.incidencia_id)
+                        WHEN v.tipo_incidencia = 'licencia_medica' THEN 
+                            (SELECT CONCAT('Licencia médica: ', COALESCE(lm.diagnostico, 'Sin diagnóstico')) 
+                             FROM licencias_medicas lm WHERE lm.id = v.incidencia_id)
+                        WHEN v.tipo_incidencia = 'justificacion' THEN 
+                            (SELECT CONCAT('Justificación: ', j.motivo) 
+                             FROM justificaciones j WHERE j.id = v.incidencia_id)
+                        ELSE v.tipo_incidencia
+                    END as descripcion_incidencia,
+                    CASE v.tipo_incidencia
+                        WHEN 'retardo' THEN (SELECT fecha FROM retardos WHERE id = v.incidencia_id)
+                        WHEN 'comision' THEN COALESCE(
+                            (SELECT fecha_inicio FROM comisiones WHERE id = v.incidencia_id),
+                            (SELECT fecha FROM retardos WHERE id = v.incidencia_id)
+                        )
+                        WHEN 'dia_economico' THEN (SELECT fecha FROM dias_economicos WHERE id = v.incidencia_id)
+                        WHEN 'ausencia' THEN (SELECT fecha_inicio FROM ausencias WHERE id = v.incidencia_id)
+                        WHEN 'constancia_tiempo' THEN (SELECT fecha_inicio FROM constancias_tiempo WHERE id = v.incidencia_id)
+                        WHEN 'licencia_medica' THEN (SELECT fecha_inicio FROM licencias_medicas WHERE id = v.incidencia_id)
+                        WHEN 'justificacion' THEN (SELECT fecha_inicio FROM justificaciones WHERE id = v.incidencia_id)
+                        ELSE v.fecha_solicitud
+                    END as fecha_incidencia
+                FROM validaciones_jefe v
+                INNER JOIN empleados e ON v.empleado_id = e.id
+                LEFT JOIN usuarios u ON v.jefe_id = u.empleado_id
+                LEFT JOIN validacion_mensajes vm ON v.ultimo_mensaje_id = vm.id
+                WHERE v.empleado_id = ?";
+        
+        $params = [$empleadoId];
+        
+        // Filtro por estado (solo para validaciones_jefe)
+        if (!empty($filters['estado'])) {
+            if (in_array($filters['estado'], ['pendientes', 'requiere_info'])) {
+                $sql .= " AND v.estado IN ('pendiente', 'requiere_info')";
+            } elseif ($filters['estado'] !== 'todos') {
+                $sql .= " AND v.estado = ?";
+                $params[] = $filters['estado'];
+            }
+        } else {
+            $sql .= " AND v.estado IN ('pendiente', 'requiere_info', 'aprobado', 'rechazado')";
+        }
+        
+        // Filtro por fecha (solo para validaciones_jefe)
+        if (!empty($filters['fecha_inicio'])) {
+            $sql .= " AND v.fecha_solicitud >= ?";
+            $params[] = $filters['fecha_inicio'];
+        }
+        if (!empty($filters['fecha_fin'])) {
+            $sql .= " AND v.fecha_solicitud <= ?";
+            $params[] = $filters['fecha_fin'];
+        }
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $validaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // 2. Obtener incidencias de otras tablas que NO están en validaciones_jefe
+        $incidenciasExternas = $this->getIncidenciasExternasEmpleado($pdo, $empleadoId, $filters);
+        
+        // 3. Combinar y ordenar
+        $todas = array_merge($validaciones, $incidenciasExternas);
+        
+        usort($todas, function($a, $b) {
+            $aPendiente = in_array($a['estado'] ?? '', ['pendiente', 'requiere_info']) ? 0 : 1;
+            $bPendiente = in_array($b['estado'] ?? '', ['pendiente', 'requiere_info']) ? 0 : 1;
+            if ($aPendiente != $bPendiente) return $aPendiente - $bPendiente;
+            $fechaA = $a['fecha_solicitud'] ?? $a['fecha_incidencia'] ?? '';
+            $fechaB = $b['fecha_solicitud'] ?? $b['fecha_incidencia'] ?? '';
+            return strcmp($fechaB, $fechaA);
+        });
+        
+        return $todas;
+    }
+    
+    /**
+     * Obtener incidencias aprobadas/rechazadas de tablas externas (sin registro en validaciones_jefe)
+     */
+    private function getIncidenciasExternasEmpleado($pdo, $empleadoId, $filters = []) {
+        $empleadoId = (int)$empleadoId;
+        $incidencias = [];
+        
+        // IDs ya existentes en validaciones_jefe para evitar duplicados
+        $stmtIds = $pdo->prepare("SELECT CONCAT(tipo_incidencia, '_', incidencia_id) as vj_key, incidencia_id FROM validaciones_jefe WHERE empleado_id = ?");
+        $stmtIds->execute([$empleadoId]);
+        $rowsVj = $stmtIds->fetchAll(PDO::FETCH_ASSOC);
+        $idsExistentes = [];
+        $incidenciaIdsExistentes = [];
+        foreach ($rowsVj as $rowVj) {
+            $idsExistentes[] = $rowVj['vj_key'];
+            $incidenciaIdsExistentes[] = $rowVj['incidencia_id'];
+        }
+        
+        $estadoFilter = $filters['estado'] ?? '';
+        
+        // Helper para mapear estado
+        $mapEstado = function($estatus) {
+            $estatus = strtolower($estatus);
+            if (in_array($estatus, ['aprobada', 'aprobado', 'autorizada'])) return 'aprobado';
+            if (in_array($estatus, ['rechazada', 'rechazado', 'cancelada'])) return 'rechazado';
+            if ($estatus === 'pendiente') return 'pendiente';
+            return $estatus;
+        };
+        
+        // Helper para filtrar por estado
+        $pasaFiltro = function($estadoNorm) use ($estadoFilter) {
+            if (empty($estadoFilter) || $estadoFilter === 'todos') return true;
+            if ($estadoFilter === 'pendientes') return in_array($estadoNorm, ['pendiente', 'requiere_info']);
+            return $estadoNorm === $estadoFilter;
+        };
+        
+        // 2a. COMISIONES
+        $stmt = $pdo->prepare("
+            SELECT c.id, c.empleado_id, c.fecha_inicio, c.fecha_fin, c.tipo_comision,
+                   c.estatus, c.descripcion, c.created_at, c.fecha_aprobacion,
+                   u.nombre_completo as aprobado_por_nombre
+            FROM comisiones c
+            LEFT JOIN usuarios u ON c.aprobado_por = u.id
+            WHERE c.empleado_id = ? AND c.estatus IS NOT NULL
+        ");
+        $stmt->execute([$empleadoId]);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $key = 'comision_' . $row['id'];
+            if (in_array($key, $idsExistentes)) continue;
+            if (in_array($row['id'], $incidenciaIdsExistentes)) continue;
+            $estadoNorm = $mapEstado($row['estatus']);
+            if (!$pasaFiltro($estadoNorm)) continue;
+            $incidencias[] = [
+                'id' => -(100000 + $row['id']),
+                'incidencia_id' => $row['id'],
+                'tipo_incidencia' => 'comision',
+                'empleado_id' => $empleadoId,
+                'jefe_id' => null,
+                'estado' => $estadoNorm,
+                'jefe_nombre' => $row['aprobado_por_nombre'] ?? 'N/A',
+                'empleado_nombre_completo' => null,
+                'empleado_area' => null,
+                'empleado_jerarquia' => null,
+                'descripcion_incidencia' => 'Comisión: ' . ($row['descripcion'] ?? 'Sin descripción'),
+                'fecha_incidencia' => $row['fecha_inicio'],
+                'fecha_solicitud' => $row['created_at'],
+                'ultimo_mensaje_id' => null,
+                'esperando_respuesta_de' => null,
+                'notificacion_leida_empleado' => 1,
+                'ultimo_mensaje_texto' => null,
+                'ultimo_mensaje_remitente' => null,
+                'ultimo_mensaje_remitente_nombre' => null,
+                'ultimo_mensaje_fecha' => null,
+            ];
+        }
+        
+        // 2b. JUSTIFICACIONES
+        $stmt = $pdo->prepare("
+            SELECT j.id, j.empleado_id, j.fecha_inicio, j.tipo_justificacion,
+                   j.estatus, j.motivo, j.created_at,
+                   u.nombre_completo as aprobado_por_nombre
+            FROM justificaciones j
+            LEFT JOIN usuarios u ON j.aprobado_por = u.id
+            WHERE j.empleado_id = ? AND j.estatus IS NOT NULL
+        ");
+        $stmt->execute([$empleadoId]);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $key = 'justificacion_' . $row['id'];
+            if (in_array($key, $idsExistentes)) continue;
+            if (in_array($row['id'], $incidenciaIdsExistentes)) continue;
+            $estadoNorm = $mapEstado($row['estatus']);
+            if (!$pasaFiltro($estadoNorm)) continue;
+            $incidencias[] = [
+                'id' => -(200000 + $row['id']),
+                'incidencia_id' => $row['id'],
+                'tipo_incidencia' => 'justificacion',
+                'empleado_id' => $empleadoId,
+                'jefe_id' => null,
+                'estado' => $estadoNorm,
+                'jefe_nombre' => $row['aprobado_por_nombre'] ?? 'N/A',
+                'empleado_nombre_completo' => null,
+                'empleado_area' => null,
+                'empleado_jerarquia' => null,
+                'descripcion_incidencia' => 'Justificación: ' . ($row['motivo'] ?? 'Sin motivo'),
+                'fecha_incidencia' => $row['fecha_inicio'],
+                'fecha_solicitud' => $row['created_at'],
+                'ultimo_mensaje_id' => null,
+                'esperando_respuesta_de' => null,
+                'notificacion_leida_empleado' => 1,
+                'ultimo_mensaje_texto' => null,
+                'ultimo_mensaje_remitente' => null,
+                'ultimo_mensaje_remitente_nombre' => null,
+                'ultimo_mensaje_fecha' => null,
+            ];
+        }
+        
+        // 2d. VACACIONES
+        $stmt = $pdo->prepare("
+            SELECT v.id, v.empleado_id, v.fecha_inicio, v.fecha_fin, v.dias_solicitados,
+                   v.estatus, v.created_at, v.fecha_aprobacion,
+                   u.nombre_completo as aprobado_por_nombre
+            FROM vacaciones v
+            LEFT JOIN usuarios u ON v.aprobado_por = u.id
+            WHERE v.empleado_id = ? AND v.estatus IS NOT NULL
+        ");
+        $stmt->execute([$empleadoId]);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $key = 'vacaciones_' . $row['id'];
+            if (in_array($key, $idsExistentes)) continue;
+            if (in_array($row['id'], $incidenciaIdsExistentes)) continue;
+            $estadoNorm = $mapEstado($row['estatus']);
+            if (!$pasaFiltro($estadoNorm)) continue;
+            $incidencias[] = [
+                'id' => -(400000 + $row['id']),
+                'incidencia_id' => $row['id'],
+                'tipo_incidencia' => 'vacaciones',
+                'empleado_id' => $empleadoId,
+                'jefe_id' => null,
+                'estado' => $estadoNorm,
+                'jefe_nombre' => $row['aprobado_por_nombre'] ?? 'N/A',
+                'empleado_nombre_completo' => null,
+                'empleado_area' => null,
+                'empleado_jerarquia' => null,
+                'descripcion_incidencia' => 'Vacaciones: ' . $row['fecha_inicio'] . ' al ' . ($row['fecha_fin'] ?? '') . ' (' . ($row['dias_solicitados'] ?? '?') . ' días)',
+                'fecha_incidencia' => $row['fecha_inicio'],
+                'fecha_solicitud' => $row['created_at'] ?? $row['fecha_aprobacion'],
+                'ultimo_mensaje_id' => null,
+                'esperando_respuesta_de' => null,
+                'notificacion_leida_empleado' => 1,
+                'ultimo_mensaje_texto' => null,
+                'ultimo_mensaje_remitente' => null,
+                'ultimo_mensaje_remitente_nombre' => null,
+                'ultimo_mensaje_fecha' => null,
+            ];
+        }
+        
+        return $incidencias;
+    }
+    
+    /**
+     * Marcar mensajes como leídos
+     * @param int $validacionId ID de la validación
+     * @param string $tipo empleado|jefe
+     */
+    public function marcarComoLeido($validacionId, $tipo = 'empleado') {
+        $pdo = $this->db->getConnection();
+        
+        $columna = ($tipo === 'jefe') ? 'notificacion_leida_jefe' : 'notificacion_leida_empleado';
+        
+        $sql = "UPDATE validaciones_jefe SET $columna = 1 WHERE id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$validacionId]);
+        
+        // Marcar mensajes no leídos como leídos
+        $sqlMsg = "UPDATE validacion_mensajes 
+                   SET leido = 1, leido_en = NOW() 
+                   WHERE validacion_id = ? AND leido = 0";
+        $stmtMsg = $pdo->prepare($sqlMsg);
+        $stmtMsg->execute([$validacionId]);
+    }
+    
+    /**
+     * Obtener contador de notificaciones no leídas para un empleado
+     * @param int $empleadoId ID del empleado
+     * @return int Cantidad de notificaciones no leídas
+     */
+    public function getContadorNoLeidasEmpleado($empleadoId) {
+        $pdo = $this->db->getConnection();
+        
+        $sql = "SELECT COUNT(*) as total
+                FROM validaciones_jefe v
+                WHERE v.empleado_id = ?
+                AND v.notificacion_leida_empleado = 0
+                AND (v.estado = 'requiere_info' OR v.esperando_respuesta_de = 'empleado')";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$empleadoId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return (int)($result['total'] ?? 0);
+    }
+    
+    /**
+     * Obtener contador de notificaciones no leídas para un jefe
+     * @param int $jefeId ID del empleado (jefe)
+     * @return int Cantidad de notificaciones no leídas
+     */
+    public function getContadorNoLeidasJefe($jefeId) {
+        $pdo = $this->db->getConnection();
+        
+        $sql = "SELECT COUNT(*) as total
+                FROM validaciones_jefe v
+                WHERE v.jefe_id = ?
+                AND v.notificacion_leida_jefe = 0
+                AND v.esperando_respuesta_de = 'jefe'";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$jefeId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return (int)($result['total'] ?? 0);
+    }
+
+    /**
+     * Registrar evidencia adjunta para un mensaje
+     */
+    public function guardarAdjunto($validacionId, $mensajeId, $archivoOriginal, $archivoPath, $tipoMime, $tamano) {
+        $pdo = $this->db->getConnection();
+        
+        $sql = "INSERT INTO validacion_adjuntos (mensaje_id, validacion_id, archivo_original, archivo_path, tipo_mime, tamano, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, NOW())";
+        $stmt = $pdo->prepare($sql);
+        return $stmt->execute([$mensajeId, $validacionId, $archivoOriginal, $archivoPath, $tipoMime, $tamano]);
+    }
+
+    /**
+     * Obtener adjuntos de un mensaje
+     */
+    public function getAdjuntosPorMensaje($mensajeId) {
+        $pdo = $this->db->getConnection();
+        
+        $sql = "SELECT * FROM validacion_adjuntos WHERE mensaje_id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$mensajeId]);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    /**
+     * Obtener adjuntos de una validación
+     */
+    public function getAdjuntosPorValidacion($validacionId) {
+        $pdo = $this->db->getConnection();
+        
+        $sql = "SELECT * FROM validacion_adjuntos WHERE validacion_id = ? ORDER BY created_at DESC";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$validacionId]);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Cargar incidencias pendientes y ya validadas de empleados para el panel del empleado
+     */
+    public function getIncidenciasEmpleadoParaValidacion($empleadoId) {
+        $pdo = $this->db->getConnection();
+        
+        // Retardos del empleado con su estado de validación
+        $sql = "SELECT r.id, r.fecha, r.minutos_retardo, r.tipo_retraso, r.justificado,
+                       r.motivo_justificacion, r.estado_validacion, r.requiere_validacion_jefe,
+                       'retardo' as origen
+                FROM retardos r
+                WHERE r.empleado_id = ?
+                ORDER BY r.fecha DESC
+                LIMIT 50";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$empleadoId]);
+        $retardos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Asistencias con incidencias
+        $sqlA = "SELECT a.id, a.fecha, a.tipo_asistencia, a.estado_validacion, a.requiere_validacion_jefe,
+                        a.observaciones, 'asistencia' as origen
+                 FROM asistencia a
+                 WHERE a.empleado_id = ? AND a.tipo_asistencia NOT IN ('normal', 'por_definir')
+                 ORDER BY a.fecha DESC
+                 LIMIT 50";
+        
+        $stmtA = $pdo->prepare($sqlA);
+        $stmtA->execute([$empleadoId]);
+        $asistencias = $stmtA->fetchAll(PDO::FETCH_ASSOC);
+        
+        return [
+            'retardos' => $retardos,
+            'asistencias' => $asistencias
         ];
     }
 }

@@ -41,17 +41,25 @@ class EmpleadoHorarios {
 
     /**
      * Asignar un ciclo rotativo a un empleado
+     * Si el empleado ya tiene un ciclo activo (sin fecha_fin), lo cierra automáticamente
      */
     public function asignarCicloEmpleado($empleado_id, $ciclo_id, $fecha_inicio, $fecha_fin = null) {
-        // Cerrar vigencia del registro actual (si existe) estableciendo fecha_fin al día anterior
+        // Cerrar SOLO el ciclo activo más reciente del empleado (que tenga fecha_fin NULL)
         $stmt = $this->db->getConnection()->prepare("
             UPDATE empleado_horarios 
             SET fecha_fin = DATE_SUB(?, INTERVAL 1 DAY) 
-            WHERE empleado_id = ? AND fecha_fin IS NULL
+            WHERE empleado_id = ? 
+              AND ciclo_id IS NOT NULL 
+              AND fecha_fin IS NULL
+            ORDER BY fecha_inicio DESC 
+            LIMIT 1
         ");
         $stmt->execute([$fecha_inicio, $empleado_id]);
+        $ciclosCerrados = $stmt->rowCount();
+        
+        error_log("Ciclos cerrados al asignar nuevo ciclo: $ciclosCerrados para empleado $empleado_id");
 
-        // Crear nueva asignación en la tabla de historial
+        // Crear nueva asignación en la tabla de historial (con fecha_fin NULL = abierta)
         $stmt = $this->db->getConnection()->prepare("
             INSERT INTO empleado_horarios (empleado_id, ciclo_id, fecha_inicio, fecha_fin)
             VALUES (?, ?, ?, ?)

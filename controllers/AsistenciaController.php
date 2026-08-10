@@ -39,7 +39,7 @@ class AsistenciaController extends BaseController {
     }
 
     public function index() {
-        $empleado_id = isset($_GET['empleado_id']) ? (int)$_GET['empleado_id'] : null;
+        $empleado_id = isset($_GET['empleado_id']) ? SecurityHelper::sanitizeInt($_GET['empleado_id']) : null;
         $asistencias = $this->asistenciaService->getByEmpleado($empleado_id);
 
         // Obtener áreas únicas para el filtro usando el modelo Empleado
@@ -53,7 +53,7 @@ class AsistenciaController extends BaseController {
 
     public function registrarEntrada() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $dispositivo_id = isset($_POST['dispositivo_id']) ? (int)$_POST['dispositivo_id'] : 1;
+            $dispositivo_id = SecurityHelper::sanitizeInt($_POST['dispositivo_id'] ?? 1, 1);
 
             // Verificar si el dispositivo está activo
             $dispositivo = $this->dispositivoBiometricoModel->getByDispositivoId($dispositivo_id);
@@ -123,7 +123,7 @@ class AsistenciaController extends BaseController {
 
     public function registrarSalida() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $dispositivo_id = isset($_POST['dispositivo_id']) ? (int)$_POST['dispositivo_id'] : 1;
+            $dispositivo_id = SecurityHelper::sanitizeInt($_POST['dispositivo_id'] ?? 1, 1);
 
             // Verificar si el dispositivo está activo
             $dispositivo = $this->dispositivoBiometricoModel->getByDispositivoId($dispositivo_id);
@@ -198,7 +198,7 @@ class AsistenciaController extends BaseController {
     
     public function getDetalles($id = null) {
         if ($id === null) {
-            $id = $_GET['id'] ?? null;
+            $id = SecurityHelper::sanitizeInt($_GET['id'] ?? null, 1);
         }
         
         if (!$id) {
@@ -271,9 +271,9 @@ public function filtrarAsistencia() {
 
             // Validar datos de entrada
             $data = [
-                'fecha_inicio' => $_POST['fecha_inicio'] ?? date('Y-m-d'),
-                'fecha_fin' => $_POST['fecha_fin'] ?? date('Y-m-d'),
-                'empleado_id' => $_POST['empleado_id'] ?? ''
+                'fecha_inicio' => SecurityHelper::sanitizeString($_POST['fecha_inicio'] ?? date('Y-m-d')),
+                'fecha_fin' => SecurityHelper::sanitizeString($_POST['fecha_fin'] ?? date('Y-m-d')),
+                'empleado_id' => SecurityHelper::sanitizeString($_POST['empleado_id'] ?? '')
             ];
             
             $errors = RequestValidator::validateAsistenciaData($data);
@@ -284,7 +284,7 @@ public function filtrarAsistencia() {
             // Filtros básicos validados
             $filtros['fecha_inicio'] = $data['fecha_inicio'];
             $filtros['fecha_fin'] = $data['fecha_fin'];
-            $area = $_POST['area'] ?? null;
+            $area = !empty($_POST['area']) ? SecurityHelper::sanitizeString($_POST['area']) : null;
 
             // Filtros avanzados
             if (!empty($_POST['dispositivo_id'])) {
@@ -339,8 +339,8 @@ public function calcularHorasLaborables() {
         try {
             // Validar fechas
             $data = [
-                'fecha_inicio' => $_POST['fecha_inicio'] ?? date('Y-m-d'),
-                'fecha_fin' => $_POST['fecha_fin'] ?? date('Y-m-d')
+                'fecha_inicio' => SecurityHelper::sanitizeString($_POST['fecha_inicio'] ?? date('Y-m-d')),
+                'fecha_fin' => SecurityHelper::sanitizeString($_POST['fecha_fin'] ?? date('Y-m-d'))
             ];
             
             $errors = RequestValidator::validateAsistenciaData($data);
@@ -350,7 +350,7 @@ public function calcularHorasLaborables() {
             
             $fecha_inicio = $data['fecha_inicio'];
             $fecha_fin = $data['fecha_fin'];
-            $area = $_POST['area'] ?? null;
+            $area = !empty($_POST['area']) ? SecurityHelper::sanitizeString($_POST['area']) : null;
 
             // Obtener empleados con asistencia en el período
             $empleados_asistencia = $this->asistenciaService->getEmpleadosConAsistencia($fecha_inicio, $fecha_fin, $area);
@@ -402,9 +402,9 @@ public function calcularHorasLaborables() {
 
     public function filtrarEmpleados() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $fecha_inicio = $_POST['fecha_inicio'] ?? date('Y-m-d');
-            $fecha_fin = $_POST['fecha_fin'] ?? date('Y-m-d');
-            $area = $_POST['area'] ?? null;
+            $fecha_inicio = SecurityHelper::sanitizeString($_POST['fecha_inicio'] ?? date('Y-m-d'));
+            $fecha_fin = SecurityHelper::sanitizeString($_POST['fecha_fin'] ?? date('Y-m-d'));
+            $area = !empty($_POST['area']) ? SecurityHelper::sanitizeString($_POST['area']) : null;
 
             // Obtener empleados con asistencia en el período
             $empleados = $this->asistenciaService->getEmpleadosConAsistencia($fecha_inicio, $fecha_fin, $area);
@@ -444,22 +444,22 @@ public function calcularHorasLaborables() {
             $filtros = [];
 
             // Filtros básicos
-            $filtros['fecha_inicio'] = $_POST['fecha_inicio'] ?? date('Y-m-d');
-            $filtros['fecha_fin'] = $_POST['fecha_fin'] ?? date('Y-m-d');
-            $area = $_POST['area'] ?? null;
+            $filtros['fecha_inicio'] = SecurityHelper::sanitizeString($_POST['fecha_inicio'] ?? date('Y-m-d'));
+            $filtros['fecha_fin'] = SecurityHelper::sanitizeString($_POST['fecha_fin'] ?? date('Y-m-d'));
+            $area = !empty($_POST['area']) ? SecurityHelper::sanitizeString($_POST['area']) : null;
 
             // Filtros avanzados
             if (!empty($_POST['dispositivo_id'])) {
-                $filtros['dispositivo_id'] = (int)$_POST['dispositivo_id'];
+                $filtros['dispositivo_id'] = SecurityHelper::sanitizeInt($_POST['dispositivo_id'], 1);
             }
             if (!empty($_POST['tipo_biometria'])) {
-                $filtros['tipo_biometria'] = $_POST['tipo_biometria'];
+                $filtros['tipo_biometria'] = SecurityHelper::sanitizeString($_POST['tipo_biometria']);
             }
             if (!empty($_POST['tipo_asistencia'])) {
-                $filtros['tipo_asistencia'] = $_POST['tipo_asistencia'];
+                $filtros['tipo_asistencia'] = SecurityHelper::sanitizeString($_POST['tipo_asistencia']);
             }
             if (!empty($_POST['empleado_id'])) {
-                $filtros['empleado_id'] = (int)$_POST['empleado_id'];
+                $filtros['empleado_id'] = SecurityHelper::sanitizeInt($_POST['empleado_id'], 1);
             }
 
             // Sin límite para exportación completa
@@ -483,22 +483,22 @@ public function calcularHorasLaborables() {
             $filtros = [];
 
             // Filtros básicos
-            $filtros['fecha_inicio'] = $_POST['fecha_inicio'] ?? date('Y-m-d');
-            $filtros['fecha_fin'] = $_POST['fecha_fin'] ?? date('Y-m-d');
-            $area = $_POST['area'] ?? null;
+            $filtros['fecha_inicio'] = SecurityHelper::sanitizeString($_POST['fecha_inicio'] ?? date('Y-m-d'));
+            $filtros['fecha_fin'] = SecurityHelper::sanitizeString($_POST['fecha_fin'] ?? date('Y-m-d'));
+            $area = !empty($_POST['area']) ? SecurityHelper::sanitizeString($_POST['area']) : null;
 
             // Filtros avanzados
             if (!empty($_POST['dispositivo_id'])) {
-                $filtros['dispositivo_id'] = (int)$_POST['dispositivo_id'];
+                $filtros['dispositivo_id'] = SecurityHelper::sanitizeInt($_POST['dispositivo_id'], 1);
             }
             if (!empty($_POST['tipo_biometria'])) {
-                $filtros['tipo_biometria'] = $_POST['tipo_biometria'];
+                $filtros['tipo_biometria'] = SecurityHelper::sanitizeString($_POST['tipo_biometria']);
             }
             if (!empty($_POST['tipo_asistencia'])) {
-                $filtros['tipo_asistencia'] = $_POST['tipo_asistencia'];
+                $filtros['tipo_asistencia'] = SecurityHelper::sanitizeString($_POST['tipo_asistencia']);
             }
             if (!empty($_POST['empleado_id'])) {
-                $filtros['empleado_id'] = (int)$_POST['empleado_id'];
+                $filtros['empleado_id'] = SecurityHelper::sanitizeInt($_POST['empleado_id'], 1);
             }
 
             // Sin límite para exportación completa

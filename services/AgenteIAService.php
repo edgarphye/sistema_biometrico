@@ -211,10 +211,10 @@ class AgenteIAService {
         if ($minutos <= $tolerancia) {
             return ['tipo' => 'puntual', 'clasificacion' => 'puntual', 'decision' => 'sin_accion'];
         }
-        if ($minutos <= $this->config['retardo_menor_min']) {
+        if ($minutos <= 20) {
             return ['tipo' => 'retardo_menor', 'clasificacion' => 'retardo', 'decision' => 'registrar'];
         }
-        if ($minutos <= $this->config['retardo_mayor_min']) {
+        if ($minutos <= 30) {
             return ['tipo' => 'retardo_mayor', 'clasificacion' => 'retardo', 'decision' => 'registrar'];
         }
         return ['tipo' => 'falta', 'clasificacion' => 'falta', 'decision' => 'registrar'];
@@ -1029,8 +1029,7 @@ class AgenteIAService {
             $params[] = $fecha_fin;
         }
 
-        $sql .= " GROUP BY e.id ORDER BY total_justificaciones DESC LIMIT ?";
-        $params[] = $limite;
+        $sql .= " GROUP BY e.id ORDER BY total_justificaciones DESC LIMIT " . (int)$limite;
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);

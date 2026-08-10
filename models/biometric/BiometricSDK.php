@@ -271,6 +271,53 @@ abstract class BiometricSDK implements BiometricInterface
         throw new Exception("getBiometricStats debe ser implementado por la subclase del SDK");
     }
 
+    public function updateEmployeeOnDevice(int $deviceId, int $employeeId): bool
+    {
+        $this->validateDeviceId($deviceId);
+
+        if (!isset($this->connectedDevices[$deviceId])) {
+            throw new Exception("Dispositivo $deviceId no está conectado");
+        }
+
+        try {
+            $this->logger->info("Actualizando empleado en dispositivo", [
+                'device_id' => $deviceId,
+                'employee_id' => $employeeId
+            ]);
+            return $this->updateEmployeeOnDeviceImplementation($deviceId, $employeeId);
+        } catch (Exception $e) {
+            $this->handleSDKError('updateEmployeeOnDevice', $e);
+            throw new Exception("No se pudo actualizar empleado en dispositivo: " . $e->getMessage());
+        }
+    }
+
+    public function downloadAttendanceFromDevice(int $deviceId): array
+    {
+        $this->validateDeviceId($deviceId);
+
+        if (!isset($this->connectedDevices[$deviceId])) {
+            throw new Exception("Dispositivo $deviceId no está conectado");
+        }
+
+        try {
+            $this->logger->info("Descargando asistencias desde dispositivo", [
+                'device_id' => $deviceId
+            ]);
+            $result = $this->downloadAttendanceFromDeviceImplementation($deviceId);
+            $this->logger->info("Asistencias descargadas", [
+                'device_id' => $deviceId,
+                'imported' => $result['imported'],
+                'duplicates' => $result['duplicates'],
+                'errors' => $result['errors'],
+                'total' => $result['total']
+            ]);
+            return $result;
+        } catch (Exception $e) {
+            $this->handleSDKError('downloadAttendanceFromDevice', $e);
+            throw new Exception("No se pudo descargar asistencias: " . $e->getMessage());
+        }
+    }
+
     // Métodos abstractos que deben ser implementados por SDK específico
 
     abstract protected function connectDeviceImplementation(int $deviceId): array;
@@ -281,4 +328,14 @@ abstract class BiometricSDK implements BiometricInterface
     abstract protected function getSDKVersion(): string;
     abstract protected function getSDKDescription(): string;
     abstract protected function getSDKCapabilities(): array;
+
+    /**
+     * Implementación específica para actualizar empleado en dispositivo
+     */
+    abstract protected function updateEmployeeOnDeviceImplementation(int $deviceId, int $employeeId): bool;
+
+    /**
+     * Implementación específica para descargar asistencias del dispositivo
+     */
+    abstract protected function downloadAttendanceFromDeviceImplementation(int $deviceId): array;
 }

@@ -148,10 +148,18 @@ class AsistenciaService {
                         );
                     }
 
-                    // Si acumuló retardos >=1, aplicar nota mala y verificar si se notifica
-                    if ($acumulados >= 1) {
+                    // Calcular notas malas según reglas: 2 retardo_menor = 1 nota, 1 retardo_mayor = 1 nota
+                    $quincena = (int)date('d', strtotime($fecha_actual)) <= 15 ? 1 : 2;
+                    $mes = (int)date('m', strtotime($fecha_actual));
+                    $anio = (int)date('Y', strtotime($fecha_actual));
+                    $control = $this->retardoModel->calcularNotasMalas($empleado_id, $mes, $anio, $quincena);
+                    $notasEsperadas = $control['notas_malas'];
+                    $sancionesExistentes = $this->sancionModel->getSancionesAcumuladasQuincena($empleado_id, $fecha_actual);
+                    $nuevasNotas = $notasEsperadas - $sancionesExistentes;
+                    for ($i = 0; $i < $nuevasNotas; $i++) {
                         $this->aplicarNotaMala($empleado_id);
-                        // Ahora llamamos al nuevo servicio para que gestione la notificación
+                    }
+                    if ($nuevasNotas > 0) {
                         $this->notificationService->verificarYNotificarSanciones($empleado_id);
                     }
                 }

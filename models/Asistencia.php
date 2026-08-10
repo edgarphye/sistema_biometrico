@@ -103,7 +103,71 @@ class Asistencia {
     
         $stmt = $this->db->getConnection()->prepare($query);
         $stmt->execute($params);
-        return $stmt->fetchAll();
+        $result = $stmt->fetchAll();
+        
+        // Recalcular tipo_asistencia basado en el horario del empleado
+        require_once __DIR__ . '/HorarioLaboral.php';
+        $horarioLaboral = new HorarioLaboral();
+        $result = $this->clasificarAsistencias($empleado_id, $result, $horarioLaboral);
+        
+        return $result;
+    }
+    
+    /**
+     * Clasifica las assistencias en tiempo real basándose en el horario del empleado
+     */
+    private function clasificarAsistencias($empleado_id, $asistencias, $horarioLaboral) {
+        foreach ($asistencias as &$asis) {
+            // Si tiene justificación aprobada, no recalcular
+            if (!empty($asis['tipo_justificacion_id']) && 
+                ($asis['estado_validacion'] === 'aprobada' || $asis['estado_validacion'] === 'aprobado')) {
+                continue;
+            }
+            
+            // Si no tiene hora de entrada, no se puede clasificar
+            if (empty($asis['hora_entrada'])) {
+                continue;
+            }
+            
+            // Obtener el horario del empleado para esta fecha
+            $horario = $horarioLaboral->getHorarioPorFecha($empleado_id, $asis['fecha']);
+            
+            if ($horario && !empty($horario['hora_entrada'])) {
+                $horaEsperada = $horario['hora_entrada'];
+                $horaReal = $asis['hora_entrada'];
+                
+                // Calcular minutos de retraso
+                $diff = strtotime($horaReal) - strtotime($horaEsperada);
+                $minutosRetraso = floor($diff / 60);
+                
+                // Clasificar
+                if ($minutosRetraso <= 0) {
+                    // A tiempo
+                    $asis['tipo_asistencia'] = 'normal';
+                    $asis['minutos_retraso'] = 0;
+                } elseif ($minutosRetraso <= 10) {
+                    // Tolerancia - считается normal
+                    $asis['tipo_asistencia'] = 'normal';
+                    $asis['minutos_retraso'] = $minutosRetraso;
+                } elseif ($minutosRetraso <= 20) {
+                    // Retardo menor
+                    $asis['tipo_asistencia'] = 'con_retardo';
+                    $asis['minutos_retraso'] = $minutosRetraso;
+                    $asis['tipo_retraso'] = 'retardo_menor';
+                } elseif ($minutosRetraso <= 30) {
+                    // Retardo mayor
+                    $asis['tipo_asistencia'] = 'con_retardo';
+                    $asis['minutos_retraso'] = $minutosRetraso;
+                    $asis['tipo_retraso'] = 'retardo_mayor';
+                } else {
+                    // Falta
+                    $asis['tipo_asistencia'] = 'falta';
+                    $asis['minutos_retraso'] = $minutosRetraso;
+                    $asis['tipo_retraso'] = 'falta';
+                }
+            }
+        }
+        return $asistencias;
     }
     
     /**
@@ -380,8 +444,69 @@ class Asistencia {
         $query .= " ORDER BY a.created_at DESC";
 
         if (!empty($filtros['limit'])) {
-            $query .= " LIMIT ?";
-            $params[] = $filtros['limit'];
+            $query .= " LIMIT " . (int)$filtros['limit'];
+        }
+
+        $stmt = $this->db->getConnection()->prepare($query);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Obtiene registros de asistencia incluyendo datos de retardos
+     * Usado para exportación Excel donde se necesita info de retardos
+     */
+    public function getAsistenciaConRetardos($filtros = []) {
+        $query = "
+            SELECT a.*,
+                   e.nombre, e.apellido, e.rfc, e.area,
+                   r.id as retardo_id,
+                   r.minutos_retardo,
+                   r.tipo_retraso,
+                   r.justificado,
+                   r.motivo_justificacion,
+                   r.estado_validacion as retardo_estado_validacion,
+                   r.fecha_aprobacion as retardo_fecha_aprobacion
+            FROM asistencia a
+            JOIN empleados e ON a.empleado_id = e.id
+            LEFT JOIN retardos r ON a.empleado_id = r.empleado_id AND a.fecha = r.fecha
+            WHERE 1=1
+        ";
+        $params = [];
+
+        if (!empty($filtros['dispositivo_id'])) {
+            $query .= " AND a.dispositivo_id = ?";
+            $params[] = $filtros['dispositivo_id'];
+        }
+
+        if (!empty($filtros['tipo_biometria'])) {
+            $query .= " AND a.tipo_biometria = ?";
+            $params[] = $filtros['tipo_biometria'];
+        }
+
+        if (!empty($filtros['tipo_asistencia'])) {
+            if ($filtros['tipo_asistencia'] === 'entrada') {
+                $query .= " AND a.hora_entrada IS NOT NULL";
+            } elseif ($filtros['tipo_asistencia'] === 'salida') {
+                $query .= " AND a.hora_salida IS NOT NULL";
+            }
+        }
+
+        if (!empty($filtros['fecha_inicio']) && !empty($filtros['fecha_fin'])) {
+            $query .= " AND DATE(a.created_at) BETWEEN ? AND ?";
+            $params[] = $filtros['fecha_inicio'];
+            $params[] = $filtros['fecha_fin'];
+        }
+
+        if (!empty($filtros['empleado_id'])) {
+            $query .= " AND a.empleado_id = ?";
+            $params[] = $filtros['empleado_id'];
+        }
+
+        $query .= " ORDER BY a.created_at DESC";
+
+        if (!empty($filtros['limit'])) {
+            $query .= " LIMIT " . (int)$filtros['limit'];
         }
 
         $stmt = $this->db->getConnection()->prepare($query);

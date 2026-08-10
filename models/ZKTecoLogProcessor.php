@@ -266,7 +266,7 @@ class ZKTecoLogProcessor {
     /**
      * Obtiene información del empleado usando el mapeo de ZKTeco
      */
-    private function getEmpleadoPorZKTecoId($idUsuario) {
+    public function getEmpleadoPorZKTecoId($idUsuario) {
         // Prioridad 1: columna dedicada en empleados.zkteo_id
         if ($this->empleadosTieneColumna('zkteo_id')) {
             $sql = "
@@ -307,8 +307,7 @@ class ZKTecoLogProcessor {
         }
         
         // Prioridad 3: compatibilidad (id interno como texto/número)
-        $sql = "
-            SELECT id, nombre, apellido, rfc, area
+        $sql = "SELECT id, nombre, apellido, rfc, area
             FROM empleados 
             WHERE (CAST(id AS CHAR) = ? OR id = CAST(? AS UNSIGNED))
               AND activo = 1

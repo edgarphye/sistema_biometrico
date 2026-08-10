@@ -1,6 +1,9 @@
 <?php  
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @group functional
+ */
 class AuthEndpointsTest extends TestCase
 {
     private $baseUrl;
@@ -8,7 +11,7 @@ class AuthEndpointsTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->baseUrl = "http://localhost/sistema_biometrico";
+        $this->baseUrl = "http://localhost";
         // To maintain cookie session for login/logout tests
         $this->cookieFile = tempnam(sys_get_temp_dir(), 'cookie');
     }
@@ -66,9 +69,21 @@ class AuthEndpointsTest extends TestCase
         $loginResp = $this->postRequest('/login', $loginData);
         $this->assertTrue(in_array($loginResp['info']['http_code'], [200,302]), 'Login should succeed and redirect');
 
-        // Test logout
-        $logoutResp = $this->postRequest('/logout', []);
-        $this->assertTrue(in_array($logoutResp['info']['http_code'], [200,302]), 'Logout should succeed and redirect');
+        // Test logout (GET route)
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $this->baseUrl . '/logout',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_COOKIEJAR => $this->cookieFile,
+            CURLOPT_COOKIEFILE => $this->cookieFile,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
+        $logoutBody = curl_exec($ch);
+        $logoutCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        $this->assertTrue(in_array($logoutCode, [200,302]), 'Logout should succeed and redirect');
     }
 
     public function testLoginWithInvalidCredentials()

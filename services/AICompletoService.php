@@ -139,8 +139,6 @@ class AICompletoService {
     private function analizarAsistencia($datos) {
         $total = count($datos);
         $asistencias = array_filter($datos, fn($d) => ($d['tipo_asistencia'] ?? '') === 'asistencia');
-        $diasLaborales = count($diasLaborales = array_filter($datos, fn($d) => !empty($d['hora_entrada'])));
-        
         $horasPromedio = 0;
         $horasTotales = 0;
         $diasLaborales = count(array_filter($datos, fn($d) => !empty($d['hora_entrada'])));
@@ -241,7 +239,8 @@ class AICompletoService {
         $puntuacionFaltas = count($faltas) * 25;
         $puntuacionJustificaciones = count($justificaciones) * 2;
         
-        $minutosNoJustificados = array_sum(array_filter($retardos, fn($r) => ($r['justificado'] ?? 0) == 0));
+        $retardosNoJustificados = array_filter($retardos, fn($r) => ($r['justificado'] ?? 0) == 0);
+        $minutosNoJustificados = array_sum(array_column($retardosNoJustificados, 'minutos_retardo'));
         $puntuacionMinutos = ($minutosNoJustificados / 60) * 5;
         
         $indice = min(100, $puntuacionRetardos + $puntuacionFaltas + $puntuacionJustificaciones + $puntuacionMinutos);
@@ -277,7 +276,7 @@ class AICompletoService {
         
         return [
             'disponible' => true,
-            'retardos_proximo_mes' => round($prediccio, 1),
+            'retardos_proximo_mes' => round($prediccion, 1),
             'tendencia' => $tendencia > 1 ? 'aumentando' : ($tendencia < -1 ? 'disminuyendo' : 'estable'),
             'nivel_confianza' => count($historial) >= 30 ? 'alto' : 'medio',
             'datos_utilizados' => count($historial)
@@ -545,8 +544,8 @@ class AICompletoService {
                 COUNT(*) as total,
                 SUM(CASE WHEN estado_validacion = 'aprobada' THEN 1 ELSE 0 END) as aprobadas,
                 SUM(CASE WHEN estado_validacion = 'pendiente' THEN 1 ELSE 0 END) as pendientes,
-                SUM(CASE WHEN tipo_justificacion_id = 1 THEN 1 ELSE 0 END) as vacaciones,
-                SUM(CASE WHEN tipo_justificacion_id = 2 THEN 1 ELSE 0 END) as licencias
+                SUM(CASE WHEN tipo_justificacion_id = 22 THEN 1 ELSE 0 END) as vacaciones,
+                SUM(CASE WHEN tipo_justificacion_id = 21 THEN 1 ELSE 0 END) as licencias
             FROM asistencia
             WHERE empleado_id = ? AND tipo_justificacion_id IS NOT NULL
             AND fecha >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)
@@ -1096,7 +1095,7 @@ class AICompletoService {
         
         if ($retardos90dias > 10) {
             $puntuacionMejora -= 15;
-            $factores[] = " molti retardi: $retardos90dias";
+            $factores[] = "Muchos retardos: $retardos90dias";
         } elseif ($retardos90dias > 5) {
             $puntuacionMejora += 5;
         }

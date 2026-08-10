@@ -348,6 +348,16 @@ class UsuarioController extends BaseController {
             });
         }
         
+        function filterEmpleados(searchId, selectId) {
+            const input = document.getElementById(searchId);
+            const filter = input.value.toLowerCase();
+            const select = document.getElementById(selectId);
+            for (let i = 0; i < select.options.length; i++) {
+                const txt = select.options[i].text.toLowerCase();
+                select.options[i].style.display = txt.includes(filter) ? "" : "none";
+            }
+        }
+        
         // Funciones para permisos del modal de edición
         function seleccionarTodoModal() {
             document.querySelectorAll(".permiso-check-modal").forEach(cb => cb.checked = true);
@@ -643,6 +653,10 @@ class UsuarioController extends BaseController {
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="permisos[]" value="usuarios_permisos">
                                         <label class="form-check-label small">Permisos</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="permisos[]" value="configurar_menu">
+                                        <label class="form-check-label small">Config Menú</label>
                                     </div>
                                 </div>
                             </div>
@@ -982,6 +996,10 @@ class UsuarioController extends BaseController {
                                             <input class="form-check-input permiso-check" type="checkbox" name="permisos[]" value="usuarios_permisos" id="perm_usuarios_permisos">
                                             <label class="form-check-label" for="perm_usuarios_permisos">Permisos</label>
                                         </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input permiso-check" type="checkbox" name="permisos[]" value="configurar_menu" id="perm_configurar_menu">
+                                            <label class="form-check-label" for="perm_configurar_menu">Configurar Menú</label>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -1154,7 +1172,8 @@ class UsuarioController extends BaseController {
                                 
                                 <div class="mb-3">
                                     <label for="empleado_id" class="form-label">Empleado Asociado</label>
-                                    <select class="form-select" id="empleado_id" name="empleado_id">
+                                    <input type="text" class="form-control mb-2" id="search_empleado" placeholder="Buscar empleado..." onkeyup="filterEmpleados(\'search_empleado\', \'empleado_id\')">
+                                    <select class="form-select" id="empleado_id" name="empleado_id" size="6">
                                         <option value="">Sin empleado asociado</option>
                                         ' . implode('', array_map(fn($e) => '<option value="' . $e['id'] . '" ' . ($usuario['empleado_id'] == $e['id'] ? 'selected' : '') . '>' . htmlspecialchars($e['nombre'] . ' ' . $e['apellido']) . '</option>', $empleados)) . '
                                     </select>
@@ -1318,7 +1337,28 @@ class UsuarioController extends BaseController {
                                             <input class="form-check-input permiso-check" type="checkbox" name="permisos[]" value="usuarios_permisos" id="perm_usuarios_permisos" ' . (in_array('usuarios_permisos', $permisosUsuario) ? 'checked' : '') . '>
                                             <label class="form-check-label" for="perm_usuarios_permisos">Administrar Permisos</label>
                                         </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input permiso-check" type="checkbox" name="permisos[]" value="configurar_menu" id="perm_configurar_menu" ' . (in_array('configurar_menu', $permisosUsuario) ? 'checked' : '') . '>
+                                            <label class="form-check-label" for="perm_configurar_menu">Configurar Menú</label>
+                                        </div>
                                     </div>
+                                </div>
+                                
+                                <hr>
+                                <h5><i class="fas fa-list me-2"></i>Configuración del Menú del Usuario</h5>
+                                <p class="text-muted small mb-2">Seleccione las opciones del menú que este usuario podrá ver. Si no se configura, se usarán los permisos por defecto del rol.</p>
+                                
+                                <div class="mb-2">
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-2" onclick="seleccionarTodoMenu()">
+                                        <i class="fas fa-check-square me-1"></i> Marcar Todos
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deseleccionarTodoMenu()">
+                                        <i class="fas fa-square me-1"></i> Desmarcar Todos
+                                    </button>
+                                </div>
+                                
+                                <div class="row">
+                                    ' . $this->generarCheckboxesMenuUsuario($id) . '
                                 </div>
                                 
                                 <hr>
@@ -1338,7 +1378,7 @@ class UsuarioController extends BaseController {
                                 
                                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                     <a href="' . BASE_URL . '/usuarios" class="btn btn-secondary me-md-2">Cancelar</a>
-                                    <button type="submit" class="btn btn-pantone-primary">
+                                    <button type="button" class="btn btn-pantone-primary" onclick="guardarUsuarioCompleto(' . $id . ')">
                                         <i class="fas fa-save me-2"></i>Guardar Cambios
                                     </button>
                                 </div>
@@ -1376,8 +1416,73 @@ class UsuarioController extends BaseController {
                 input.type = "password";
             }
         }
-        </script>
-        ';
+        
+        function seleccionarTodoMenu() {
+            document.querySelectorAll(".menu-usuario-check").forEach(cb => cb.checked = true);
+        }
+        
+        function deseleccionarTodoMenu() {
+            document.querySelectorAll(".menu-usuario-check").forEach(cb => cb.checked = false);
+        }
+        
+        async function guardarUsuarioCompleto(usuarioId) {
+            const formData = new FormData(document.getElementById("form-usuario"));
+            
+            try {
+                const response = await fetch("' . BASE_URL . '/usuarios/update", {
+                    method: "POST",
+                    credentials: "include",
+                    body: formData
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    const menuData = new FormData();
+                    menuData.append("usuario_id", usuarioId);
+                    document.querySelectorAll(".menu-usuario-check").forEach(cb => {
+                        menuData.append("menu_usuario[" + cb.name.replace("menu_usuario[", "").replace("]", "") + "]", cb.checked ? "1" : "0");
+                    });
+                    
+                    const menuResponse = await fetch("' . BASE_URL . '/usuarios/guardar-menu", {
+                        method: "POST",
+                        credentials: "include",
+                        body: menuData
+                    });
+                    const menuResult = await menuResponse.json();
+                    
+                    if (menuResult.success) {
+                        mostrarAlerta("success", "✅ Usuario y configuración de menú guardados correctamente");
+                        setTimeout(() => window.location.href = "' . BASE_URL . '/usuarios", 1500);
+                    } else {
+                        mostrarAlerta("warning", "⚠️ Usuario guardado, pero hubo error en menú: " + menuResult.message);
+                    }
+                } else {
+                    mostrarAlerta("danger", "❌ " + result.message);
+                }
+            } catch (error) {
+                mostrarAlerta("danger", "❌ Error: " + error.message);
+            }
+        }
+        
+        function mostrarAlerta(tipo, mensaje) {
+            const alertDiv = document.createElement("div");
+            alertDiv.className = "alert alert-" + tipo + " alert-dismissible fade show position-fixed top-0 end-0 m-3";
+            alertDiv.style.zIndex = "9999";
+            alertDiv.innerHTML = mensaje + "<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\"></button>";
+            document.body.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+        
+        function filterEmpleados(searchId, selectId) {
+            const input = document.getElementById(searchId);
+            const filter = input.value.toLowerCase();
+            const select = document.getElementById(selectId);
+            for (let i = 0; i < select.options.length; i++) {
+                const txt = select.options[i].text.toLowerCase();
+                select.options[i].style.display = txt.includes(filter) ? "" : "none";
+            }
+        }
+        </script>';
         
         include __DIR__ . '/../views/layout.php';
     }
@@ -1461,10 +1566,13 @@ class UsuarioController extends BaseController {
                             
                             <div class="mb-3">
                                 <label for="edit_empleado_id" class="form-label" style="color: #235B4E; font-weight: 600;">Empleado Asociado</label>
-                                <select class="form-select" id="edit_empleado_id" name="empleado_id" style="border-radius: 12px; border: 2px solid #e0e0e0; padding: 12px 15px;">
-                                    <option value="">Sin empleado asociado</option>
-                                    ' . implode('', array_map(fn($e) => '<option value="' . $e['id'] . '" ' . ($usuario['empleado_id'] == $e['id'] ? 'selected' : '') . '>' . htmlspecialchars($e['nombre'] . ' ' . $e['apellido']) . '</option>', $empleados)) . '
-                                </select>
+                                <div style="position: relative;">
+                                    <input type="text" class="form-control mb-2" id="search_edit_empleado" placeholder="Buscar empleado..." onkeyup="filterEmpleados(\'search_edit_empleado\', \'edit_empleado_id\')" style="border-radius: 12px; border: 2px solid #e0e0e0; padding: 12px 15px; font-size: 0.9rem;">
+                                    <select class="form-select" id="edit_empleado_id" name="empleado_id" size="5" style="border-radius: 12px; border: 2px solid #e0e0e0; padding: 8px; font-size: 0.85rem;">
+                                        <option value="">Sin empleado asociado</option>
+                                        ' . implode('', array_map(fn($e) => '<option value="' . $e['id'] . '" ' . ($usuario['empleado_id'] == $e['id'] ? 'selected' : '') . '>' . htmlspecialchars($e['nombre'] . ' ' . $e['apellido']) . '</option>', $empleados)) . '
+                                    </select>
+                                </div>
                             </div>
                             
                             <div class="mb-3 form-check form-switch">
@@ -1639,6 +1747,10 @@ class UsuarioController extends BaseController {
                                         <input class="form-check-input permiso-check-modal" type="checkbox" name="permisos[]" value="usuarios_permisos" ' . (in_array('usuarios_permisos', $permisosUsuario) ? 'checked' : '') . '>
                                         <label class="form-check-label small">Permisos</label>
                                     </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input permiso-check-modal" type="checkbox" name="permisos[]" value="configurar_menu" ' . (in_array('configurar_menu', $permisosUsuario) ? 'checked' : '') . '>
+                                        <label class="form-check-label small">Config Menú</label>
+                                    </div>
                                 </div>
                             </div>
                         </form>
@@ -1762,6 +1874,154 @@ class UsuarioController extends BaseController {
             $this->jsonResponse(['success' => true, 'message' => 'Contraseña actualizada']);
         } else {
             $this->jsonResponse(['success' => false, 'message' => 'Error al actualizar contraseña'], 500);
+        }
+    }
+    
+    private function generarCheckboxesMenuUsuario($usuarioId) {
+        $menuItems = [
+            ['path' => '/dashboard', 'label' => 'Dashboard', 'icon' => 'fa-gauge-high'],
+            ['path' => '/', 'label' => 'Inicio', 'icon' => 'fa-home'],
+            ['path' => '/empleados', 'label' => 'Empleados', 'icon' => 'fa-users'],
+            ['path' => '/asistencia', 'label' => 'Asistencia', 'icon' => 'fa-clock'],
+            ['path' => '/marcaciones', 'label' => 'Marcaciones', 'icon' => 'fa-stopwatch'],
+            ['path' => '/mis-validaciones', 'label' => 'Mis Validaciones', 'icon' => 'fa-check-double'],
+            ['path' => '/horarios', 'label' => 'Horarios', 'icon' => 'fa-calendar-alt'],
+            ['path' => '/ciclos', 'label' => 'Ciclos', 'icon' => 'fa-sync'],
+            ['path' => '/validaciones', 'label' => 'Validaciones', 'icon' => 'fa-user-check'],
+            ['path' => '/reportes/excel', 'label' => 'Reportes Excel', 'icon' => 'fa-file-excel'],
+            ['path' => '/resumen-justificaciones', 'label' => 'Resumen Justificaciones', 'icon' => 'fa-clipboard-check'],
+            ['path' => '/analisis-predictivo', 'label' => 'Análisis Predictivo', 'icon' => 'fa-brain'],
+            ['path' => '/agent-ia', 'label' => 'Agent IA', 'icon' => 'fa-network-wired'],
+            ['path' => '/ai', 'label' => 'AI Dashboard', 'icon' => 'fa-robot'],
+            ['path' => '/biometricos', 'label' => 'Dispositivos Biométricos', 'icon' => 'fa-fingerprint'],
+            ['path' => '/biometricos/gestionar', 'label' => 'Gestionar Biométrico', 'icon' => 'fa-sliders-h'],
+            ['path' => '/database', 'label' => 'Base de Datos', 'icon' => 'fa-database'],
+            ['path' => '/catalogos', 'label' => 'Catálogos', 'icon' => 'fa-sitemap'],
+            ['path' => '/permisos-menu', 'label' => 'Permisos de Menú', 'icon' => 'fa-shield-halved'],
+            ['path' => '/configuracion', 'label' => 'Configuración', 'icon' => 'fa-gear'],
+            ['path' => '/notas-malas', 'label' => 'Notas Malas', 'icon' => 'fa-exclamation-triangle'],
+            ['path' => '/usuarios', 'label' => 'Usuarios', 'icon' => 'fa-user-cog'],
+            ['path' => '/logs', 'label' => 'Logs de Errores', 'icon' => 'fa-file-alt'],
+        ];
+        
+        $menuConfig = [];
+        if ($usuarioId) {
+            try {
+                $stmt = $this->db->getConnection()->prepare("SELECT menu_path, visible FROM menu_config WHERE usuario_id = ?");
+                $stmt->execute([$usuarioId]);
+                foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                    $menuConfig[$row['menu_path']] = (bool)$row['visible'];
+                }
+            } catch (Exception $e) {
+                error_log("Error al cargar config menu: " . $e->getMessage());
+            }
+        }
+        
+        $html = '';
+        $count = 0;
+        $totalItems = count($menuItems);
+        $itemsPerCol = ceil($totalItems / 4);
+        
+        $html .= '<div class="row g-2">';
+        foreach ($menuItems as $index => $item) {
+            $checked = !isset($menuConfig[$item['path']]) || $menuConfig[$item['path']];
+            $html .= '<div class="col-6 col-md-3">';
+            $html .= '<div class="form-check">';
+            $html .= '<input class="form-check-input menu-usuario-check" type="checkbox" name="menu_usuario[' . htmlspecialchars($item['path']) . ']" id="menu_usuario_' . $index . '" value="1"' . ($checked ? ' checked' : '') . '>';
+            $html .= '<label class="form-check-label small" for="menu_usuario_' . $index . '">';
+            $html .= '<i class="fas ' . $item['icon'] . ' me-1 text-muted"></i>' . htmlspecialchars($item['label']);
+            $html .= '</label>';
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+        $html .= '</div>';
+        
+        return $html;
+    }
+    
+    public function toggleStatus($id) {
+        header('Content-Type: application/json');
+
+        require_once 'models/Usuario.php';
+        $usuarioModel = new Usuario($this->db);
+
+        $activo = $_POST['activo'] ?? null;
+        if ($activo === null) {
+            $this->jsonResponse(['success' => false, 'message' => 'Parámetro activo requerido'], 400);
+            return;
+        }
+
+        try {
+            $usuarioModel->toggleStatus($id, (int)$activo);
+            $this->jsonResponse(['success' => true, 'message' => 'Estado actualizado']);
+        } catch (Exception $e) {
+            $this->jsonResponse(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function guardarMenuUsuario() {
+        header('Content-Type: application/json');
+        
+        require_once 'models/Usuario.php';
+        if (!Usuario::tienePermiso('usuarios_editar')) {
+            $this->jsonResponse(['success' => false, 'message' => 'No tienes permiso'], 403);
+            return;
+        }
+        
+        $usuarioId = $_POST['usuario_id'] ?? null;
+        $menuConfig = $_POST['menu_usuario'] ?? [];
+        
+        if (!$usuarioId) {
+            $this->jsonResponse(['success' => false, 'message' => 'Usuario no especificado'], 400);
+            return;
+        }
+        
+        $menuItems = [
+            ['path' => '/dashboard', 'label' => 'Dashboard'],
+            ['path' => '/', 'label' => 'Inicio'],
+            ['path' => '/empleados', 'label' => 'Empleados'],
+            ['path' => '/asistencia', 'label' => 'Asistencia'],
+            ['path' => '/marcaciones', 'label' => 'Marcaciones'],
+            ['path' => '/mis-validaciones', 'label' => 'Mis Validaciones'],
+            ['path' => '/horarios', 'label' => 'Horarios'],
+            ['path' => '/ciclos', 'label' => 'Ciclos'],
+            ['path' => '/validaciones', 'label' => 'Validaciones'],
+            ['path' => '/reportes/excel', 'label' => 'Reportes Excel'],
+            ['path' => '/resumen-justificaciones', 'label' => 'Resumen Justificaciones'],
+            ['path' => '/analisis-predictivo', 'label' => 'Análisis Predictivo'],
+            ['path' => '/agent-ia', 'label' => 'Agent IA'],
+            ['path' => '/ai', 'label' => 'AI Dashboard'],
+            ['path' => '/biometricos', 'label' => 'Dispositivos Biométricos'],
+            ['path' => '/biometricos/gestionar', 'label' => 'Gestionar Biométrico'],
+            ['path' => '/database', 'label' => 'Base de Datos'],
+            ['path' => '/catalogos', 'label' => 'Catálogos'],
+            ['path' => '/permisos-menu', 'label' => 'Permisos de Menú'],
+            ['path' => '/configuracion', 'label' => 'Configuración'],
+            ['path' => '/notas-malas', 'label' => 'Notas Malas'],
+            ['path' => '/usuarios', 'label' => 'Usuarios'],
+            ['path' => '/logs', 'label' => 'Logs de Errores'],
+        ];
+        
+        try {
+            $pdo = $this->db->getConnection();
+            $pdo->beginTransaction();
+            
+            $stmtDelete = $pdo->prepare("DELETE FROM menu_config WHERE usuario_id = ?");
+            $stmtDelete->execute([$usuarioId]);
+            
+            $stmtInsert = $pdo->prepare("INSERT INTO menu_config (usuario_id, menu_path, visible) VALUES (?, ?, ?)");
+            
+            foreach ($menuItems as $item) {
+                $path = $item['path'];
+                $visible = isset($menuConfig[$path]) ? 1 : 0;
+                $stmtInsert->execute([$usuarioId, $path, $visible]);
+            }
+            
+            $pdo->commit();
+            $this->jsonResponse(['success' => true, 'message' => 'Menú configurado correctamente']);
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            $this->jsonResponse(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
         }
     }
 }

@@ -188,11 +188,14 @@ if (!function_exists('cleanupTestDatabase')) {
             
             // Limpiar todas las tablas
             $pdo->exec("USE " . TEST_DB_NAME);
+            $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
             $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
             
             foreach ($tables as $table) {
                 $pdo->exec("TRUNCATE TABLE `{$table}`");
             }
+            
+            $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
             
             return true;
         } catch (Exception $e) {

@@ -12,9 +12,18 @@ class CiclosController extends BaseController {
 
     protected function requireAuth() {
         if (!isset($_SESSION['user_id'])) {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'error' => 'No autorizado - Sesión requerida']);
-            exit;
+            // For API requests, return JSON; for page requests, redirect
+            $isApi = isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false
+                  || isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
+            
+            if ($isApi) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'error' => 'No autorizado - Sesión requerida']);
+                exit;
+            } else {
+                header('Location: /login');
+                exit;
+            }
         }
         return true;
     }

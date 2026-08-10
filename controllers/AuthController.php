@@ -1,82 +1,79 @@
 <?php
 require_once __DIR__ . '/../models/Usuario.php';
 require_once __DIR__ . '/BaseController.php';
+require_once __DIR__ . '/../helpers/SessionSecurity.php';
+require_once __DIR__ . '/../helpers/SecurityHelper.php';
 
 class AuthController extends BaseController {
     private $usuarioModel;
+    private $sessionSecurity;
 
     public function __construct() {
         parent::__construct();
         $this->usuarioModel = new Usuario();
+        $this->sessionSecurity = new SessionSecurity();
     }
 
     public function login() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $username = $_POST['username'] ?? '';
-            $password = $_POST['password'] ?? '';
+            $username = SecurityHelper::sanitizeString($_POST['username'] ?? '', 'general');
+            $password = trim($_POST['password'] ?? '');
+
+            // Rate limiting para intentos de login
+            $clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+            $identifier = $username . '_' . $clientIp;
+            
+            if ($this->sessionSecurity->isBlocked($identifier)) {
+                $error = 'Demasiados intentos fallidos. Intente de nuevo en 15 minutos.';
+                include __DIR__ . '/../views/auth/login.php';
+                return;
+            }
 
             $user = $this->usuarioModel->authenticate($username, $password);
 
             if ($user) {
-                // Temporalmente desactivar 2FA para testing
+                require_once __DIR__ . '/../helpers/TwoFactorAuth.php';
+                $twoFA = new TwoFactorAuth();
+
+                if ($twoFA->is2FAEnabled($user['id'])) {
+                    $_SESSION['pending_2fa'] = true;
+                    $_SESSION['temp_user'] = $user;
+                    $_SESSION['2fa_method'] = 'totp';
+
+                    if (!empty($user['email'])) {
+                        $_SESSION['2fa_code'] = $twoFA->generateCode();
+                        $_SESSION['2fa_method'] = 'email';
+                        $twoFA->sendEmailCode($user['email'], $_SESSION['2fa_code'], $user['id']);
+                    }
+
+                    $this->redirect(rtrim(BASE_URL, '/') . '/verify-2fa');
+                    return;
+                }
+
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['rol'] = $user['rol'];
-                $_SESSION['user_role'] = $user['rol']; // Añadir variable adicional para compatibilidad
+                $_SESSION['user_role'] = $user['rol'];
                 $_SESSION['empleado_id'] = $user['empleado_id'];
-                
+
+                $pdo = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASS, DB_OPTIONS);
+                $stmt = $pdo->prepare("REPLACE INTO sessions (id, data, timestamp) VALUES (?, ?, ?)");
+                $stmt->execute([session_id(), session_encode(), time()]);
+
                 $permisosBase = Usuario::getPermisosPorRol($user['rol']);
                 $usuarioModel = new Usuario();
                 $permisosExtra = $usuarioModel->getPermisos($user['id']);
                 $_SESSION['permisos'] = array_merge($permisosBase, $permisosExtra);
-                
-                // Debug: registrar variables de sesión
-                error_log("AUTH DEBUG - User logged in: " . print_r([
-                    'user_id' => $_SESSION['user_id'],
-                    'username' => $_SESSION['username'],
-                    'rol' => $_SESSION['rol'],
-                    'user_role' => $_SESSION['user_role'],
-                    'permisos' => $_SESSION['permisos']
-                ], true));
-                
+
                 $this->redirect(rtrim(BASE_URL, '/') . '/dashboard');
             } else {
+                // Registrar intento fallido para rate limiting
+                $this->sessionSecurity->recordFailedAttempt($identifier);
                 $error = 'Credenciales incorrectas';
             }
         }
 
-        $content = '
-        <div class="container mt-5">
-            <div class="row justify-content-center">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 class="text-center">Iniciar Sesión</h4>
-                        </div>
-                        <div class="card-body">
-                            ' . (isset($error) ? '<div class="alert alert-danger">' . $error . '</div>' : '') . '
-                            <form method="POST">
-                                ' . Csrf::getHiddenInput() . '
-                                <div class="mb-3">
-                                    <label for="username" class="form-label">Usuario</label>
-                                    <input type="text" class="form-control" id="username" name="username" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">Contraseña</label>
-                                    <input type="password" class="form-control" id="password" name="password" required>
-                                </div>
-                                <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        ';
-
-        include __DIR__ . '/../views/layout.php';
+        include __DIR__ . '/../views/auth/login.php';
     }
 
     public function logout() {
@@ -84,13 +81,21 @@ class AuthController extends BaseController {
         $this->redirect(rtrim(BASE_URL, '/') . '/login');
     }
 
+    public function setup2FA() {
+        $this->requireAuth();
+        $_SESSION['2fa_user_id'] = $_SESSION['user_id'];
+        include __DIR__ . '/../views/auth/setup_2fa.php';
+    }
+
     public function register() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
-                'username' => $_POST['username'],
-                'password' => $_POST['password'],
-                'rol' => $_POST['rol'] ?? 'usuario',
-                'empleado_id' => $_POST['empleado_id'] ?? null
+                'username' => SecurityHelper::sanitizeString($_POST['username'] ?? '', 'alphanum'),
+                'password' => trim($_POST['password'] ?? ''),
+                'email' => SecurityHelper::sanitizeEmail($_POST['email'] ?? '') ?? null,
+                'rol' => SecurityHelper::sanitizeString($_POST['rol'] ?? 'usuario', 'alpha'),
+                'empleado_id' => SecurityHelper::sanitizeInt($_POST['empleado_id'] ?? null),
+                'jefe_directo_id' => SecurityHelper::sanitizeInt($_POST['jefe_directo_id'] ?? null)
             ];
 
             if ($this->usuarioModel->create($data)) {
@@ -100,58 +105,24 @@ class AuthController extends BaseController {
             }
         }
 
-        require_once 'models/Empleado.php';
+        require_once __DIR__ . '/../models/Empleado.php';
         $empleadoModel = new Empleado();
         $empleados = $empleadoModel->getAll();
+        
+        // Obtener mandos/jefes (empleados con jerarquía de mando)
+        require_once __DIR__ . '/../models/Database.php';
+        $db = Database::getInstance()->getConnection();
+        $stmtMandos = $db->prepare("
+            SELECT id, nombre, apellido, rfc, area, jerarquia 
+            FROM empleados 
+            WHERE activo = 1 
+            AND jerarquia IN ('director', 'subdirector', 'jefe_departamento', 'jefe_area', 'supervisor', 'coordinador', 'gerente')
+            ORDER BY nombre, apellido
+        ");
+        $stmtMandos->execute();
+        $mandos = $stmtMandos->fetchAll();
 
-        $content = '
-        <div class="container mt-5">
-            <div class="row justify-content-center">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 class="text-center">Registrar Usuario</h4>
-                        </div>
-                        <div class="card-body">
-                            ' . (isset($error) ? '<div class="alert alert-danger">' . $error . '</div>' : '') . '
-                            <form method="POST">
-                                ' . Csrf::getHiddenInput() . '
-                                <div class="mb-3">
-                                    <label for="username" class="form-label">Usuario</label>
-                                    <input type="text" class="form-control" id="username" name="username" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">Contraseña</label>
-                                    <input type="password" class="form-control" id="password" name="password" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="rol" class="form-label">Rol</label>
-                                    <select class="form-select" id="rol" name="rol">
-                                        <option value="usuario">Usuario</option>
-                                        <option value="admin">Administrador</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="empleado_id" class="form-label">Empleado Asociado</label>
-                                    <select class="form-select" id="empleado_id" name="empleado_id">
-                                        <option value="">Sin empleado asociado</option>
-                                        ' . implode('', array_map(function($emp) {
-                                            return '<option value="' . $emp['id'] . '">' . htmlspecialchars($emp['nombre'] . ' ' . $emp['apellido']) . '</option>';
-                                        }, $empleados)) . '
-                                    </select>
-                                </div>
-                                <div class="d-grid">
-                                    <button type="submit" class="btn btn-success">Registrar</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        ';
-
-        include __DIR__ . '/../views/layout.php';
+        include __DIR__ . '/../views/auth/register.php';
     }
 
     public function verify2FA() {
@@ -160,48 +131,48 @@ class AuthController extends BaseController {
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $code = $_POST['2fa_code'] ?? '';
-            
-            if ($code === ($_SESSION['2fa_code'] ?? '')) {
-                // Código correcto, finalizar login
-                $user = $_SESSION['temp_user'];
-                
+            $code = SecurityHelper::sanitizeString($_POST['2fa_code'] ?? '', 'alphanum');
+            $user = $_SESSION['temp_user'] ?? [];
+            $method = $_SESSION['2fa_method'] ?? 'email';
+
+            $verified = false;
+
+            if ($method === 'totp') {
+                require_once __DIR__ . '/../helpers/TwoFactorAuth.php';
+                $twoFA = new TwoFactorAuth();
+                $verified = $twoFA->verifyTOTP($user['id'] ?? 0, $code);
+            } else {
+                $verified = $code === ($_SESSION['2fa_code'] ?? '');
+            }
+
+            if ($verified) {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['rol'] = $user['rol'];
+                $_SESSION['user_role'] = $user['rol'];
                 $_SESSION['empleado_id'] = $user['empleado_id'];
-                
-                // Limpiar sesión 2FA
+
+                $pdo = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASS, DB_OPTIONS);
+                $stmt = $pdo->prepare("REPLACE INTO sessions (id, data, timestamp) VALUES (?, ?, ?)");
+                $stmt->execute([session_id(), session_encode(), time()]);
+
+                $permisosBase = Usuario::getPermisosPorRol($user['rol']);
+                $usuarioModel = new Usuario();
+                $permisosExtra = $usuarioModel->getPermisos($user['id']);
+                $_SESSION['permisos'] = array_merge($permisosBase, $permisosExtra);
+
                 unset($_SESSION['pending_2fa']);
                 unset($_SESSION['temp_user']);
                 unset($_SESSION['2fa_code']);
-                
+                unset($_SESSION['2fa_method']);
+
                 $this->redirect(rtrim(BASE_URL, '/') . '/dashboard');
             } else {
                 $error = 'Código de verificación incorrecto';
             }
         }
 
-        $content = '
-        <div class="container mt-5">
-            <div class="row justify-content-center">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header"><h4 class="text-center">Verificación de Dos Pasos</h4></div>
-                        <div class="card-body">
-                            ' . (isset($error) ? '<div class="alert alert-danger">' . $error . '</div>' : '') . '
-                            <p class="text-center">Ingresa el código de verificación (Código de prueba: ' . ($_SESSION['2fa_code'] ?? '') . ')</p>
-                            <form method="POST">
-                                ' . Csrf::getHiddenInput() . '
-                                <div class="mb-3"><input type="text" class="form-control text-center" name="2fa_code" required autocomplete="off"></div>
-                                <div class="d-grid"><button type="submit" class="btn btn-primary">Verificar</button></div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>';
-        include __DIR__ . '/../views/layout.php';
+        include __DIR__ . '/../views/auth/verify2fa.php';
     }
 
     private function generate2FACode() {

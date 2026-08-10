@@ -302,6 +302,70 @@ class Retardo {
         $stmtRetardos->execute([$empleado_id]);
         $justificaciones = array_merge($justificaciones, $stmtRetardos->fetchAll());
 
+        // 7. LICENCIAS MÉDICAS (de tabla licencias_medicas)
+        $stmtLicencias = $pdo->prepare("
+            SELECT
+                lm.id,
+                lm.empleado_id,
+                lm.fecha_inicio AS fecha,
+                NULL AS hora_entrada,
+                NULL AS hora_salida,
+                lm.dias_otorgados AS minutos_retardo,
+                'licencia_medica' AS tipo_incidencia,
+                CASE lm.estatus WHEN 'aprobada' THEN 1 WHEN 'pendiente' THEN 0 ELSE 0 END AS justificado,
+                CONCAT('Licencia médica: ', COALESCE(lm.diagnostico, 'Sin diagnóstico')) AS descripcion,
+                'Licencia médica' AS tipo_justificacion_nombre,
+                1 AS validado_por_jefe,
+                lm.estatus AS estado_validacion_jefe,
+                NULL AS motivo_validacion_jefe,
+                NULL AS comentarios_validacion_jefe,
+                lm.updated_at AS fecha_validacion_jefe,
+                ua.nombre_completo AS jefe_validador_nombre,
+                'RH' AS validado_por_rh,
+                lm.estatus AS estado_validacion_rh,
+                lm.updated_at AS fecha_validacion_rh,
+                'licencia_medica' AS fuente,
+                lm.incidencia_id AS asistencia_id
+            FROM licencias_medicas lm
+            LEFT JOIN usuarios ua ON ua.id = lm.creado_por
+            WHERE lm.empleado_id = ?
+            ORDER BY lm.fecha_inicio DESC
+        ");
+        $stmtLicencias->execute([$empleado_id]);
+        $justificaciones = array_merge($justificaciones, $stmtLicencias->fetchAll());
+
+        // 8. CONSTANCIAS DE TIEMPO (de tabla constancias_tiempo)
+        $stmtConstancias = $pdo->prepare("
+            SELECT
+                ct.id,
+                ct.empleado_id,
+                ct.fecha_inicio AS fecha,
+                NULL AS hora_entrada,
+                NULL AS hora_salida,
+                NULL AS minutos_retardo,
+                'constancia_tiempo' AS tipo_incidencia,
+                CASE ct.estatus WHEN 'aprobada' THEN 1 WHEN 'pendiente' THEN 0 ELSE 0 END AS justificado,
+                COALESCE(ct.motivo, 'Constancia de tiempo') AS descripcion,
+                'Constancia de tiempo' AS tipo_justificacion_nombre,
+                1 AS validado_por_jefe,
+                ct.estatus AS estado_validacion_jefe,
+                NULL AS motivo_validacion_jefe,
+                NULL AS comentarios_validacion_jefe,
+                ct.fecha_aprobacion AS fecha_validacion_jefe,
+                ua.nombre_completo AS jefe_validador_nombre,
+                'RH' AS validado_por_rh,
+                ct.estatus AS estado_validacion_rh,
+                ct.fecha_aprobacion AS fecha_validacion_rh,
+                'constancia_tiempo' AS fuente,
+                NULL AS asistencia_id
+            FROM constancias_tiempo ct
+            LEFT JOIN usuarios ua ON ua.id = ct.aprobado_por
+            WHERE ct.empleado_id = ?
+            ORDER BY ct.fecha_inicio DESC
+        ");
+        $stmtConstancias->execute([$empleado_id]);
+        $justificaciones = array_merge($justificaciones, $stmtConstancias->fetchAll());
+
         // Ordenar por fecha descendente
         usort($justificaciones, function($a, $b) {
             $fa = strtotime($a['fecha'] ?? '1970-01-01');
@@ -681,10 +745,11 @@ class Retardo {
 
     /**
      * Determinar el tipo de retardo según los minutos de retardo
-     * Retardo menor: 10-20 minutos (después de los 10 minutos de tolerancia)
-     * Retardo mayor: 20-30 minutos (después de los primeros 20 minutos)
+     * Retardo menor: 11-20 minutos (después de los 10 minutos de tolerancia)
+     * Retardo mayor: 21-30 minutos
+     * Falta: 31+ minutos
      * @param int $minutos Minutos de retardo
-     * @return string Tipo de retardo: 'menor', 'mayor', o null si no es retardo
+     * @return string|null Tipo de retardo: 'retardo_menor', 'retardo_mayor', 'falta', o null si ≤10
      */
     public function determinarTipoRetardo($minutos) {
         $minutos = (int)$minutos;
@@ -693,6 +758,8 @@ class Retardo {
             return 'retardo_menor';
         } elseif ($minutos > 20 && $minutos <= 30) {
             return 'retardo_mayor';
+        } elseif ($minutos > 30) {
+            return 'falta';
         }
         
         return null;
@@ -724,7 +791,7 @@ class Retardo {
             $fin = "$anio-$mes-15";
         } elseif ($quincena === 2) {
             $inicio = "$anio-$mes-16";
-            $fin = "$anio-$mes-30"; // Límite para segunda quincena
+            $fin = date('Y-m-t', strtotime("$anio-$mes-01"));
         } else {
             $inicio = "$anio-$mes-01";
             $fin = date('Y-m-t', strtotime("$anio-$mes-01"));
@@ -799,7 +866,7 @@ class Retardo {
             $nombre_quincena = "PRIMERA QUINCENA (1-15)";
         } else {
             $inicio = "$anio-$mes-16";
-            $fin = "$anio-$mes-30";
+            $fin = date('Y-m-t', strtotime("$anio-$mes-01"));
             $nombre_quincena = "SEGUNDA QUINCENA (16-30)";
         }
         
@@ -1053,10 +1120,11 @@ class Retardo {
         $esComision = $esComisionEntrada || $esComisionSalida || $esComisionTodoDia;
         $esRetardo = in_array($tipo, ['retardo_menor', 'retardo_mayor', 'normal']);
         
-        if ($esRetardo) {
+if ($esRetardo) {
             // Regla 6: Retardos hasta día 15 y 30
             $quincena_retardo = ($dia_retardo <= 15) ? 1 : 2;
-            $limite = ($quincena_retardo === 1) ? 15 : 30;
+            $limite = ($quincena_retardo === 1) ? '15' : '30';
+            $limite_fecha = sprintf('%s-%02d-%02d', date('Y'), $mes_retardo, (int)$limite);
             $mensajeBase = "período: hasta el día $limite";
         } elseif ($esComision) {
             // Reglas 7, 8, 9: 2 días hábiles posteriores a la fecha de incidencia
@@ -1074,12 +1142,13 @@ class Retardo {
         } else {
             // Por defecto, regla 6
             $quincena_retardo = ($dia_retardo <= 15) ? 1 : 2;
-            $limite = ($quincena_retardo === 1) ? 15 : 30;
+            $limite = ($quincena_retardo === 1) ? '15' : '30';
+            $limite_fecha = sprintf('%s-%02d-%02d', date('Y'), $mes_retardo, (int)$limite);
             $mensajeBase = "período: hasta el día $limite";
         }
         
         // Calcular días restantes
-        $dias_restantes = (strtotime($limite) - strtotime($fecha_actual)) / 86400;
+        $dias_restantes = (strtotime($limite_fecha) - strtotime($fecha_actual)) / 86400;
         
         if ($dias_restantes < 0) {
             return [

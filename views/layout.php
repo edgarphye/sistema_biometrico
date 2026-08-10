@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sistema Biométrico</title>
 <link rel="icon" type="image/svg+xml" href="<?php echo rtrim(BASE_URL, '/'); ?>/favicon.svg">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+    <link href="<?php echo rtrim(BASE_URL, '/'); ?>/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?php echo rtrim(BASE_URL, '/'); ?>/assets/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="<?php echo rtrim(BASE_URL, '/'); ?>/assets/css/dataTables.bootstrap5.min.css">
+    <script src="<?php echo rtrim(BASE_URL, '/'); ?>/assets/js/chart.umd.min.js"></script>
+    <script src="<?php echo rtrim(BASE_URL, '/'); ?>/assets/js/jquery-3.6.0.min.js"></script>
     <link href="<?php echo rtrim(BASE_URL, '/'); ?>/assets/css/modals.css" rel="stylesheet">
     <link href="<?php echo rtrim(BASE_URL, '/'); ?>/assets/css/empleados.css" rel="stylesheet">
     <link href="<?php echo rtrim(BASE_URL, '/'); ?>/assets/css/colores-pantone.css" rel="stylesheet">
@@ -23,7 +23,7 @@
     <!-- Scripts de Bootstrap y jQuery cargados en el head para asegurar disponibilidad -->
    
     
-    <script>
+    <script<?= SecurityHelper::nonceAttr() ?>>
         // Prevenir inicialización automática de modales hasta que Bootstrap esté completamente cargado
         document.addEventListener('DOMContentLoaded', function() {
             // Esperar a que Bootstrap esté disponible
@@ -38,11 +38,11 @@
             waitForBootstrap();
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js" crossorigin="anonymous"></script>
+    <script src="<?php echo rtrim(BASE_URL, '/'); ?>/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="<?php echo rtrim(BASE_URL, '/'); ?>/assets/js/jquery.dataTables.min.js"></script>
+    <script src="<?php echo rtrim(BASE_URL, '/'); ?>/assets/js/dataTables.bootstrap5.min.js"></script>
 
-    <style>
+    <style<?= SecurityHelper::nonceAttr() ?>>
         /* Variables CSS con colores Pantone Institucionales Exactos */
         :root {
             --pantone-vino: #9F2241;
@@ -1244,7 +1244,6 @@
     ?>
 </head>
 <body>
-    <!-- Theme Toggle Button - Solo mostrar si está logueado -->
     <?php if (AuthController::isLoggedIn()): ?>
     
     <!-- Top Bar -->
@@ -1422,27 +1421,49 @@
                     ['path' => '/', 'label' => 'Inicio', 'icon' => 'fa-home', 'permiso' => 'inicio'],
                     ['path' => '/empleados', 'label' => 'Empleados', 'icon' => 'fa-users', 'permiso' => 'empleados'],
                     ['path' => '/asistencia', 'label' => 'Asistencia', 'icon' => 'fa-clock', 'permiso' => 'asistencia'],
+                    ['path' => '/marcaciones', 'label' => 'Marcaciones', 'icon' => 'fa-stopwatch', 'permiso' => 'marcaciones'],
+                    ['path' => '/mis-validaciones', 'label' => 'Mis Validaciones', 'icon' => 'fa-check-double', 'permiso' => 'mis_validaciones'],
                     ['path' => '/horarios', 'label' => 'Horarios', 'icon' => 'fa-calendar-alt', 'permiso' => 'horarios'],
                     ['path' => '/ciclos', 'label' => 'Ciclos', 'icon' => 'fa-sync', 'permiso' => 'ciclos'],
                     ['path' => '/validaciones', 'label' => 'Validaciones', 'icon' => 'fa-user-check', 'permiso' => 'validaciones'],
-                    ['path' => '/reportes/excel', 'label' => 'Reportes Excel', 'icon' => 'fa-file-excel', 'permiso' => 'reportes_excel'],
+                   ['path' => '/reportes/excel', 'label' => 'Reportes Excel', 'icon' => 'fa-file-excel', 'permiso' => 'reportes_excel'],
                     ['path' => '/resumen-justificaciones', 'label' => 'Resumen Justificaciones', 'icon' => 'fa-clipboard-check', 'permiso' => 'resumen_justificaciones'],
                     ['path' => '/analisis-predictivo', 'label' => 'Análisis Predictivo', 'icon' => 'fa-brain', 'permiso' => 'analisis_predictivo'],
                     ['path' => '/agent-ia', 'label' => 'Agent IA', 'icon' => 'fa-network-wired', 'permiso' => 'analisis_predictivo'],
                     ['path' => '/ai', 'label' => 'AI Dashboard', 'icon' => 'fa-robot', 'permiso' => 'analisis_predictivo'],
                     ['path' => '/biometricos', 'label' => 'Dispositivos Biométricos', 'icon' => 'fa-fingerprint', 'permiso' => 'biometricos'],
+        ['path' => '/biometricos/gestionar', 'label' => 'Gestionar Biométrico', 'icon' => 'fa-sliders-h', 'permiso' => 'biometricos_gestionar'],
                     ['path' => '/database', 'label' => 'Base de Datos', 'icon' => 'fa-database', 'permiso' => 'database'],
                     ['path' => '/catalogos', 'label' => 'Catálogos', 'icon' => 'fa-sitemap', 'permiso' => 'catalogos'],
-                    ['path' => '/permisos-menu', 'label' => 'Permisos de Menú', 'icon' => 'fa-shield-halved', 'permiso' => 'superadmin'],
+                    ['path' => '/permisos-menu', 'label' => 'Permisos de Menú', 'icon' => 'fa-shield-halved', 'permiso' => 'configurar_menu'],
                     ['path' => '/configuracion', 'label' => 'Configuración', 'icon' => 'fa-gear', 'permiso' => 'configuracion'],
                     ['path' => '/notas-malas', 'label' => 'Notas Malas', 'icon' => 'fa-exclamation-triangle', 'permiso' => 'usuarios'],
                     ['path' => '/usuarios', 'label' => 'Usuarios', 'icon' => 'fa-user-cog', 'permiso' => 'usuarios'],
                     ['path' => '/logs', 'label' => 'Logs de Errores', 'icon' => 'fa-file-alt', 'permiso' => 'admin'],
                 ];
                 
-                $menuFiltrado = array_filter($menuItems, function($item) use ($todosPermisos, $rol) {
+                $menuConfig = [];
+                if (isset($_SESSION['user_id'])) {
+                    $pdo = $db->getConnection();
+                    $stmt = $pdo->prepare("SELECT menu_path, visible FROM menu_config WHERE usuario_id = ?");
+                    $stmt->execute([$_SESSION['user_id']]);
+                    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                        $menuConfig[$row['menu_path']] = (bool)$row['visible'];
+                    }
+                }
+                
+                $menuFiltrado = array_filter($menuItems, function($item) use ($todosPermisos, $rol, $menuConfig) {
                     if ($rol === 'superadmin') return true;
-                    return in_array($item['permiso'], $todosPermisos);
+                    
+                    $tienePermisoRol = in_array($item['permiso'], $todosPermisos);
+                    $configurado = isset($menuConfig[$item['path']]);
+                    $configVisible = $configurado ? $menuConfig[$item['path']] : true;
+                    
+                    if ($configurado) {
+                        return $configVisible;
+                    }
+                    
+                    return $tienePermisoRol && $configVisible;
                 });
 
                 $currentUri = $_SERVER['REQUEST_URI'] ?? '/';
@@ -1474,6 +1495,9 @@
                             <?php if($item['label'] == 'Validaciones'): ?>
                             <span class="badge bg-danger ms-1" id="menuPendientesCount" style="display: none; min-width: 20px; font-size: 0.75rem; padding: 2px 6px;">0</span>
                             <?php endif; ?>
+                            <?php if($item['label'] == 'Mis Validaciones'): ?>
+                            <span class="badge bg-danger ms-1" id="misValidacionesPendientesCount" style="display: none; min-width: 20px; font-size: 0.75rem; padding: 2px 6px;">0</span>
+                            <?php endif; ?>
                         </a>
                     </li>
                     <?php endforeach; ?>
@@ -1500,7 +1524,7 @@
     ?>">
     
     <!-- Configuración global para JavaScript -->
-    <script>
+    <script<?= SecurityHelper::nonceAttr() ?>>
         window.BASE_URL = '<?php echo rtrim(BASE_URL, '/'); ?>';
         window.empleadosConfig = {
             baseUrl: '<?php echo rtrim(BASE_URL, '/'); ?>',
@@ -1548,7 +1572,7 @@
     endif;
     ?>
     
-    <script>
+    <script<?= SecurityHelper::nonceAttr() ?>>
     function abrirMiPerfil() {
         console.log('Ejecutando abrirMiPerfil');
         var btnPerfil = document.querySelector('#btnMiPerfil');
@@ -1577,9 +1601,7 @@
     }
     </script>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <script>
+    <script<?= SecurityHelper::nonceAttr() ?>>
         document.addEventListener('DOMContentLoaded', function() {
             function saveThemePreference(theme) {
                 localStorage.setItem('theme', theme);

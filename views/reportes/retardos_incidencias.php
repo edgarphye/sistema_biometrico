@@ -531,9 +531,9 @@ $fechaFinDefault = date('Y-m-t');
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="<?php echo rtrim(BASE_URL, '/'); ?>/assets/js/xlsx.full.min.js"></script>
+<script src="<?php echo rtrim(BASE_URL, '/'); ?>/assets/js/exceljs.min.js"></script>
+<script src="<?php echo rtrim(BASE_URL, '/'); ?>/assets/js/chart.umd.min.js"></script>
 <script>
     let datosReporte = [];
     
@@ -555,29 +555,50 @@ $fechaFinDefault = date('Y-m-t');
         document.getElementById('mensajeInicial').classList.add('hidden');
         
         // Use the new API endpoint
-        fetch('/sistema_biometrico/api/reportes_excel.php?' + params.toString(), {
+        fetch('/api/reportes_excel.php?' + params.toString(), {
             headers: { 'Accept': 'application/json' }
         })
             .then(response => {
+                if (response.status === 401) {
+                    alert('Tu sesión ha expirado. Serás redirigido al login.');
+                    window.location.href = '/sistema_biometrico/login';
+                    throw new Error('Sesión expirada');
+                }
                 if (!response.ok) throw new Error('HTTP ' + response.status);
                 return response.json();
             })
             .then(data => {
-                datosReporte = data.datos;
+                if (!data || typeof data !== 'object') {
+                    throw new Error('Respuesta inválida del servidor');
+                }
+                if (data.success === false) {
+                    throw new Error(data.error || 'Error desconocido del servidor');
+                }
+                if (!data.stats) {
+                    throw new Error('Datos de estadísticas no encontrados');
+                }
+                datosReporte = data.datos || [];
                 mostrarResultados(data);
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-search me-2"></i>Generar Reporte';
             })
             .catch(err => {
-                console.error('Error fetch:', err);
-                alert('Error al generar el reporte: ' + err.message);
-                alert('Error al generar el reporte: ' + err.message);
+                if (err.message !== 'Sesión expirada') {
+                    console.error('Error fetch:', err);
+                    alert('Error al generar el reporte: ' + err.message);
+                }
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-search me-2"></i>Generar Reporte';
             });
     }
     
     function mostrarResultados(data) {
+        if (!data || !data.stats) {
+            console.error('Datos inválidos:', data);
+            alert('Error: Datos de reporte inválidos');
+            return;
+        }
+        
         document.getElementById('resultadosContainer').classList.remove('hidden');
         document.getElementById('btnExportar').disabled = false;
         
@@ -609,35 +630,36 @@ $fechaFinDefault = date('Y-m-t');
             return;
         }
         
-        data.datos.forEach((row, idx) => {
+data.datos.forEach((row, idx) => {
             const tipoBadge = getTipoBadge(row.tipo_registro);
-            const justBadge = row.justificado == 1 ? 'badge-justificado' : 'badge-pendiente';
+            const justBadge = (row.justificado == 1 || row.justificado === true) ? 'badge-justificado' : 'badge-pendiente';
             const minClass = (row.minutos_retardo || 0) > 30 ? 'text-danger' : ((row.minutos_retardo || 0) > 0 ? 'text-warning' : '');
             const detalles = getDetalles(row);
-            const horaEntrada = row.hora_entrada ? row.hora_entrada.substring(0,5) : '-';
-            const horaSalida = row.hora_salida ? row.hora_salida.substring(0,5) : '-';
+            const horaEntrada = row.hora_entrada ? (row.hora_entrada || '').substring(0,5) : '-';
+            const horaSalida = row.hora_salida ? (row.hora_salida || '').substring(0,5) : '-';
             const registroTipo = getRegistroTipoLabel(row.registro_tipo);
-            
+            const nombreCompleto = `${row.apellido || ''} ${row.nombre || ''}`.trim() || row.empleado || 'Sin nombre';
+             
             tbody.innerHTML += `
                 <tr>
-                    <td>${idx + 1}</td>
-                    <td><strong>${row.apellido} ${row.nombre}</strong></td>
-                    <td><code>${row.rfc || 'N/A'}</code></td>
-                    <td><span class="depto-badge">${row.clave_depto || 'N/A'}</span></td>
-                    <td><small>${row.puesto || 'N/A'}</small></td>
-                    <td>${formatDate(row.fecha)}</td>
-                    <td class="fw-bold">${horaEntrada}</td>
-                    <td class="fw-bold">${horaSalida}</td>
-                    <td><span class="badge ${tipoBadge}">${row.tipo_registro}</span><br><small class="text-muted">${registroTipo}</small></td>
-                    <td><small>${(row.tipo_retraso || 'N/A').replace(/_/g, ' ')}</small></td>
-                    <td class="text-center fw-bold ${minClass}">${row.minutos_retardo > 0 ? row.minutos_retardo : '-'}</td>
-                    <td><span class="badge ${justBadge}">${row.justificado == 1 ? 'Sí' : 'No'}</span></td>
-                    <td><small>${row.justificacion_tipo || '-'}</small></td>
-                    <td><small>${row.motivo_justificacion || '-'}</small></td>
-                    <td><small>${detalles}</small></td>
-                    <td><span class="badge ${getEstadoBadge(row.estado_validacion)}">${formatEstado(row.estado_validacion)}</span></td>
-                    <td><small>${row.nombre_jefe || 'Sin asignar'}</small></td>
-                </tr>
+                        <td>${idx + 1}</td>
+                        <td><strong>${nombreCompleto}</strong></td>
+                        <td><code>${row.rfc || 'N/A'}</code></td>
+                        <td><span class="depto-badge">${row.clave_depto || 'N/A'}</span></td>
+                        <td><small>${row.puesto || 'N/A'}</small></td>
+                        <td>${formatDate(row.fecha)}</td>
+                        <td class="fw-bold">${horaEntrada}</td>
+                        <td class="fw-bold">${horaSalida}</td>
+                        <td><span class="badge ${tipoBadge}">${row.tipo_registro || '-'}</span><br><small class="text-muted">${registroTipo}</small></td>
+                        <td><small>${(row.tipo_retraso || 'N/A').replace(/_/g, ' ')}</small></td>
+                        <td class="text-center fw-bold ${minClass}">${row.minutos_retardo > 0 ? row.minutos_retardo : '-'}</td>
+                        <td><span class="badge ${justBadge}">${(row.justificado == 1 || row.justificado === true) ? 'Sí' : 'No'}</span></td>
+                        <td><small>${row.justificacion_tipo || '-'}</small></td>
+                        <td><small>${row.motivo_justificacion || '-'}</small></td>
+                        <td><small>${detalles}</small></td>
+                        <td><span class="badge ${getEstadoBadge(row.estado_validacion)}">${formatEstado(row.estado_validacion)}</span></td>
+                        <td><small>${row.jefe_nombre || 'Sin asignar'}</small></td>
+                    </tr>
             `;
         });
         
@@ -906,7 +928,7 @@ $fechaFinDefault = date('Y-m-t');
                 row.motivo_justificacion || '-',
                 getDetalles(row),
                 formatEstado(row.estado_validacion),
-                row.nombre_jefe || 'Sin asignar'
+                row.jefe_nombre || 'Sin asignar'
             ];
             
             datos.forEach((val, colIdx) => {

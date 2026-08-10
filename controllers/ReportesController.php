@@ -1,11 +1,15 @@
 <?php
-require_once 'models/Empleado.php';
-require_once 'models/Asistencia.php';
-require_once 'models/Retardo.php';
-require_once 'models/Comision.php';
-require_once 'models/Ausencia.php';
+require_once __DIR__ . '/../models/Empleado.php';
+require_once __DIR__ . '/../models/Asistencia.php';
+require_once __DIR__ . '/../models/Retardo.php';
+require_once __DIR__ . '/../models/Comision.php';
+require_once __DIR__ . '/../models/Ausencia.php';
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../models/Database.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ReportesController extends BaseController {
     private $empleadoModel;
@@ -350,9 +354,12 @@ public function __construct($skipAuth = false) {
             $resultados[] = [
                 'empleado' => $empleadosMap[$retardo['empleado_id']] ?? 'Desconocido',
                 'fecha' => $retardo['fecha'],
+                'hora_entrada' => $retardo['hora_entrada'] ?? '',
+                'hora_salida' => $retardo['hora_salida'] ?? '',
                 'minutos_retardo' => $retardo['minutos_retardo'],
-                'tipo' => $retardo['tipo'] ?? $retardo['tipo_retraso'] ?? 'menor',
-                'justificado' => $retardo['justificado']
+                'tipo_retraso' => $retardo['tipo_retraso'] ?? $retardo['tipo'] ?? 'menor',
+                'justificado' => ($retardo['justificado'] ?? 0) ? 'Sí' : 'No',
+                'motivo' => $retardo['motivo_justificacion'] ?? ''
             ];
         }
 
@@ -443,20 +450,42 @@ public function __construct($skipAuth = false) {
                 break;
         }
 
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename=reporte_' . $tipo . '_' . date('Ymd') . '.csv');
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-        $output = fopen('php://output', 'w');
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBB));
+        $sheet->setCellValue('A1', 'Sistema Biométrico - Reporte: ' . ucfirst(str_replace('_', ' ', $tipo)));
+        $sheet->mergeCells('A1:H1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
 
         if (!empty($resultados)) {
-            fputcsv($output, array_keys($resultados[0]), ';');
+            $headers = array_keys($resultados[0]);
+            $col = 'A';
+            foreach ($headers as $i => $header) {
+                $sheet->setCellValue($col . '3', ucfirst(str_replace('_', ' ', $header)));
+                $sheet->getStyle($col . '3')->getFont()->setBold(true);
+                $col++;
+            }
+            $rowNum = 4;
             foreach ($resultados as $row) {
-                fputcsv($output, $row, ';');
+                $col = 'A';
+                foreach ($row as $value) {
+                    $sheet->setCellValue($col . $rowNum, is_string($value) ? html_entity_decode(strip_tags($value)) : $value);
+                    $col++;
+                }
+                $rowNum++;
             }
         }
 
-        fclose($output);
+        foreach (range('A', 'H') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename=reporte_' . $tipo . '_' . date('Ymd') . '.xlsx');
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
         exit;
     }
 

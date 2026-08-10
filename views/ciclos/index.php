@@ -19,7 +19,7 @@ require_once 'models/Usuario.php';
     .admin-window {
         display: flex;
         flex-direction: column;
-        height: calc(100vh - 100px);
+        height: calc(100vh - 185px);
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         border: 1px solid #d0d0d2;
         box-shadow: 0 4px 20px rgba(0,0,0,0.08);
@@ -55,7 +55,7 @@ require_once 'models/Usuario.php';
     }
     .cycles-table-container {
         flex-grow: 1;
-        overflow-y: auto;
+        overflow: auto;
     }
     .cycles-table {
         width: 100%;
@@ -66,6 +66,8 @@ require_once 'models/Usuario.php';
         padding: 12px 16px;
         text-align: left;
         white-space: nowrap;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 0.8rem;
     }
     .cycles-table th {
         background-color: #f8f9fa;
@@ -327,6 +329,13 @@ require_once 'models/Usuario.php';
     .modal-header {
         border-radius: 12px 12px 0 0;
     }
+    .modal-body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .modal-body .form-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
     .modal-footer {
         background-color: #f8f7f5;
         border-top: 1px solid #d0d0d2;
@@ -411,31 +420,33 @@ require_once 'models/Usuario.php';
 
 <!-- MODAL CREAR CICLO -->
 <div class="modal fade" id="modal-ciclo" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header" style="background: linear-gradient(135deg, #235B4E 0%, #10312B 100%); color: #ffffff;">
                 <h5 class="modal-title"><i class="fas fa-sync-alt me-2"></i>Nuevo Ciclo</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Nombre</label>
-                    <input type="text" class="form-control" id="ciclo-nombre">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Fecha Inicio</label>
-                    <input type="date" class="form-control" id="ciclo-fecha">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Número Ciclo</label>
-                    <input type="number" class="form-control" id="ciclo-num" value="1">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Unidad</label>
-                    <select class="form-select" id="ciclo-unidad">
-                        <option value="Semana">Semana</option>
-                        <option value="Mes">Mes</option>
-                    </select>
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="ciclo-nombre">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Unidad</label>
+                        <select class="form-select" id="ciclo-unidad">
+                            <option value="Semana">Semana</option>
+                            <option value="Mes">Mes</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Fecha Inicio</label>
+                        <input type="date" class="form-control" id="ciclo-fecha">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Número Ciclo</label>
+                        <input type="number" class="form-control" id="ciclo-num" value="1">
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -448,41 +459,48 @@ require_once 'models/Usuario.php';
 
 <!-- MODAL AÑADIR BLOQUE -->
 <div class="modal fade" id="modal-bloque" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header" style="background: linear-gradient(135deg, #9F2241 0%, #691C32 100%); color: #ffffff;">
                 <h5 class="modal-title"><i class="fas fa-clock me-2"></i>Asignar Horario</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Horario Base</label>
-                    <select class="form-select" id="bloque-horario"></select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Días</label>
-                    <div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input day-check" type="checkbox" value="0" checked> <label class="form-check-label">Lun</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input day-check" type="checkbox" value="1" checked> <label class="form-check-label">Mar</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input day-check" type="checkbox" value="2" checked> <label class="form-check-label">Mié</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input day-check" type="checkbox" value="3" checked> <label class="form-check-label">Jue</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input day-check" type="checkbox" value="4" checked> <label class="form-check-label">Vie</label>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Horario Base</label>
+                        <select class="form-select" id="bloque-horario"></select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Días</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <div class="form-check">
+                                <input class="form-check-input day-check" type="checkbox" value="0" checked id="dia-lun">
+                                <label class="form-check-label" for="dia-lun">Lun</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input day-check" type="checkbox" value="1" checked id="dia-mar">
+                                <label class="form-check-label" for="dia-mar">Mar</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input day-check" type="checkbox" value="2" checked id="dia-mie">
+                                <label class="form-check-label" for="dia-mie">Mié</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input day-check" type="checkbox" value="3" checked id="dia-jue">
+                                <label class="form-check-label" for="dia-jue">Jue</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input day-check" type="checkbox" value="4" checked id="dia-vie">
+                                <label class="form-check-label" for="dia-vie">Vie</label>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="mb-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="limpiar-dia">
-                        <label class="form-check-label" for="limpiar-dia">Limpiar día antes de asignar</label>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="limpiar-dia">
+                            <label class="form-check-label" for="limpiar-dia"><i class="fas fa-eraser me-1"></i>Limpiar día antes de asignar</label>
+                        </div>
                     </div>
                 </div>
             </div>

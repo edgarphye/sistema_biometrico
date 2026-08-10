@@ -267,9 +267,20 @@ class DatabaseController extends BaseController {
             
             $filepath = $this->dbManager->resolveBackupFilePath($filename);
             
-            if (!$filepath || !file_exists($filepath)) {
+            error_log("DEBUG deleteBackup: filename='$filename', filepath='$filepath'");
+            
+            if (!$filepath) {
+                throw new Exception('No se pudo resolver la ruta del archivo: ' . $filename);
+            }
+            
+            if (!file_exists($filepath)) {
                 throw new Exception('Archivo no encontrado: ' . $filepath);
             }
+            
+            $perms = fileperms($filepath);
+            $owner = fileowner($filepath);
+            $group = filegroup($filepath);
+            error_log("DEBUG file perms=" . decoct($perms) . " owner=$owner group=$group");
             
             if (@unlink($filepath)) {
                 $this->jsonResponse(['success' => true, 'message' => 'Backup eliminado: ' . $filename]);
@@ -284,14 +295,16 @@ class DatabaseController extends BaseController {
             
             $output = [];
             $returnVar = 0;
-            @exec("rm -f '" . escapeshellcmd($filepath) . "'", $output, $returnVar);
+            $cmd = "rm -f '" . $filepath . "' 2>&1; echo 'EXIT:' $?";
+            $shellResult = shell_exec($cmd);
+            error_log("DEBUG rm result: " . $shellResult);
             
-            if ($returnVar === 0 && !file_exists($filepath)) {
+            if (!file_exists($filepath)) {
                 $this->jsonResponse(['success' => true, 'message' => 'Backup eliminado: ' . $filename]);
                 return;
             }
             
-            throw new Exception('No se pudo eliminar el archivo');
+            throw new Exception('No se pudo eliminar el archivo. Debug: ' . $shellResult);
         } catch (Exception $e) {
             $this->jsonResponse(['success' => false, 'message' => $e->getMessage()], 500);
         }

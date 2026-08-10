@@ -101,20 +101,45 @@ CREATE TABLE IF NOT EXISTS tipos_justificacion (
     activo BOOLEAN DEFAULT TRUE
 );
 
--- Tabla de Retardos
+-- Tabla de Retardos (sincronizada con la BD real vía migraciones)
 CREATE TABLE IF NOT EXISTS retardos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     empleado_id INT NOT NULL,
+    zk_empleado_id_original VARCHAR(50) NULL,
     fecha DATE NOT NULL,
-    minutos_retraso INT NOT NULL,
-    tipo_retraso ENUM('menor', 'mayor') NOT NULL,
+    hora_entrada TIME NULL,
+    hora_salida TIME NULL,
+    fecha_asistencia DATE NULL,
+    asistencia_id INT NULL,
+    dia_semana ENUM('lunes','martes','miércoles','jueves','viernes','sábado','domingo') NULL,
+    tipo_registro ENUM('entrada','salida','ambos') DEFAULT 'entrada',
+    unique_dia_empleado VARCHAR(50) NULL,
+    minutos_retardo INT NOT NULL DEFAULT 0,
+    tipo_retraso ENUM('normal','retardo_menor','retardo_mayor','falta','comision_entrada','comision_salida','comision_todo_dia','dia_economico','ausencia') NOT NULL,
+    tipo_asistencia ENUM('entrada','salida','completa') DEFAULT 'entrada',
+    categoria_principal ENUM('asistencia_normal','retardo','comision','dia_economico','ausencia') DEFAULT 'asistencia_normal',
+    hora_registro TIME NULL,
+    motivo_detalle TEXT NULL,
+    requiere_validacion_jefe TINYINT(1) DEFAULT 0,
+    evidencia_adjunta VARCHAR(255) NULL,
+    estado_validacion VARCHAR(50) NULL,
     justificado TINYINT(1) DEFAULT 0,
     horario_id INT NULL,
     tipo_justificacion_id INT NULL,
     motivo_justificacion TEXT NULL,
     aprobado_por INT NULL,
     fecha_aprobacion TIMESTAMP NULL,
+    soporte VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    validado_por_jefe TINYINT(1) DEFAULT 0,
+    justificacion_bloqueada TINYINT(1) DEFAULT 0,
+    INDEX idx_retardos_fecha (fecha),
+    INDEX idx_retardos_tipo (tipo_retraso),
+    INDEX idx_retardos_dia_empleado (unique_dia_empleado),
+    INDEX idx_retardos_fecha_empleado (fecha, empleado_id),
+    INDEX idx_retardos_tipo_estado (tipo_retraso, estado_validacion),
+    INDEX idx_retardos_empleado (empleado_id),
+    INDEX idx_retardos_horario (horario_id),
     FOREIGN KEY (empleado_id) REFERENCES empleados(id),
     FOREIGN KEY (horario_id) REFERENCES horarios_laborales(id),
     FOREIGN KEY (tipo_justificacion_id) REFERENCES tipos_justificacion(id),
@@ -216,3 +241,14 @@ CREATE TABLE IF NOT EXISTS logs_dispositivos (
 -- Insertar usuario admin por defecto (Password: admin123)
 INSERT IGNORE INTO usuarios (username, password, email, rol, nombre_completo) 
 VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@sistema.local', 'admin', 'Administrador');
+
+-- Tabla de Configuración de Menú por Usuario
+CREATE TABLE IF NOT EXISTS menu_config (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    menu_path VARCHAR(100) NOT NULL,
+    visible TINYINT(1) DEFAULT 1,
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_usuario_menu (usuario_id, menu_path)
+);

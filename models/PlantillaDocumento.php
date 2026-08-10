@@ -108,8 +108,8 @@ class DocumentoGenerado {
     public function create($data) {
         $pdo = $this->db->getConnection();
         $stmt = $pdo->prepare("
-            INSERT INTO documentos_generados (empleado_id, tipo_documento, plantilla_id, titulo, contenido, archivo_path, periodo, generado_por)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO documentos_generados (empleado_id, tipo_documento, plantilla_id, titulo, contenido, archivo_path, periodo, generado_por, quincena)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         return $stmt->execute([
             $data['empleado_id'],
@@ -119,8 +119,33 @@ class DocumentoGenerado {
             $data['contenido'] ?? null,
             $data['archivo_path'] ?? null,
             $data['periodo'],
-            $data['generado_por'] ?? null
+            $data['generado_por'] ?? null,
+            $data['quincena'] ?? 0
         ]);
+    }
+
+    /**
+     * Busca un documento generado por empleado, tipo, periodo y quincena
+     */
+    public function getByEmpleadoPeriodo($empleado_id, $tipo_documento, $periodo, $quincena = 0) {
+        $pdo = $this->db->getConnection();
+        $stmt = $pdo->prepare("
+            SELECT * FROM documentos_generados
+            WHERE empleado_id = ? AND tipo_documento = ? AND periodo = ? AND quincena = ?
+            ORDER BY fecha_generacion DESC
+            LIMIT 1
+        ");
+        $stmt->execute([$empleado_id, $tipo_documento, $periodo, $quincena]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    public function getById($id) {
+        $pdo = $this->db->getConnection();
+        $stmt = $pdo->prepare("
+            SELECT * FROM documentos_generados WHERE id = ?
+        ");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
     public function getByEmpleado($empleado_id, $limit = 50) {
@@ -129,9 +154,9 @@ class DocumentoGenerado {
             SELECT * FROM documentos_generados 
             WHERE empleado_id = ?
             ORDER BY fecha_generacion DESC
-            LIMIT ?
+            LIMIT " . (int)$limit . "
         ");
-        $stmt->execute([$empleado_id, $limit]);
+        $stmt->execute([$empleado_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

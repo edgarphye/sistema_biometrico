@@ -119,4 +119,22 @@ interface BiometricInterface
      * @return bool True si la sincronización fue exitosa
      */
     public function syncEmployees(int $deviceId, array $employees): bool;
+
+    /**
+     * Actualiza los datos de un empleado en el dispositivo biométrico
+     * (nombre, password, privilegio) sin re-enrolar la huella.
+     * Busca al empleado por su ID registrado (zkteco_id) en el dispositivo.
+     * @param int $deviceId ID del dispositivo
+     * @param int $employeeId ID del empleado en BD
+     * @return bool True si la actualización fue exitosa
+     */
+    public function updateEmployeeOnDevice(int $deviceId, int $employeeId): bool;
+
+    /**
+     * Descarga todos los registros de asistencia desde el dispositivo biométrico,
+     * los procesa y los inserta en la tabla asistencia.
+     * @param int $deviceId ID del dispositivo
+     * @return array{imported: int, duplicates: int, errors: int, total: int}
+     */
+    public function downloadAttendanceFromDevice(int $deviceId): array;
 }

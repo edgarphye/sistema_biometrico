@@ -22,6 +22,10 @@
         background-color: #501526;
         color: white;
     }
+    input[readonly].form-control {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    }
     .avatar-circle {
         width: 90px;
         height: 90px;
@@ -262,6 +266,7 @@ require_once 'helpers/permisos_helper.php';
 require_once 'models/Usuario.php';
 $rolActual = strtolower((string)($_SESSION['rol'] ?? ''));
 $puedeGestionarCiclos = in_array($rolActual, ['admin', 'superadmin'], true);
+$esAdmin = $puedeGestionarCiclos;
 $esUsuario = $rolActual === 'usuario';
 ?>
 
@@ -273,6 +278,9 @@ $esUsuario = $rolActual === 'usuario';
         </div>
         <div class="col-md-6 text-end">
             <?php if (tienePermiso('empleados_crear')): ?>
+            <button class="btn btn-outline-secondary me-2" onclick="abrirModalMarcaciones()" title="Marcaciones - Modificar Justificaciones">
+                <i class="fas fa-clock me-2"></i>Marcaciones
+            </button>
             <a href="<?= BASE_URL ?>/empleados/create" class="btn btn-custom">
                 <i class="fas fa-user-plus me-2"></i>Nuevo Empleado
             </a>
@@ -397,6 +405,21 @@ $esUsuario = $rolActual === 'usuario';
             </div>
             <div class="modal-body p-0" style="overflow-y: auto;">
                 <style>
+                    .seccion-header, .accordion-item { display: none !important; }
+                    #empleadoTabs { 
+                        display: flex !important; 
+                        flex-wrap: nowrap;
+                        overflow-x: auto;
+                        white-space: nowrap;
+                    }
+                    #empleadoTabs .nav-item {
+                        display: inline-block;
+                        flex-shrink: 0;
+                    }
+                    #empleadoTabs .nav-link {
+                        display: inline-block;
+                        white-space: nowrap;
+                    }
                     .seccion-header {
                         background: #f8f9fa;
                         border: none;
@@ -426,332 +449,102 @@ $esUsuario = $rolActual === 'usuario';
                     .seccion-header:not(.collapsed) .seccion-icon {
                         color: white;
                     }
+                    .seccion-tab {
+                        background: transparent;
+                        border: none;
+                        border-bottom: 2px solid transparent;
+                        color: #691C32;
+                        font-weight: 600;
+                        padding: 10px 15px;
+                        font-size: 0.85rem;
+                    }
+                    .seccion-tab:hover {
+                        background: #f8f9fa;
+                        border-bottom-color: #e9ecef;
+                    }
+                    .seccion-tab.active {
+                        background: transparent;
+                        border-bottom-color: #691C32;
+                        color: #691C32;
+                    }
                 </style>
-                <div class="accordion" id="empleadoAccordion">
-                    <!-- General -->
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button seccion-header rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-general">
-                                <i class="fas fa-user seccion-icon"></i>Información General
-                            </button>
-                        </h2>
-                        <div id="collapse-general" class="accordion-collapse collapse show" data-bs-parent="#empleadoAccordion">
-                            <div class="accordion-body p-0" id="general"></div>
-                        </div>
-                    </div>
-                    <!-- Asistencia -->
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed seccion-header rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-asistencia">
-                                <i class="fas fa-calendar-check seccion-icon"></i>Asistencia
-                            </button>
-                        </h2>
-                        <div id="collapse-asistencia" class="accordion-collapse collapse" data-bs-parent="#empleadoAccordion">
-                            <div class="accordion-body p-0" id="asistencia">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0" style="font-size: 0.85rem;">
-                                        <thead class="table-light">
-                                            <tr><th>Fecha</th><th>Hora Entrada</th><th>Hora Salida</th><th>Tipo</th></tr>
-                                        </thead>
-                                        <tbody id="tabla-asistencia"><tr><td colspan="4" class="text-center text-muted py-3">Cargando...</td></tr></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Retardos -->
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed seccion-header rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-retardos">
-                                <i class="fas fa-clock seccion-icon"></i>Retardos
-                            </button>
-                        </h2>
-                        <div id="collapse-retardos" class="accordion-collapse collapse" data-bs-parent="#empleadoAccordion">
-                            <div class="accordion-body p-0" id="retardos">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0" style="font-size: 0.85rem;">
-                                        <thead class="table-light">
-                                            <tr><th>Fecha</th><th>Minutos</th><th>Tipo</th><th>Justificado</th><th>Acción</th></tr>
-                                        </thead>
-                                        <tbody id="tabla-retardos"><tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Comisiones (Comisiones reales de la tabla comisiones) -->
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed seccion-header rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-comisiones">
-                                <i class="fas fa-briefcase seccion-icon"></i>Comisiones
-                            </button>
-                        </h2>
-                        <div id="collapse-comisiones" class="accordion-collapse collapse" data-bs-parent="#empleadoAccordion">
-                            <div class="accordion-body p-0" id="comisiones">
-                                <div class="p-2 border-bottom bg-light">
-                                    <button type="button" class="btn btn-primary btn-sm w-100" onclick="abrirModalComision()">
-                                        <i class="fas fa-plus-circle me-1"></i>Solicitar Comisión
-                                    </button>
-                                </div>
-                                <div id="comisiones-content">
-                                    <div class="text-center py-3"><div class="spinner-border text-primary"></div></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Incidencias -->
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed seccion-header rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-incidencias">
-                                <i class="fas fa-exclamation-triangle seccion-icon"></i>Incidencias
-                            </button>
-                        </h2>
-                        <div id="collapse-incidencias" class="accordion-collapse collapse" data-bs-parent="#empleadoAccordion">
-                            <div class="accordion-body p-0" id="tabla-incidencias">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0" style="font-size: 0.85rem;">
-                                        <thead class="table-light">
-                                            <tr><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Tipo Asistencia</th><th>Tipo Justificación</th><th>Estado</th><th>Acciones</th></tr>
-                                        </thead>
-                                        <tbody id="tbody-incidencias"><tr><td colspan="7" class="text-center text-muted py-3">Cargando...</td></tr></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Vacaciones -->
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed seccion-header rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-vacaciones">
-                                <i class="fas fa-umbrella-beach seccion-icon"></i>Vacaciones
-                            </button>
-                        </h2>
-                        <div id="collapse-vacaciones" class="accordion-collapse collapse" data-bs-parent="#empleadoAccordion">
-                            <div class="accordion-body p-0" id="vacaciones">
-                                <div class="p-2 border-bottom bg-light">
-                                    <button type="button" class="btn btn-primary btn-sm w-100" onclick="abrirModalVacaciones()">
-                                        <i class="fas fa-plus-circle me-1"></i>Solicitar Vacaciones
-                                    </button>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0" style="font-size: 0.85rem;">
-                                        <thead class="table-light">
-                                            <tr><th>Fecha Inicio</th><th>Fecha Fin</th><th>Días</th><th>Motivo</th><th>Estatus</th></tr>
-                                        </thead>
-                                        <tbody id="tabla-vacaciones"><tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Lic.Médica -->
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed seccion-header rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-licenciasmedicas">
-                                <i class="fas fa-user-md seccion-icon"></i>Licencia Médica
-                            </button>
-                        </h2>
-                        <div id="collapse-licenciasmedicas" class="accordion-collapse collapse" data-bs-parent="#empleadoAccordion">
-                            <div class="accordion-body p-0" id="licenciasmedicas">
-                                <div class="p-2 border-bottom bg-light">
-                                    <button type="button" class="btn btn-primary btn-sm w-100" onclick="abrirModalLicenciaMedica()">
-                                        <i class="fas fa-plus-circle me-1"></i>Solicitar Licencia Médica
-                                    </button>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0" style="font-size: 0.85rem;">
-                                        <thead class="table-light">
-                                            <tr><th>Fecha Inicio</th><th>Fecha Fin</th><th>Días</th><th>Diagnóstico</th><th>Estatus</th></tr>
-                                        </thead>
-                                        <tbody id="tabla-licencias"><tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Días Econ. -->
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed seccion-header rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-diaseconomicos">
-                                <i class="fas fa-calendar-day seccion-icon"></i>Días Económicos
-                            </button>
-                        </h2>
-                        <div id="collapse-diaseconomicos" class="accordion-collapse collapse" data-bs-parent="#empleadoAccordion">
-                            <div class="accordion-body p-0" id="diaseconomicos">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0" style="font-size: 0.85rem;">
-                                        <thead class="table-light">
-                                            <tr><th>Fecha</th><th>Motivo</th><th>Estatus</th></tr>
-                                        </thead>
-                                        <tbody id="tabla-diaseconomicos"><tr><td colspan="3" class="text-center text-muted py-3">Cargando...</td></tr></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Cuidados Maternos -->
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed seccion-header rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-cuidados-maternos">
-                                <i class="fas fa-baby seccion-icon"></i>Cuidados Maternos
-                            </button>
-                        </h2>
-                        <div id="collapse-cuidados-maternos" class="accordion-collapse collapse" data-bs-parent="#empleadoAccordion">
-                            <div class="accordion-body p-0" id="cuidados-maternos">
-                                <div class="p-2 border-bottom bg-light">
-                                    <button type="button" class="btn btn-primary btn-sm w-100" onclick="abrirModalCuidados('maternos')">
-                                        <i class="fas fa-plus-circle me-1"></i>Solicitar Cuidados Maternos
-                                    </button>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0" style="font-size: 0.85rem;">
-                                        <thead class="table-light">
-                                            <tr><th>Fecha Inicio</th><th>Fecha Fin</th><th>Días</th><th>Motivo</th><th>Estatus</th></tr>
-                                        </thead>
-                                        <tbody id="tabla-cuidados-maternos"><tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Cuidados Paternos -->
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed seccion-header rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-cuidados-paternos">
-                                <i class="fas fa-user-friends seccion-icon"></i>Cuidados Paternos
-                            </button>
-                        </h2>
-                        <div id="collapse-cuidados-paternos" class="accordion-collapse collapse" data-bs-parent="#empleadoAccordion">
-                            <div class="accordion-body p-0" id="cuidados-paternos">
-                                <div class="p-2 border-bottom bg-light">
-                                    <button type="button" class="btn btn-primary btn-sm w-100" onclick="abrirModalCuidados('paternos')">
-                                        <i class="fas fa-plus-circle me-1"></i>Solicitar Cuidados Paternos
-                                    </button>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0" style="font-size: 0.85rem;">
-                                        <thead class="table-light">
-                                            <tr><th>Fecha Inicio</th><th>Fecha Fin</th><th>Días</th><th>Motivo</th><th>Estatus</th></tr>
-                                        </thead>
-                                        <tbody id="tabla-cuidados-paternos"><tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Constancias -->
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed seccion-header rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-constancias">
-                                <i class="fas fa-file-medical seccion-icon"></i>Constancias
-                            </button>
-                        </h2>
-                        <div id="collapse-constancias" class="accordion-collapse collapse" data-bs-parent="#empleadoAccordion">
-                            <div class="accordion-body p-0" id="constancias">
-                                <div class="p-2 border-bottom bg-light">
-                                    <button type="button" class="btn btn-primary btn-sm w-100" onclick="abrirModalConstancia()">
-                                        <i class="fas fa-plus-circle me-1"></i>Solicitar Constancia de Tiempo
-                                    </button>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0" style="font-size: 0.85rem;">
-                                        <thead class="table-light">
-                                            <tr><th>Fecha Inicio</th><th>Fecha Fin</th><th>Días</th><th>Tipo</th><th>Estatus</th></tr>
-                                        </thead>
-                                        <tbody id="tabla-constancias"><tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Sanciones -->
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed seccion-header rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sanciones">
-                                <i class="fas fa-gavel seccion-icon"></i>Sanciones
-                            </button>
-                        </h2>
-                        <div id="collapse-sanciones" class="accordion-collapse collapse" data-bs-parent="#empleadoAccordion">
-                            <div class="accordion-body p-0" id="sanciones">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0" style="font-size: 0.85rem;">
-                                        <thead class="table-light">
-                                            <tr><th>Fecha</th><th>Tipo</th><th>Motivo</th><th>Estado</th></tr>
-                                        </thead>
-                                        <tbody id="tabla-sanciones"><tr><td colspan="4" class="text-center text-muted py-3">Cargando...</td></tr></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Ciclos -->
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed seccion-header rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-ciclos">
-                                <i class="fas fa-sync-alt seccion-icon"></i>Ciclos
-                            </button>
-                        </h2>
-                        <div id="collapse-ciclos" class="accordion-collapse collapse" data-bs-parent="#empleadoAccordion">
-                            <div class="accordion-body p-0" id="ciclos">
-                                <div class="p-3">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h6 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Ciclos y Horarios Asignados</h6>
-                                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-actualizar-ciclos" onclick="recargarCiclos()">
-                                            <i class="fas fa-sync-alt me-1"></i> Actualizar
-                                        </button>
-                                    </div>
-                                    <div id="ciclos-content"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Nota: Las tabs antiguas se ocultan pero se mantienen por compatibilidad JS -->
-                <ul class="nav nav-tabs nav-fill empleado-tabs d-none" id="empleadoTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="constancias-tab" data-bs-toggle="tab" data-bs-target="#constancias" type="button" role="tab">
-                            <i class="fas fa-file-medical me-1"></i>Constancias
+                <!-- Tabs Navigation -->
+                <ul class="nav nav-tabs border-bottom mb-0" role="tablist" id="empleadoTabs">
+                    <li class="nav-item">
+                        <button class="nav-link active seccion-tab" data-bs-toggle="tab" data-bs-target="#tab-general" type="button">
+                            <i class="fas fa-user seccion-icon"></i>General
                         </button>
                     </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="sanciones-tab" data-bs-toggle="tab" data-bs-target="#sanciones" type="button" role="tab">
-                            <i class="fas fa-gavel me-1"></i>Sanciones
+                    <li class="nav-item">
+                        <button class="nav-link seccion-tab" data-bs-toggle="tab" data-bs-target="#tab-asistencia" type="button">
+                            <i class="fas fa-calendar-check seccion-icon"></i>Asistencia
                         </button>
                     </li>
-                    <?php if ($puedeGestionarCiclos): ?>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="ciclos-tab" data-bs-toggle="tab" data-bs-target="#ciclos" type="button" role="tab">
-                            <i class="fas fa-sync-alt me-1"></i>Ciclos
+                    <li class="nav-item">
+                        <button class="nav-link seccion-tab" data-bs-toggle="tab" data-bs-target="#tab-retardos" type="button">
+                            <i class="fas fa-clock seccion-icon"></i>Retardos
                         </button>
                     </li>
-                    <?php endif; ?>
+                    <li class="nav-item">
+                        <button class="nav-link seccion-tab" data-bs-toggle="tab" data-bs-target="#tab-comisiones" type="button">
+                            <i class="fas fa-briefcase seccion-icon"></i>Comisiones
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link seccion-tab" data-bs-toggle="tab" data-bs-target="#tab-incidencias" type="button">
+                            <i class="fas fa-exclamation-triangle seccion-icon"></i>Incidencias
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link seccion-tab" data-bs-toggle="tab" data-bs-target="#tab-vacaciones" type="button">
+                            <i class="fas fa-umbrella-beach seccion-icon"></i>Vacaciones
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link seccion-tab" data-bs-toggle="tab" data-bs-target="#tab-licencias" type="button">
+                            <i class="fas fa-user-md seccion-icon"></i>Licencias
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link seccion-tab" data-bs-toggle="tab" data-bs-target="#tab-eco" type="button">
+                            <i class="fas fa-calendar-day seccion-icon"></i>Días Eco.
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link seccion-tab" data-bs-toggle="tab" data-bs-target="#tab-cuidados" type="button">
+                            <i class="fas fa-child seccion-icon"></i>Cuidados
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link seccion-tab" data-bs-toggle="tab" data-bs-target="#tab-constancias" type="button">
+                            <i class="fas fa-file-signature seccion-icon"></i>Constancias
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link seccion-tab" data-bs-toggle="tab" data-bs-target="#tab-sanciones" type="button">
+                            <i class="fas fa-gavel seccion-icon"></i>Sanciones
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link seccion-tab" data-bs-toggle="tab" data-bs-target="#tab-ciclos" type="button">
+                            <i class="fas fa-school seccion-icon"></i>Ciclos
+                        </button>
+                    </li>
                 </ul>
-                
-                <script>
-                // Evento cuando se cambia a la pestaña de ciclos
-                const ciclosTab = document.querySelector('#ciclos-tab');
-                if (ciclosTab) {
-                    ciclosTab.addEventListener('shown.bs.tab', function () {
-                        const contenido = document.getElementById('ciclos-content');
-                        if (!contenido || contenido.innerHTML.trim() === '') {
-                            recargarCiclos();
-                        }
-                    });
-                }
-                </script>
-                <!-- Las tabs ahora son accordion vertical - ver arriba -->
-                    <?php if ($puedeGestionarCiclos): ?>
-                    <div class="tab-pane fade" id="ciclos" role="tabpanel">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="mb-0">Ciclos y Horarios Asignados</h6>
-                            <button type="button" class="btn btn-sm btn-outline-pantone-primary" id="btn-actualizar-ciclos" onclick="recargarCiclos()">
-                                <i class="fas fa-sync-alt me-1"></i> Actualizar
-                            </button>
-                        </div>
-                        <div id="ciclos-content"></div>
-                    </div>
-                    <?php endif; ?>
+                <!-- Tab Content -->
+                <div class="tab-content p-0" id="empleadoTabContent">
+<div class="tab-pane fade show active" id="tab-general"><div class="p-3" id="general"></div></div>
+                    <div class="tab-pane fade" id="tab-asistencia"><div class="table-responsive" id="asistencia"></div></div>
+                    <div class="tab-pane fade" id="tab-retardos"><div class="p-3" id="retardos"></div></div>
+                    <div class="tab-pane fade" id="tab-comisiones"><div class="p-3" id="comisiones"></div></div>
+                    <div class="tab-pane fade" id="tab-incidencias"><div class="p-3" id="tabla-incidencias"></div></div>
+                    <div class="tab-pane fade" id="tab-vacaciones"><div class="p-3" id="vacaciones"></div></div>
+                    <div class="tab-pane fade" id="tab-licencias"><div class="p-3" id="licenciasmedicas"></div></div>
+                    <div class="tab-pane fade" id="tab-eco"><div class="p-3" id="diaseconomicos"></div></div>
+<div class="tab-pane fade" id="tab-cuidados"><div class="p-3" id="cuidados-maternos"></div></div>
+                    <div class="tab-pane fade" id="tab-constancias"><div class="p-3" id="constancias"></div></div>
+                    <div class="tab-pane fade" id="tab-sanciones"><div class="p-3" id="sanciones"></div></div>
+                    <div class="tab-pane fade" id="tab-ciclos"><div class="p-3" id="ciclos"><div id="ciclos-content"></div></div></div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -889,20 +682,10 @@ $esUsuario = $rolActual === 'usuario';
                         <div class="row">
                             <div class="col-md-6">
                                 <label for="just_fecha_inicio_comision" class="form-label fw-bold">
-                                    <i class="fas fa-calendar-alt me-1"></i>Fecha de Inicio
+                                    <i class="fas fa-calendar-alt me-1"></i>Fecha a Justificar
                                 </label>
-                                <input type="date" class="form-control" id="just_fecha_inicio_comision" name="fecha_inicio_comision">
+                                <input type="date" class="form-control" id="just_fecha_inicio_comision" name="fecha_inicio_comision" readonly>
                             </div>
-                            <div class="col-md-6">
-                                <label for="just_fecha_fin_comision" class="form-label fw-bold">
-                                    <i class="fas fa-calendar-alt me-1"></i>Fecha de Fin
-                                </label>
-                                <input type="date" class="form-control" id="just_fecha_fin_comision" name="fecha_fin_comision" onchange="actualizarDiasComision()">
-                            </div>
-                        </div>
-                        <div class="mt-2">
-                            <small class="text-muted" id="just_dias_comision_display"></small>
-                            <input type="hidden" id="just_dias_comision" name="dias_comision" value="0">
                         </div>
                     </div>
 
@@ -938,8 +721,8 @@ $esUsuario = $rolActual === 'usuario';
                                 </select>
                             </div>
                             <div class="col-md-4 mb-3" id="div_fecha_inicio_eco">
-                                <label for="just_fecha_inicio_eco" class="form-label fw-bold">
-                                    <i class="fas fa-calendar me-1"></i>Fecha Inicio
+<label for="just_fecha_inicio_eco" class="form-label fw-bold">
+                                    <i class="fas fa-calendar-alt me-1"></i>Fecha de Inicio
                                 </label>
                                 <input type="date" class="form-control" id="just_fecha_inicio_eco" name="fecha_inicio_eco" onchange="validarFechaInicioDiaEconomico()">
                                 <div class="form-text text-danger" id="fecha_inicio_error" style="display: none;"></div>
@@ -975,8 +758,8 @@ $esUsuario = $rolActual === 'usuario';
                                     min="1" max="60" placeholder="Número de días" oninput="calcularFechaFinLicencia()">
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label for="just_fecha_inicio_licencia" class="form-label fw-bold">
-                                    <i class="fas fa-calendar me-1"></i>Fecha de Inicio
+<label for="just_fecha_inicio_licencia" class="form-label fw-bold">
+                                    <i class="fas fa-calendar-alt me-1"></i>Fecha de Inicio
                                 </label>
                                 <input type="date" class="form-control" id="just_fecha_inicio_licencia" name="fecha_inicio_licencia" onchange="calcularFechaFinLicencia()">
                             </div>
@@ -1174,7 +957,7 @@ $esUsuario = $rolActual === 'usuario';
                                 $mandos = $catalogo->getAllMandos();
                                 foreach ($mandos as $mando): 
                                 ?>
-                                <option value="<?= htmlspecialchars($mando['id']) ?>" 
+                                <option value="<?= htmlspecialchars($mando['clave_area']) ?>" 
                                     data-area="<?= htmlspecialchars($mando['area']) ?>"
                                     data-clave="<?= htmlspecialchars($mando['clave_area']) ?>">
                                     <?= htmlspecialchars($mando['nombre_mando']) ?> - <?= htmlspecialchars($mando['area']) ?>
@@ -1352,6 +1135,16 @@ function mapearTipoCatalogo(tipoCatalogo, tipoIncidencia) {
         return tipoDb;
     }
     
+    // Para otros tipos de incidencias especiales
+    if (['PDSEP-SNTE', 'CLIDDA', 'EYR', 'FUMIGACION', 'cuidados_maternos', 'cuidados_paternos', 'permiso_fallecimiento'].includes(tipoDb)) {
+        return tipoDb;
+    }
+    
+    // Para cualquier tipo que no sea retardo - mostrar en el catálogo
+    if (tipoDb && tipoDb !== 'retardo' && tipoDb !== 'retardo_menor' && tipoDb !== 'retardo_mayor') {
+        return tipoDb;
+    }
+    
     return '';
 }
 
@@ -1426,17 +1219,8 @@ function abrirModalJustificar(id, diasDisp, puedeSolicitar, origen, tipoRetardo 
             if (data.success) {
                 const asistencia = data.asistencia || data.retardo;
                 
-                // VALIDACIÓN: No abrir modal si es registro normal (ambas horas, sin justificación, no es retardo)
-                const horaEntrada = asistencia.hora_entrada;
-                const horaSalida = asistencia.hora_salida;
-                const tieneAmbasHoras = horaEntrada && horaSalida;
-                const tieneJustificacion = asistencia.tipo_justificacion_id;
-                const esPorDefinir = asistencia.tipo_asistencia === 'por_definir';
-                
-                if (!esRetardo && tieneAmbasHoras && !tieneJustificacion && !esPorDefinir) {
-                    console.log('Registro normal - no requiere justificación');
-                    return;
-                }
+                // REMOVIDO: Validación que bloqueaba registros normales
+                // Ahora siempre abre el modal para permitir ver/editar
                 
                 // Obtener el tipo de incidencia del servidor
                 const tipoIncidenciaServer = data.tipo_incidencia || 'retardo';
@@ -1758,6 +1542,26 @@ function abrirModalJustificar(id, diasDisp, puedeSolicitar, origen, tipoRetardo 
                             tipoJustificacionSeleccionada = tipoSeleccionado;
                             const selectedOpt = selectEl.options[selectEl.selectedIndex];
                             tipoJustificacionCatalogoId = selectedOpt?.dataset?.tipoId || null;
+                            
+                            // Establecer fecha automáticamente según el tipo de justificación usando la fecha del registro
+                            const fechaRegistro = asistencia.fecha || '';
+                            
+                            // Comisiones
+                            if (tipoSeleccionado === 'comision_entrada' || tipoSeleccionado === 'comision_salida' || tipoSeleccionado === 'comision_todo_dia') {
+                                document.getElementById('just_fecha_inicio_comision').value = fechaRegistro;
+                            }
+                            // Día económico
+                            else if (tipoSeleccionado === 'dia_economico') {
+                                document.getElementById('just_fecha_inicio_eco').value = fechaRegistro;
+                            }
+                            // Licencias y cuidados
+                            else if (tipoSeleccionado.includes('licencia') || tipoSeleccionado.includes('cuidados')) {
+                                document.getElementById('just_fecha_inicio_licencia').value = fechaRegistro;
+                            }
+                            // Otros tipos: usar campo de comisión como defaults
+                            else if (fechaRegistro) {
+                                document.getElementById('just_fecha_inicio_comision').value = fechaRegistro;
+                            }
                             
                             // Llamar a la función para actualizar la UI
                             if (typeof cambiarTipoJustificacion === 'function') {
@@ -2402,6 +2206,7 @@ function validarFechaFin(input, fechaInicioId) {
 async function verEmpleado(id) {
     window.empleadoId = id;
     window.empleadoIdGlobal = id;
+    const esAdmin = <?php echo $esAdmin ? 'true' : 'false'; ?>;
     
     // Verificar que existe el modal
     const modalEl = document.getElementById('empleadoModal');
@@ -2418,16 +2223,16 @@ async function verEmpleado(id) {
     const generalEl = document.getElementById('general');
     const asistenciaEl = document.getElementById('asistencia');
     const retardosEl = document.getElementById('retardos');
-    const comisionesEl = document.getElementById('comisiones-content');
+    const comisionesEl = document.getElementById('comisiones');
     const incidenciasEl = document.getElementById('tabla-incidencias');
-    const vacacionesEl = document.getElementById('tabla-vacaciones');
-    const licenciasEl = document.getElementById('tabla-licencias');
-    const cuidadosMatEl = document.getElementById('tabla-cuidados-maternos');
-    const cuidadosPatEl = document.getElementById('tabla-cuidados-paternos');
-    const constanciasEl = document.getElementById('tabla-constancias');
-    const diasEcoEl = document.getElementById('tabla-diaseconomicos');
+    const vacacionesEl = document.getElementById('vacaciones');
+    const licenciasEl = document.getElementById('licenciasmedicas');
+    const cuidadosMatEl = document.getElementById('cuidados-maternos');
+    const cuidadosPatEl = document.getElementById('cuidados-paternos');
+    const constanciasEl = document.getElementById('constancias');
+    const diasEcoEl = document.getElementById('diaseconomicos');
     const licenciasMedicasEl = document.getElementById('licenciasmedicas');
-    const sancionesEl = document.getElementById('tabla-sanciones');
+    const sancionesEl = document.getElementById('sanciones');
     const ciclosEl = document.getElementById('ciclos');
     
     // Mostrar spinner de carga en cada pestaña
@@ -2436,11 +2241,11 @@ async function verEmpleado(id) {
     if (retardosEl) retardosEl.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
     if (comisionesEl) comisionesEl.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
     if (incidenciasEl) incidenciasEl.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
-    if (vacacionesEl) vacacionesEl.innerHTML = '<tr><td colspan="5" class="text-center py-3"><div class="spinner-border text-primary"></div></td></tr>';
-    if (licenciasEl) licenciasEl.innerHTML = '<tr><td colspan="5" class="text-center py-3"><div class="spinner-border text-primary"></div></td></tr>';
-    if (cuidadosMatEl) cuidadosMatEl.innerHTML = '<tr><td colspan="5" class="text-center py-3"><div class="spinner-border text-primary"></div></td></tr>';
-    if (cuidadosPatEl) cuidadosPatEl.innerHTML = '<tr><td colspan="5" class="text-center py-3"><div class="spinner-border text-primary"></div></td></tr>';
-    if (constanciasEl) constanciasEl.innerHTML = '<tr><td colspan="5" class="text-center py-3"><div class="spinner-border text-primary"></div></td></tr>';
+    if (vacacionesEl) vacacionesEl.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
+    if (licenciasEl) licenciasEl.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
+    if (cuidadosMatEl) cuidadosMatEl.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
+    if (cuidadosPatEl) cuidadosPatEl.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
+    if (constanciasEl) constanciasEl.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
     if (diasEcoEl) diasEcoEl.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
     if (licenciasMedicasEl) licenciasMedicasEl.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
     if (sancionesEl) sancionesEl.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
@@ -2618,97 +2423,6 @@ async function verEmpleado(id) {
                                     </tbody>
                                 </table>
                             </div>
-                            ${(data.plazas && data.plazas.filter(p => p.HORAS && p.HORAS > 0).length > 0 && data.ciclos_asignados && data.ciclos_asignados.length > 0) ? `
-                            <div class="mt-3 p-3 rounded" style="background-color: ${PANTONE.gray}10;">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h6 class="mb-0" style="color: ${PANTONE.secondaryDark}; font-weight: 600;">
-                                        <i class="fas fa-balance-scale me-2"></i>Comparación Plazas vs Ciclo (Normativa SEP)
-                                        <button class="btn btn-sm btn-outline-info ms-2" data-bs-toggle="modal" data-bs-target="#modalCalculoPlazas" title="Ver cómo se calculó">
-                                            <i class="fas fa-info-circle"></i>
-                                        </button>
-                                    </h6>
-                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalComparacionPlazasCiclo">
-                                        <i class="fas fa-expand-alt me-1"></i> Ver Detalle Completo
-                                    </button>
-                                </div>
-                                <div class="row g-2">
-                                    <div class="col-6 col-md-3">
-                                        <div class="p-2 rounded" style="background-color: ${PANTONE.secondary}15;">
-                                            <small class="d-block text-muted" style="font-size: 0.7rem;">HRS PLAZA (Mes)</small>
-                                            <span class="fw-bold" style="color: ${PANTONE.secondaryDark}; font-size: 1.1rem;">${Math.round(data.plazas_horas_mensuales * 100) / 100}</span>
-                                            <small class="text-muted">hrs/mes</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-6 col-md-3">
-                                        <div class="p-2 rounded" style="background-color: ${PANTONE.primary}15;">
-                                            <small class="d-block text-muted" style="font-size: 0.7rem;">HRS REQUERIDAS (Ciclo)</small>
-                                            <span class="fw-bold" style="color: ${PANTONE.primaryDark}; font-size: 1.1rem;">${data.ciclos_asignados[0].horas_requeridas ? parseFloat(data.ciclos_asignados[0].horas_requeridas).toFixed(1) : '-'}</span>
-                                            <small class="text-muted">hrs/mes</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-6 col-md-3">
-                                        <div class="p-2 rounded" style="background-color: ${PANTONE.success}15;">
-                                            <small class="d-block text-muted" style="font-size: 0.7rem;">HRS TRABAJADAS</small>
-                                            <span class="fw-bold" style="color: ${PANTONE.success}; font-size: 1.1rem;">${data.ciclos_asignados[0].horas_trabajadas ? parseFloat(data.ciclos_asignados[0].horas_trabajadas).toFixed(1) : '-'}</span>
-                                            <small class="text-muted">hrs/mes</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-6 col-md-3">
-                                        <div class="p-2 rounded" style="background-color: ${PANTONE.warning}15;">
-                                            <small class="d-block text-muted" style="font-size: 0.7rem;">CUMPLIMIENTO PLAZA</small>
-                                            ${(data.plazas_horas_mensuales > 0 && data.ciclos_asignados[0].horas_requeridas > 0) ?
-                                                `${(() => {
-                                                    const cumplimiento = Math.min(100, Math.round((data.plazas_horas_mensuales / parseFloat(data.ciclos_asignados[0].horas_requeridas)) * 100));
-                                                    const colorCump = cumplimiento >= 100 ? PANTONE.success : (cumplimiento >= 80 ? PANTONE.warning : PANTONE.danger);
-                                                    return `<span class="fw-bold" style="color: ${colorCump}; font-size: 1.1rem;">${cumplimiento}%</span>`;
-                                                })()}` : '<span class="text-muted">-</span>'}
-                                        </div>
-                                    </div>
-                                    </div>
-                                </div>
-                                ${(data.plazas_horas_mensuales > 0 && data.ciclos_asignados[0].horas_requeridas > 0) ?
-                                    `${(() => {
-                                        const hrsPlazaSem = data.plazas_horas_semanales;
-                                        const hrsPlazaMes = data.plazas_horas_mensuales;
-                                        const hrsRequeridas = parseFloat(data.ciclos_asignados[0].horas_requeridas);
-                                        const hrsTrabajadas = data.ciclos_asignados[0].horas_trabajadas ? parseFloat(data.ciclos_asignados[0].horas_trabajadas) : 0;
-                                        const hrsDia = hrsPlazaSem / 5;
-                                        const diff = hrsPlazaMes - hrsRequeridas;
-                                        const absDiff = Math.abs(Math.round(diff * 100) / 100);
-                                        let mensaje = '';
-                                        
-                                        // Comparación plaza vs ciclo
-                                        if (absDiff < 1) {
-                                            mensaje = `<div class="mt-2 alert alert-success py-1 px-2" style="font-size: 0.85rem;"><i class="fas fa-check-circle me-1"></i> <strong>PLAZA vs CICLO:</strong> Las hrs de plaza (${hrsPlazaSem.toFixed(1)} hrs/sem = ${hrsPlazaMes.toFixed(1)} hrs/mes) coinciden con hrs requeridas del ciclo (${hrsRequeridas.toFixed(1)} hrs/mes). ✓ CUMPLIMIENTO</div>`;
-                                        } else if (diff > 0) {
-                                            mensaje = `<div class="mt-2 alert alert-warning py-1 px-2" style="font-size: 0.85rem;"><i class="fas fa-exclamation-triangle me-1"></i> <strong>PLAZA vs CICLO:</strong> Plaza tiene +${absDiff} hrs/mes más que el ciclo. Verificar si es plaza de confianza.</div>`;
-                                        } else {
-                                            mensaje = `<div class="mt-2 alert alert-danger py-1 px-2" style="font-size: 0.85rem;"><i class="fas fa-exclamation-circle me-1"></i> <strong>PLAZA vs CICLO:</strong> Plaza tiene -${absDiff} hrs/mes menos que el ciclo. Verificar hrs de plaza.</div>`;
-                                        }
-                                        
-                                        // Estado de hrs trabajadas
-                                        if (hrsTrabajadas > 0 && hrsRequeridas > 0) {
-                                            const cumplimiento = Math.round((hrsTrabajadas / hrsRequeridas) * 100);
-                                            if (cumplimiento < 80) {
-                                                mensaje += `<div class="mt-2 alert alert-danger py-1 px-2" style="font-size: 0.85rem;"><i class="fas fa-clock me-1"></i> <strong>ASISTENCIA INSUFICIENTE:</strong> Solo has trabajado ${hrsTrabajadas.toFixed(1)} hrs/mes de ${hrsRequeridas.toFixed(1)} hrs/mes requeridas (${cumplimiento}%). Tu horario (${hrsPlazaSem.toFixed(1)} hrs/sem) está correcto según la plaza, pero necesitas completar las hrs.</div>`;
-                                            } else if (cumplimiento < 100) {
-                                                mensaje += `<div class="mt-2 alert alert-warning py-1 px-2" style="font-size: 0.85rem;"><i class="fas fa-clock me-1"></i> <strong>ASISTENCIA PARCIAL:</strong> Has trabajado ${hrsTrabajadas.toFixed(1)} hrs/mes de ${hrsRequeridas.toFixed(1)} hrs/mes (${cumplimiento}%). Continúa con tu horario de ${hrsPlazaSem.toFixed(1)} hrs/sem.</div>`;
-                                            }
-                                        }
-                                        
-                                        // Recomendación de horario
-                                        mensaje += `<div class="mt-2 p-2 rounded" style="background-color: ${PANTONE.info}10; border-left: 3px solid ${PANTONE.primary};">
-                                            <strong><i class="fas fa-lightbulb me-1"></i> Tu horario correcto según plaza (Normativa SEP):</strong><br>
-                                            <small class="text-muted">
-                                            • hrs/semana: <strong>${hrsPlazaSem.toFixed(1)} hrs</strong> (÷ 5 días = <strong>${hrsDia.toFixed(2)} hrs/día</strong>)<br>
-                                            • <strong>Horario sugerido L-V:</strong> ${hrsDia.toFixed(2)} hrs/día (35 hrs = 7 hrs/día)<br>
-                                            • Ejemplo para 7 hrs/día: <strong>9:00 a 16:00</strong> (con 1 hr comida) o <strong>8:00 a 15:00</strong>
-                                            </small>
-                                        </div>`;
-                                        return mensaje;
-                                    })()}` : ''}
-                            </div>
-                            ` : ''}
                         </div>
                         ` : ''}
                     </div>
@@ -2781,7 +2495,7 @@ async function verEmpleado(id) {
 
         // Render Retardos tab
         if(retardosEl) {
-            const retardosData = data.retardos || [];
+            const retardosData = (data.retardos || []).sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
             let retHtml = `
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="d-flex align-items-center gap-2">
@@ -2851,7 +2565,7 @@ async function verEmpleado(id) {
 
         // Render Comisiones Reales tab (from tabla comisiones)
         if (comisionesEl) {
-            const comisionesRealesData = data.comisiones_reales || [];
+            const comisionesRealesData = (data.comisiones_reales || []).sort((a, b) => new Date(b.fecha_inicio || 0) - new Date(a.fecha_inicio || 0));
             let comHtml = '';
             
             if (comisionesRealesData.length > 0) {
@@ -2865,6 +2579,7 @@ async function verEmpleado(id) {
                                 <th style="padding: 10px;"><i class="fas fa-align-left me-1"></i>Descripción</th>
                                 <th style="padding: 10px;"><i class="fas fa-toggle-on me-1"></i>Estatus</th>
                                 <th style="padding: 10px;"><i class="fas fa-user-check me-1"></i>Revisor</th>
+                                <th style="padding: 10px; width: 60px;"><i class="fas fa-tools me-1"></i></th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -2891,6 +2606,9 @@ async function verEmpleado(id) {
                             <td style="padding: 10px;"><small>${descripcion.substring(0, 50)}${descripcion.length > 50 ? '...' : ''}</small></td>
                             <td style="padding: 10px;">${estatusBadge}</td>
                             <td style="padding: 10px;"><small>${aprobador}</small></td>
+                            <td style="padding: 10px; text-align: center;">
+                                ${esAdmin ? `<button class="btn btn-sm btn-outline-primary" onclick='editarComision(${JSON.stringify(c).replace(/'/g, "\\'")})' title="Editar comisión"><i class="fas fa-edit"></i></button>` : ''}
+                            </td>
                         </tr>`;
                 });
                 comHtml += '</tbody></table></div>';
@@ -2906,40 +2624,17 @@ async function verEmpleado(id) {
 
         // Render Incidencias/Justificaciones tab (from asistencia table with tipo_justificacion_id)
         if (incidenciasEl) {
-            const tbodyEl = document.getElementById('tbody-incidencias');
-            const incidenciasEl = document.getElementById('tabla-incidencias');
-            
-            console.log('=== INCIDENCIAS ===');
-            console.log('tbodyEl:', tbodyEl ? 'EXISTS' : 'NULL');
-            console.log('incidenciasEl:', incidenciasEl ? 'EXISTS' : 'NULL');
-            
-            // Si tbody no existe, buscar dentro del contenedor
-            let targetEl = tbodyEl;
-            if (!targetEl && incidenciasEl) {
-                // Buscar tbody dentro del div
-                const table = incidenciasEl.querySelector('table');
-                if (table) {
-                    targetEl = table.querySelector('tbody');
-                    console.log('tbody encontrado en tabla:', targetEl ? 'EXISTS' : 'NULL');
-                }
-            }
-            
             // CEJILLA INCIDENCIAS: mostrar por_definir + registros con justificación
-            // Filtrar asistencia para obtener: tipo_asistencia = 'por_definir' O tiene tipo_justificacion_id
             let incidenciasData = [];
             if (data.asistencias && Array.isArray(data.asistencias)) {
-                // Filtrar: por_definir O tiene justificación
-                // EXCLUIR: con_retardo (estos van en la cejilla Retardos)
                 incidenciasData = data.asistencias.filter(a => 
                     (a.tipo_asistencia === 'por_definir' || a.tipo_justificacion_id) &&
                     a.tipo_asistencia !== 'con_retardo'
                 );
             }
             
-            // Usar incidenciasData en lugar de justificacionesData
-            let justificacionesData = incidenciasData;
+            let justificacionesData = incidenciasData.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
             
-            // Verificar formato y limpiar si es corrupto
             if (typeof justificacionesData === 'string') {
                 const trimmed = justificacionesData.trim();
                 if (!trimmed.startsWith('[') && !trimmed.startsWith('{')) {
@@ -2947,7 +2642,6 @@ async function verEmpleado(id) {
                 }
             }
             
-            // Verificar que sea array válido
             let esValido = Array.isArray(justificacionesData) && justificacionesData.length > 0;
             if (!esValido) {
                 justificacionesData = [];
@@ -2989,119 +2683,133 @@ async function verEmpleado(id) {
                     </tr>`;
             }
             
-            // Insertar siempre en el tbody de la tabla dentro de incidenciasEl
+            // Insertar siempre en el contenedor de incidencias
             if (incidenciasEl) {
-                const table = incidenciasEl.querySelector('table');
-                if (table) {
-                    const tbody = table.querySelector('tbody') || document.createElement('tbody');
-                    tbody.id = 'tbody-incidencias';
-                    tbody.innerHTML = incHtml;
-                    if (!table.querySelector('tbody')) {
-                        table.appendChild(tbody);
-                    }
-                    console.log('Incidencias - HTML insertado en tabla');
-                } else if (tbodyEl) {
-                    tbodyEl.innerHTML = incHtml;
-                    console.log('Incidencias - HTML insertado en tbody');
-                } else {
-                    // Último recurso: crear estructura mínima de tabla
-                    incidenciasEl.innerHTML = `
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0" style="font-size: 0.85rem;">
-                                <thead class="table-light">
-                                    <tr><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Tipo Asistencia</th><th>Tipo Justificación</th><th>Estado</th><th>Acciones</th></tr>
-                                </thead>
-                                <tbody>${incHtml}</tbody>
-                            </table>
-                        </div>`;
-                    console.log('Incidencias - HTML insertado creando tabla');
-                }
+                incidenciasEl.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" style="font-size: 0.85rem;">
+                            <thead class="table-light">
+                                <tr><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Tipo Asistencia</th><th>Tipo Justificación</th><th>Estado</th><th>Acciones</th></tr>
+                            </thead>
+                            <tbody>${incHtml}</tbody>
+                        </table>
+                    </div>`;
             }
         }
 
         // Render Vacaciones tab
         if (vacacionesEl) {
-            const vacacionesData = data.vacaciones || [];
-            let vacHtml = '';
+            const vacacionesData = (data.vacaciones || []).sort((a, b) => new Date(b.fecha_inicio || 0) - new Date(a.fecha_inicio || 0));
+            let vacHtml = `
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover" style="border-radius: 8px; overflow: hidden;">
+                        <thead style="background-color: ${PANTONE.primary}; color: white;">
+                            <tr><th>Inicio</th><th>Fin</th><th>Días</th><th>Motivo</th><th>Estado</th><th style="width:50px;"></th></tr>
+                        </thead>
+                        <tbody>`;
             if (vacacionesData.length > 0) {
                 vacacionesData.forEach(v => {
                     const estado = v.estatus || 'pendiente';
                     const estadoLabel = estado === 'aprobada' ? 'Aprobada' : estado === 'rechazada' ? 'Rechazada' : 'Pendiente';
                     const estadoColor = estado === 'aprobada' ? PANTONE.success : estado === 'rechazada' ? PANTONE.danger : PANTONE.warning;
-                    vacHtml += `<tr><td>${v.fecha_inicio || '-'}</td><td>${v.fecha_fin || '-'}</td><td>${v.dias_solicitados || 0}</td><td>${v.motivo || '-'}</td><td><span class="badge" style="background-color: ${estadoColor}20; color: ${estadoColor};">${estadoLabel}</span></td></tr>`;
+                    vacHtml += `<tr><td>${v.fecha_inicio || '-'}</td><td>${v.fecha_fin || '-'}</td><td>${v.dias_solicitados || 0}</td><td>${v.motivo || '-'}</td><td><span class="badge" style="background-color: ${estadoColor}20; color: ${estadoColor};">${estadoLabel}</span></td><td>${esAdmin ? `<button class="btn btn-sm btn-outline-primary py-0 px-1" onclick='editarRegistroTab(${JSON.stringify(v).replace(/'/g, "\\'")}, "vacaciones")' title="Editar"><i class="fas fa-edit"></i></button>` : ''}</td></tr>`;
                 });
             } else {
-                vacHtml = '<tr><td colspan="5" class="text-center py-4 text-muted">Sin vacaciones registradas</td></tr>';
+                vacHtml += '<tr><td colspan="6" class="text-center py-4 text-muted">Sin vacaciones registradas</td></tr>';
             }
-            vacacionesEl.innerHTML = vacHtml;
+            vacacionesEl.innerHTML = vacHtml + '</tbody></table></div>';
         }
 
         // Render Licencias Médicas tab (already exists, using data.licencias_medicas)
         if (licenciasEl) {
-            const licenciasData = data.licencias_medicas || [];
-            let licHtml = '';
+            const licenciasData = (data.licencias_medicas || []).sort((a, b) => new Date(b.fecha_inicio || 0) - new Date(a.fecha_inicio || 0));
+            let licHtml = `
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover" style="border-radius: 8px; overflow: hidden;">
+                        <thead style="background-color: ${PANTONE.secondary}; color: white;">
+                            <tr><th>Inicio</th><th>Fin</th><th>Días</th><th>Diagnóstico</th><th>Estado</th><th style="width:50px;"></th></tr>
+                        </thead>
+                        <tbody>`;
             if (licenciasData.length > 0) {
                 licenciasData.forEach(l => {
                     const estado = l.estatus || 'pendiente';
                     const estadoLabel = estado === 'aprobada' ? 'Aprobada' : estado === 'rechazada' ? 'Rechazada' : 'Pendiente';
                     const estadoColor = estado === 'aprobada' ? PANTONE.success : estado === 'rechazada' ? PANTONE.danger : PANTONE.warning;
-                    licHtml += `<tr><td>${l.fecha_inicio || '-'}</td><td>${l.fecha_fin || '-'}</td><td>${l.dias_otorgados || 0}</td><td>${l.diagnostico || '-'}</td><td><span class="badge" style="background-color: ${estadoColor}20; color: ${estadoColor};">${estadoLabel}</span></td></tr>`;
+                    licHtml += `<tr><td>${l.fecha_inicio || '-'}</td><td>${l.fecha_fin || '-'}</td><td>${l.dias_otorgados || 0}</td><td>${l.diagnostico || '-'}</td><td><span class="badge" style="background-color: ${estadoColor}20; color: ${estadoColor};">${estadoLabel}</span></td><td>${esAdmin ? `<button class="btn btn-sm btn-outline-primary py-0 px-1" onclick='editarRegistroTab(${JSON.stringify(l).replace(/'/g, "\\'")}, "licencias_medicas")' title="Editar"><i class="fas fa-edit"></i></button>` : ''}</td></tr>`;
                 });
             } else {
-                licHtml = '<tr><td colspan="5" class="text-center py-4 text-muted">Sin licencias médicas</td></tr>';
+                licHtml += '<tr><td colspan="6" class="text-center py-4 text-muted">Sin licencias médicas</td></tr>';
             }
-            licenciasEl.innerHTML = licHtml;
+            licenciasEl.innerHTML = licHtml + '</tbody></table></div>';
         }
 
         // Render Cuidados Maternos tab
         if (cuidadosMatEl) {
-            const cuidadosMatData = data.cuidados_maternos || [];
-            let cmHtml = '';
+            const cuidadosMatData = (data.cuidados_maternos || []).sort((a, b) => new Date(b.fecha_inicio || 0) - new Date(a.fecha_inicio || 0));
+            let cmHtml = `
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover" style="border-radius: 8px; overflow: hidden;">
+                        <thead style="background-color: ${PANTONE.accent}; color: ${PANTONE.textPrimary};">
+                            <tr><th>Inicio</th><th>Fin</th><th>Días</th><th>Motivo</th><th>Estado</th><th style="width:50px;"></th></tr>
+                        </thead>
+                        <tbody>`;
             if (cuidadosMatData.length > 0) {
                 cuidadosMatData.forEach(c => {
                     const estado = c.estatus || 'pendiente';
                     const estadoLabel = estado === 'aprobada' ? 'Aprobada' : estado === 'rechazada' ? 'Rechazada' : 'Pendiente';
                     const estadoColor = estado === 'aprobada' ? PANTONE.success : estado === 'rechazada' ? PANTONE.danger : PANTONE.warning;
-                    cmHtml += `<tr><td>${c.fecha_inicio || '-'}</td><td>${c.fecha_fin || '-'}</td><td>${c.dias_solicitados || 0}</td><td>${c.motivo || '-'}</td><td><span class="badge" style="background-color: ${estadoColor}20; color: ${estadoColor};">${estadoLabel}</span></td></tr>`;
+                    cmHtml += `<tr><td>${c.fecha_inicio || '-'}</td><td>${c.fecha_fin || '-'}</td><td>${c.dias_solicitados || 0}</td><td>${c.motivo || '-'}</td><td><span class="badge" style="background-color: ${estadoColor}20; color: ${estadoColor};">${estadoLabel}</span></td><td>${esAdmin ? `<button class="btn btn-sm btn-outline-primary py-0 px-1" onclick='editarRegistroTab(${JSON.stringify(c).replace(/'/g, "\\'")}, "cuidados_maternos")' title="Editar"><i class="fas fa-edit"></i></button>` : ''}</td></tr>`;
                 });
             } else {
-                cmHtml = '<tr><td colspan="5" class="text-center py-4 text-muted">Sin cuidados maternos</td></tr>';
+                cmHtml += '<tr><td colspan="6" class="text-center py-4 text-muted">Sin cuidados maternos</td></tr>';
             }
-            cuidadosMatEl.innerHTML = cmHtml;
+            cuidadosMatEl.innerHTML = cmHtml + '</tbody></table></div>';
         }
 
         // Render Cuidados Paternos tab
         if (cuidadosPatEl) {
-            const cuidadosPatData = data.cuidados_paternos || [];
-            let cpHtml = '';
+            const cuidadosPatData = (data.cuidados_paternos || []).sort((a, b) => new Date(b.fecha_inicio || 0) - new Date(a.fecha_inicio || 0));
+            let cpHtml = `
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover" style="border-radius: 8px; overflow: hidden;">
+                        <thead style="background-color: ${PANTONE.accent}; color: ${PANTONE.textPrimary};">
+                            <tr><th>Inicio</th><th>Fin</th><th>Días</th><th>Motivo</th><th>Estado</th><th style="width:50px;"></th></tr>
+                        </thead>
+                        <tbody>`;
             if (cuidadosPatData.length > 0) {
                 cuidadosPatData.forEach(c => {
                     const estado = c.estatus || 'pendiente';
                     const estadoLabel = estado === 'aprobada' ? 'Aprobada' : estado === 'rechazada' ? 'Rechazada' : 'Pendiente';
                     const estadoColor = estado === 'aprobada' ? PANTONE.success : estado === 'rechazada' ? PANTONE.danger : PANTONE.warning;
-                    cpHtml += `<tr><td>${c.fecha_inicio || '-'}</td><td>${c.fecha_fin || '-'}</td><td>${c.dias_solicitados || 0}</td><td>${c.motivo || '-'}</td><td><span class="badge" style="background-color: ${estadoColor}20; color: ${estadoColor};">${estadoLabel}</span></td></tr>`;
+                    cpHtml += `<tr><td>${c.fecha_inicio || '-'}</td><td>${c.fecha_fin || '-'}</td><td>${c.dias_solicitados || 0}</td><td>${c.motivo || '-'}</td><td><span class="badge" style="background-color: ${estadoColor}20; color: ${estadoColor};">${estadoLabel}</span></td><td>${esAdmin ? `<button class="btn btn-sm btn-outline-primary py-0 px-1" onclick='editarRegistroTab(${JSON.stringify(c).replace(/'/g, "\\'")}, "cuidados_paternos")' title="Editar"><i class="fas fa-edit"></i></button>` : ''}</td></tr>`;
                 });
             } else {
-                cpHtml = '<tr><td colspan="5" class="text-center py-4 text-muted">Sin cuidados paternos</td></tr>';
+                cpHtml += '<tr><td colspan="6" class="text-center py-4 text-muted">Sin cuidados paternos</td></tr>';
             }
-            cuidadosPatEl.innerHTML = cpHtml;
+            cuidadosPatEl.innerHTML = cpHtml + '</tbody></table></div>';
         }
 
         // Render Constancias tab
         if (constanciasEl) {
             const constanciasData = data.constancias_tiempo || [];
-            let ctHtml = '';
+            let ctHtml = `
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover" style="border-radius: 8px; overflow: hidden;">
+                        <thead style="background-color: ${PANTONE.gray}; color: white;">
+                            <tr><th>Inicio</th><th>Fin</th><th>Días</th><th>Tipo</th><th>Estado</th><th style="width:50px;"></th></tr>
+                        </thead>
+                        <tbody>`;
             if (constanciasData.length > 0) {
                 constanciasData.forEach(c => {
                     const estado = c.estatus || 'pendiente';
                     const estadoLabel = estado === 'aprobada' ? 'Aprobada' : estado === 'rechazada' ? 'Rechazada' : 'Pendiente';
                     const estadoColor = estado === 'aprobada' ? PANTONE.success : estado === 'rechazada' ? PANTONE.danger : PANTONE.warning;
-                    ctHtml += `<tr><td>${c.fecha_inicio || '-'}</td><td>${c.fecha_fin || '-'}</td><td>${c.dias_solicitados || 0}</td><td>${c.tipo_constancia || '-'}</td><td><span class="badge" style="background-color: ${estadoColor}20; color: ${estadoColor};">${estadoLabel}</span></td></tr>`;
+                    ctHtml += `<tr><td>${c.fecha_inicio || '-'}</td><td>${c.fecha_fin || '-'}</td><td>${c.dias_solicitados || 0}</td><td>${c.tipo_constancia || '-'}</td><td><span class="badge" style="background-color: ${estadoColor}20; color: ${estadoColor};">${estadoLabel}</span></td><td>${esAdmin ? `<button class="btn btn-sm btn-outline-primary py-0 px-1" onclick='editarRegistroTab(${JSON.stringify(c).replace(/'/g, "\\'")}, "constancias_tiempo")' title="Editar"><i class="fas fa-edit"></i></button>` : ''}</td></tr>`;
                 });
             } else {
-                ctHtml = '<tr><td colspan="5" class="text-center py-4 text-muted">Sin constancias</td></tr>';
+                ctHtml += '<tr><td colspan="6" class="text-center py-4 text-muted">Sin constancias</td></tr>';
             }
-            constanciasEl.innerHTML = ctHtml;
+            constanciasEl.innerHTML = ctHtml + '</tbody></table></div>';
         }
 
         // Render Días Económicos tab
@@ -3200,6 +2908,7 @@ async function verEmpleado(id) {
                                 <th style="padding: 10px;"><i class="fas fa-calendar-plus me-1"></i>Días</th>
                                 <th style="padding: 10px;"><i class="fas fa-info-circle me-1"></i>Modalidad</th>
                                 <th style="padding: 10px;"><i class="fas fa-check-circle me-1"></i>Estatus</th>
+                                <th style="padding: 10px; width: 60px;"><i class="fas fa-tools me-1"></i></th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -3232,12 +2941,15 @@ async function verEmpleado(id) {
                             <td style="padding: 10px;"><span class="badge" style="background-color: ${badgeColor}; color: white;">${d.dias_solicitados || 0}</span></td>
                             <td style="padding: 10px;"><small>${modalidadTexto}</small></td>
                             <td style="padding: 10px;"><span class="badge" style="background-color: ${badgeColor}; color: white; text-transform: capitalize;">${estatusTexto}</span></td>
+                            <td style="padding: 10px; text-align: center;">
+                                ${esAdmin ? `<button class="btn btn-sm btn-outline-success" onclick='editarDiaEconomico(${JSON.stringify(d).replace(/'/g, "\\'")})' title="Editar día económico"><i class="fas fa-edit"></i></button>` : ''}
+                            </td>
                         </tr>`;
                 });
             } else {
                 ecoHtml += `
                     <tr>
-                        <td colspan="4" class="text-center py-3 text-muted">
+                        <td colspan="5" class="text-center py-3 text-muted">
                             <i class="fas fa-inbox me-2"></i>Sin solicitudes registradas
                         </td>
                     </tr>`;
@@ -3292,6 +3004,7 @@ async function verEmpleado(id) {
                                 <th style="padding: 12px;"><i class="fas fa-calendar-alt me-1"></i>Fecha</th>
                                 <th style="padding: 12px;"><i class="fas fa-tag me-1"></i>Tipo</th>
                                 <th style="padding: 12px;"><i class="fas fa-align-left me-1"></i>Motivo</th>
+                                <th style="width:50px; padding: 12px;"></th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -3307,12 +3020,13 @@ async function verEmpleado(id) {
                             <td style="padding: 12px;"><strong>${s.fecha_inicio || '-'}</strong></td>
                             <td style="padding: 12px;"><span class="badge" style="background-color: ${tipoColor}15; color: ${tipoColor}; text-transform: capitalize;">${s.tipo || '-'}</span></td>
                             <td style="padding: 12px;">${s.motivo || '-'}</td>
+                            <td style="padding: 12px;">${esAdmin ? `<button class="btn btn-sm btn-outline-primary py-0 px-1" onclick='editarRegistroTab(${JSON.stringify(s).replace(/'/g, "\\'")}, "sanciones")' title="Editar"><i class="fas fa-edit"></i></button>` : ''}</td>
                         </tr>`;
                 });
             } else {
                 sanHtml += `
                     <tr>
-                        <td colspan="3" class="text-center py-4">
+                        <td colspan="4" class="text-center py-4">
                             <i class="fas fa-check-circle" style="font-size: 2rem; color: ${PANTONE.success};"></i>
                             <p class="mt-2 mb-0" style="color: ${PANTONE.grayDark};">Sin sanciones este año</p>
                         </td>
@@ -3963,6 +3677,27 @@ function guardarCicloAsignado() {
     
     const formData = new FormData(form);
     formData.append('empleado_id', window.empleadoId);
+    formData.append('csrf_token', document.getElementById('csrf_token')?.value || '');
+    
+    // Calcular fecha_fin automática: día anterior al nuevo ciclo
+    const nuevoCicloId = form.get('ciclo_id');
+    const nuevaFechaInicio = form.get('fecha_inicio');
+    
+    if (nuevoCicloId && nuevaFechaInicio) {
+        // Buscar el ciclo seleccionado para obtener su fecha_inicio
+        const select = document.getElementById('ciclo_select');
+        const selectedOption = select?.options?.[select.selectedIndex];
+        
+        // Si hay una fecha_fin proporcionada, usarla; si no, calcular como día anterior al nuevo ciclo
+        const fechaFinInput = form.get('fecha_fin');
+        if (!fechaFinInput || fechaFinInput === '') {
+            // Calcular un día antes de la nueva fecha de inicio
+            const fechaInicioObj = new Date(nuevaFechaInicio);
+            fechaInicioObj.setDate(fechaInicioObj.getDate() - 1);
+            const fechaFinCalculada = fechaInicioObj.toISOString().split('T')[0];
+            formData.set('fecha_fin', fechaFinCalculada);
+        }
+    }
     
     fetch(`<?= BASE_URL ?>/horarios/asignar-ciclo-empleado`, {
         method: 'POST',
@@ -4767,12 +4502,12 @@ function cambiarTipoJustificacion() {
         seccionSoporte.style.display = 'none';
         seccionLugar.style.display = 'block';
         
-        // Mostrar sección de fechas solo para comisión de todo el día
+        // Mostrar sección de fechas para todos los tipos de comisión
         const seccionFechasComision = document.getElementById('seccion-fechas-comision');
         if (seccionFechasComision) {
-            if (esComisionDia) {
+            if (esComision) {
                 seccionFechasComision.style.display = 'block';
-                // Establecer fecha por defecto
+                // Establecer fecha por defecto si no está establecida
                 const fechaInput = document.getElementById('just_fecha_inicio_comision');
                 const fechaActual = new Date().toISOString().split('T')[0];
                 if (fechaInput && !fechaInput.value) {
@@ -5014,6 +4749,78 @@ function cambiarTipoJustificacion() {
         if (seccionLicenciaMedica) {
             seccionLicenciaMedica.style.display = 'none';
         }
+        
+        // Mostrar fundamentos genéricos para otros tipos de justificación
+        rowTipoIncidencia.style.display = 'block';
+        seccionDatosRetardo.style.display = 'none';
+        seccionFundamentos.style.display = 'block';
+        seccionMotivo.style.display = 'none';
+        seccionSoporte.style.display = 'none';
+        seccionLugar.style.display = 'none';
+        
+        // Mostrar sección de fechas para comisión (como campo genérico)
+        const seccionFechasComision = document.getElementById('seccion-fechas-comision');
+        if (seccionFechasComision) {
+            seccionFechasComision.style.display = 'block';
+        }
+        
+        // Determinar label según el tipo
+        let tipoLabel = '';
+        let fundamentosTexto = '';
+        
+        if (tipo === 'vacaciones') {
+            tipoLabel = 'Vacaciones';
+            fundamentosTexto = '<strong>ART. 42 - VACACIONES</strong><br>' +
+                'Del Reglamento de las Condiciones Generales de Trabajo del Personal de la S.E.P.<br><br>' +
+                '<strong>Periodo vacacional:</strong> Se otorgará conforme al calendario oficial.<br>' +
+                '<strong>Documentación requerida:</strong> Solicitud de vacaciones con validación del jefe inmediato.';
+        } else if (tipo === 'cuidados_maternos' || tipo === 'cuidados_paternos') {
+            tipoLabel = tipo === 'cuidados_maternos' ? 'Cuidados Maternos' : 'Cuidados Paternos';
+            fundamentosTexto = '<strong>ART. 52 - LICENCIA POR CUIDADOS MATERNOS/PATERNOS</strong><br>' +
+                'Del Reglamento de las Condiciones Generales de Trabajo del Personal de la S.E.P.<br><br>' +
+                '<strong>Requisitos:</strong><br>' +
+                '- Solicitud con mínimo 15 días de anticipación<br>' +
+                '- Presentar documentación que acredite el nacimiento/adopción<br>' +
+                '- Máximo 60 días naturales';
+        } else if (tipo === 'PDSEP-SNTE') {
+            tipoLabel = 'Programa Deportivo SEP-SNTE';
+            fundamentosTexto = '<strong>PROGRAMA DEPORTIVO SEP-SNTE</strong><br>' +
+                'Programa de actividades deportivas y recreativas.<br><br>' +
+                '<strong>Documentación requerida:</strong> Constancia de participación oficial.';
+        } else if (tipo === 'CLIDDA') {
+            tipoLabel = 'CLIDDA';
+            fundamentosTexto = '<strong>CLIDDA</strong><br>' +
+                'Comité de Laboral, Investigación y Desarrollo Académico.<br><br>' +
+                '<strong>Documentación requerida:</strong> Constancia oficial del CLIDDA.';
+        } else if (tipo === 'EYR') {
+            tipoLabel = 'ESTÍMULOS Y RECOMPENSAS';
+            fundamentosTexto = '<strong>ESTÍMULOS Y RECOMPENSAS</strong><br>' +
+                'Reconocimiento por desempeño laboral excepcional.<br><br>' +
+                '<strong>Documentación requerida:</strong> Constancia de reconocimiento oficial.';
+        } else if (tipo === 'FUMIGACION') {
+            tipoLabel = 'FUMIGACIÓN';
+            fundamentosTexto = '<strong>FUMIGACIÓN</strong><br>' +
+                'Permiso por servicio de fumigación en el hogar.<br><br>' +
+                '<strong>Documentación requerida:</strong> Comprobante del servicio.';
+        } else if (tipo === 'permiso_fallecimiento') {
+            tipoLabel = 'PERMISO POR FALLECIMIENTO';
+            fundamentosTexto = '<strong>ART. 37 - PERMISO POR FALLECIMIENTO</strong><br>' +
+                'Del Reglamento de las Condiciones Generales de Trabajo del Personal de la S.E.P.<br><br>' +
+                '<strong>Días Permitidos:</strong><br>' +
+                '- Cónyuge, padre o hijo: 5 días<br>' +
+                '- Hermanos, abuelos o nietos: 3 días<br>' +
+                '- Otros familiares: 1 día<br><br>' +
+                '<strong>Documentación requerida:</strong> Acta de defunción y documentación que acredite el parentesco.';
+        } else {
+            // Mostrar la fecha pero sin fundamentos específicos
+            tipoLabel = tipo ? tipo.replace(/_/g, ' ').toUpperCase() : 'Otro';
+            fundamentosTexto = '<strong>Justificación especial</strong><br>' +
+                'Seleccione la fecha a justificar y complete los datos requeridos.';
+        }
+        
+        document.getElementById('just_tipo_retardo_display').textContent = tipoLabel;
+        fundamentosDisplay.innerHTML = fundamentosTexto;
+        fundamentosInput.value = fundamentosTexto.replace(/<[^>]*>/g, '');
     }
 }
 
@@ -5766,6 +5573,215 @@ document.getElementById('empleadoModal').addEventListener('hidden.bs.modal', fun
     document.body.style.overflow = '';
     document.body.style.paddingRight = '';
 });
+
+function editarComision(c) {
+    document.getElementById('ec_id').value = c.id;
+    document.getElementById('ec_empleado_id').value = c.empleado_id;
+    document.getElementById('ec_descripcion').value = c.descripcion || '';
+    document.getElementById('ec_fecha_inicio').value = c.fecha_inicio || '';
+    document.getElementById('ec_fecha_fin').value = c.fecha_fin || '';
+    const estatusText = {pendiente: 'Pendiente', aprobada: 'Aprobada', aprobado: 'Aprobada', rechazada: 'Rechazada', rechazado: 'Rechazada'};
+    document.getElementById('ec_estatus').value = estatusText[c.estatus] || 'Pendiente';
+    document.getElementById('ec_tipo').value = c.tipo_comision || 'comision_todo_dia';
+    document.getElementById('ec_errores').classList.add('d-none');
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalEditarComision'));
+    modal.show();
+}
+
+function guardarEdicionComision() {
+    const id = document.getElementById('ec_id').value;
+    const empleado_id = document.getElementById('ec_empleado_id').value;
+    const descripcion = document.getElementById('ec_descripcion').value.trim();
+    const fecha_inicio = document.getElementById('ec_fecha_inicio').value;
+    const fecha_fin = document.getElementById('ec_fecha_fin').value;
+    const tipo = document.getElementById('ec_tipo').value;
+    const erroresDiv = document.getElementById('ec_errores');
+    
+    if (!descripcion) {
+        erroresDiv.textContent = 'La descripción es requerida';
+        erroresDiv.classList.remove('d-none');
+        return;
+    }
+    if (!fecha_inicio) {
+        erroresDiv.textContent = 'La fecha de inicio es requerida';
+        erroresDiv.classList.remove('d-none');
+        return;
+    }
+    
+    erroresDiv.classList.add('d-none');
+    
+    fetch('<?php echo rtrim(BASE_URL, '/'); ?>/comisiones/actualizar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            id, empleado_id, descripcion, fecha_inicio, fecha_fin, tipo
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarComision'));
+            if (modal) modal.hide();
+            window.location.reload();
+        } else {
+            erroresDiv.textContent = data.error || 'Error al guardar';
+            erroresDiv.classList.remove('d-none');
+        }
+    })
+    .catch(error => {
+        erroresDiv.textContent = 'Error de conexión: ' + error.message;
+        erroresDiv.classList.remove('d-none');
+    });
+}
+
+function editarDiaEconomico(d) {
+    document.getElementById('ede_id').value = d.id;
+    document.getElementById('ede_empleado_id').value = d.empleado_id;
+    document.getElementById('ede_fecha').value = d.fecha || '';
+    document.getElementById('ede_dias').value = d.dias_solicitados || 1;
+    document.getElementById('ede_modalidad').value = d.modalidad || 'A';
+    document.getElementById('ede_motivo').value = d.motivo || '';
+    const estatusText = {pendiente: 'Pendiente', aprobado: 'Aprobado', rechazado: 'Rechazado'};
+    document.getElementById('ede_estatus').value = estatusText[d.estatus] || 'Pendiente';
+    document.getElementById('ede_errores').classList.add('d-none');
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalEditarDiaEconomico'));
+    modal.show();
+}
+
+function guardarEdicionDiaEconomico() {
+    const id = document.getElementById('ede_id').value;
+    const empleado_id = document.getElementById('ede_empleado_id').value;
+    const fecha = document.getElementById('ede_fecha').value;
+    const dias_solicitados = document.getElementById('ede_dias').value;
+    const modalidad = document.getElementById('ede_modalidad').value;
+    const motivo = document.getElementById('ede_motivo').value.trim();
+    const erroresDiv = document.getElementById('ede_errores');
+    
+    if (!fecha) {
+        erroresDiv.textContent = 'La fecha es requerida';
+        erroresDiv.classList.remove('d-none');
+        return;
+    }
+    if (!motivo) {
+        erroresDiv.textContent = 'El motivo es requerido';
+        erroresDiv.classList.remove('d-none');
+        return;
+    }
+    
+    erroresDiv.classList.add('d-none');
+    
+    fetch('<?php echo rtrim(BASE_URL, '/'); ?>/dias-economicos/actualizar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, empleado_id, fecha, dias_solicitados, modalidad, motivo })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarDiaEconomico'));
+            if (modal) modal.hide();
+            window.location.reload();
+        } else {
+            erroresDiv.textContent = data.error || 'Error al guardar';
+            erroresDiv.classList.remove('d-none');
+        }
+    })
+    .catch(error => {
+        erroresDiv.textContent = 'Error de conexión: ' + error.message;
+        erroresDiv.classList.remove('d-none');
+    });
+}
+
+function editarRegistroTab(d, tabla) {
+    const titulo = {vacaciones:'Vacación', licencias_medicas:'Licencia Médica', cuidados_maternos:'Cuidado Materno', cuidados_paternos:'Cuidado Paterno', constancias_tiempo:'Constancia de Tiempo', sanciones:'Sanción'};
+    document.getElementById('modalEditarRegistroTitulo').textContent = 'Editar ' + (titulo[tabla] || 'Registro');
+    document.getElementById('er_id').value = d.id;
+    document.getElementById('er_empleado_id').value = d.empleado_id;
+    document.getElementById('er_tabla').value = tabla;
+    document.getElementById('er_fecha_inicio').value = d.fecha_inicio || '';
+    document.getElementById('er_fecha_fin').value = d.fecha_fin || '';
+    const estatusMap = {pendiente:'Pendiente', aprobada:'Aprobada', aprobado:'Aprobada', rechazada:'Rechazada', rechazado:'Rechazada', activa:'Activa', cumplida:'Cumplida', cancelada:'Cancelada'};
+    document.getElementById('er_estatus').value = estatusMap[d.estatus] || 'Pendiente';
+    document.getElementById('er_dias').value = d.dias_solicitados || d.dias_otorgados || d.dias || 0;
+    document.getElementById('er_motivo').value = d.motivo || '';
+    const fieldDiag = document.getElementById('er_field_diagnostico');
+    const fieldTipo = document.getElementById('er_field_tipo');
+    if (tabla === 'licencias_medicas') {
+        fieldDiag.style.display = '';
+        document.getElementById('er_label_motivo').textContent = 'Diagnóstico';
+        document.getElementById('er_motivo').value = d.diagnostico || '';
+        document.getElementById('er_diagnostico').value = d.diagnostico || '';
+        document.getElementById('er_dias_full').value = d.dias_full || 0;
+        document.getElementById('er_dias_half').value = d.dias_half || 0;
+        fieldTipo.style.display = 'none';
+    } else {
+        fieldDiag.style.display = 'none';
+        document.getElementById('er_label_motivo').textContent = 'Motivo';
+    }
+    if (tabla === 'constancias_tiempo') {
+        fieldTipo.style.display = '';
+        document.getElementById('er_label_tipo').textContent = 'Tipo Constancia';
+        const sel = document.getElementById('er_tipo');
+        sel.innerHTML = '<option value="medica">Médica</option><option value="legal">Legal</option><option value="oficial">Oficial</option>';
+        sel.value = d.tipo_constancia || 'medica';
+    } else if (tabla === 'sanciones') {
+        fieldTipo.style.display = '';
+        document.getElementById('er_label_tipo').textContent = 'Tipo Sanción';
+        const sel = document.getElementById('er_tipo');
+        sel.innerHTML = '<option value="amonestacion">Amonestación</option><option value="suspension">Suspensión</option><option value="acta_administrativa">Acta Administrativa</option><option value="otro">Otro</option>';
+        sel.value = d.tipo_sancion || d.tipo || 'amonestacion';
+    } else {
+        fieldTipo.style.display = 'none';
+    }
+    document.getElementById('er_errores').classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('modalEditarRegistro')).show();
+}
+
+function guardarEdicionRegistroTab() {
+    const id = document.getElementById('er_id').value;
+    const empleado_id = document.getElementById('er_empleado_id').value;
+    const tabla = document.getElementById('er_tabla').value;
+    const fecha_inicio = document.getElementById('er_fecha_inicio').value;
+    const fecha_fin = document.getElementById('er_fecha_fin').value;
+    const dias = document.getElementById('er_dias').value;
+    const motivo = document.getElementById('er_motivo').value.trim();
+    const tipo = document.getElementById('er_tipo').value;
+    const diagnostico = document.getElementById('er_diagnostico')?.value?.trim() || '';
+    const dias_full = document.getElementById('er_dias_full')?.value || 0;
+    const dias_half = document.getElementById('er_dias_half')?.value || 0;
+    const erroresDiv = document.getElementById('er_errores');
+    if (!fecha_inicio) {
+        erroresDiv.textContent = 'La fecha de inicio es requerida';
+        erroresDiv.classList.remove('d-none');
+        return;
+    }
+    erroresDiv.classList.add('d-none');
+    let payload = { id, empleado_id, tabla, fecha_inicio, fecha_fin, dias, motivo };
+    if (tabla === 'licencias_medicas') { payload.diagnostico = diagnostico; payload.dias_full = dias_full; payload.dias_half = dias_half; }
+    else if (tabla === 'constancias_tiempo' || tabla === 'sanciones') { payload.tipo = tipo; }
+    fetch('<?php echo rtrim(BASE_URL, '/'); ?>/api/actualizar-registro-tab', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarRegistro'));
+            if (modal) modal.hide();
+            window.location.reload();
+        } else {
+            erroresDiv.textContent = data.error || 'Error al guardar';
+            erroresDiv.classList.remove('d-none');
+        }
+    })
+    .catch(error => {
+        erroresDiv.textContent = 'Error de conexión: ' + error.message;
+        erroresDiv.classList.remove('d-none');
+    });
+}
 
 // Modal para solicitar comisión directa
 function abrirModalComision() {
@@ -6750,6 +6766,206 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
+<!-- Modal Editar Comisión -->
+<div class="modal fade" id="modalEditarComision" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #9F2241 0%, #691C32 100%); color: white;">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Comisión</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarComision">
+                    <input type="hidden" id="ec_id" name="id">
+                    <input type="hidden" id="ec_empleado_id" name="empleado_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descripción</label>
+                        <textarea class="form-control" id="ec_descripcion" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Fecha Inicio</label>
+                            <input type="date" class="form-control" id="ec_fecha_inicio">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Fecha Fin</label>
+                            <input type="date" class="form-control" id="ec_fecha_fin">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Estatus</label>
+                            <input type="text" class="form-control" id="ec_estatus" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Tipo</label>
+                            <select class="form-select" id="ec_tipo">
+                                <option value="comision_todo_dia">Comisión día completo</option>
+                                <option value="comision_entrada">Comisión entrada</option>
+                                <option value="comision_salida">Comisión salida</option>
+                                <option value="viaticos">Viáticos</option>
+                                <option value="gastos_representacion">Gastos representación</option>
+                                <option value="transporte">Transporte</option>
+                                <option value="hospedaje">Hospedaje</option>
+                                <option value="alimentacion">Alimentación</option>
+                                <option value="otros">Otros</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="ec_errores" class="alert alert-danger d-none"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarEdicionComision()">
+                    <i class="fas fa-save me-1"></i>Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Día Económico -->
+<div class="modal fade" id="modalEditarDiaEconomico" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #235B4E 0%, #10312B 100%); color: white;">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Día Económico</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarDiaEconomico">
+                    <input type="hidden" id="ede_id" name="id">
+                    <input type="hidden" id="ede_empleado_id" name="empleado_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Estatus</label>
+                        <input type="text" class="form-control" id="ede_estatus" readonly>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Fecha</label>
+                            <input type="date" class="form-control" id="ede_fecha">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Días Solicitados</label>
+                            <select class="form-select" id="ede_dias">
+                                <option value="1">1 día</option>
+                                <option value="2">2 días</option>
+                                <option value="3">3 días</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Modalidad</label>
+                        <select class="form-select" id="ede_modalidad">
+                            <option value="A">A - 3 días</option>
+                            <option value="B">B - 2 días</option>
+                            <option value="C">C - 1 día</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Motivo</label>
+                        <textarea class="form-control" id="ede_motivo" rows="2"></textarea>
+                    </div>
+                    
+                    <div id="ede_errores" class="alert alert-danger d-none"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="guardarEdicionDiaEconomico()">
+                    <i class="fas fa-save me-1"></i>Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Registro (unificado para Vacaciones, Licencias, Cuidados M/P, Constancias, Sanciones) -->
+<div class="modal fade" id="modalEditarRegistro" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #4A4A4A 0%, #2C2C2C 100%); color: white;">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i><span id="modalEditarRegistroTitulo">Editar Registro</span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarRegistro">
+                    <input type="hidden" id="er_id" name="id">
+                    <input type="hidden" id="er_empleado_id" name="empleado_id">
+                    <input type="hidden" id="er_tabla" name="tabla">
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Fecha Inicio</label>
+                            <input type="date" class="form-control" id="er_fecha_inicio">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Fecha Fin</label>
+                            <input type="date" class="form-control" id="er_fecha_fin">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6" id="er_field_dias">
+                            <label class="form-label fw-bold">Días</label>
+                            <input type="number" class="form-control" id="er_dias" min="1">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Estatus</label>
+                            <input type="text" class="form-control" id="er_estatus" readonly>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="er_field_motivo">
+                        <label class="form-label fw-bold" id="er_label_motivo">Motivo</label>
+                        <textarea class="form-control" id="er_motivo" rows="2"></textarea>
+                    </div>
+
+                    <div class="mb-3" id="er_field_tipo" style="display:none;">
+                        <label class="form-label fw-bold" id="er_label_tipo">Tipo</label>
+                        <select class="form-select" id="er_tipo"></select>
+                    </div>
+
+                    <!-- Licencias extra fields -->
+                    <div id="er_field_diagnostico" style="display:none;">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Diagnóstico</label>
+                            <textarea class="form-control" id="er_diagnostico" rows="2"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Días Full</label>
+                                <input type="number" class="form-control" id="er_dias_full" min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Días Half</label>
+                                <input type="number" class="form-control" id="er_dias_half" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="er_errores" class="alert alert-danger d-none"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarEdicionRegistroTab()">
+                    <i class="fas fa-save me-1"></i>Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal de Comparación Plazas vs Ciclo -->
 <div class="modal fade" id="modalComparacionPlazasCiclo" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -6772,5 +6988,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 </div>
+
+<?php include __DIR__ . '/partials/modal_marcaciones.php'; ?>
 
 <script src="<?php echo defined('BASE_URL') ? rtrim(BASE_URL, '/') : ''; ?>/assets/js/empleados.js?v=20260406"></script>

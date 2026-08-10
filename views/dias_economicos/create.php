@@ -303,4 +303,4 @@ document.getElementById('formAccionDia').addEventListener('submit', function(e) 
 });
 </script>
 
-<?php include 'footer.php'; ?>
+<?php include __DIR__ . '/../footer.php'; ?>

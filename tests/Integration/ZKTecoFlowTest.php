@@ -6,6 +6,9 @@ require_once __DIR__ . '/../../models/ZKTecoUniversalParser.php';
 require_once __DIR__ . '/../../models/ZKTecoAsistenciaInserter.php';
 require_once __DIR__ . '/../../models/Database.php';
 
+/**
+ * @group integration
+ */
 class ZKTecoFlowTest extends TestCase
 {
     private $tempFile;
@@ -63,9 +66,16 @@ class ZKTecoFlowTest extends TestCase
 
         // Simular comportamiento de las consultas:
         // - fetch() devuelve false (simula que NO existen duplicados)
+        // - fetchAll() devuelve un array vacío (simula que no hay empleados precargados)
         // - execute() devuelve true (simula que la inserción fue exitosa)
         $stmtMock->method('fetch')->willReturn(false);
+        $stmtMock->method('fetchAll')->willReturn([50]);
         $stmtMock->method('execute')->willReturn(true);
+
+        // query() también necesita devolver un statement (usado en validarExistenciaEmpleado)
+        $pdoMock->method('query')->willReturn($stmtMock);
+        // lastInsertId() es llamado después de insertar en la tabla asistencia
+        $pdoMock->method('lastInsertId')->willReturn('123');
 
         // 5. Ejecutar Inserter con los registros obtenidos del Parser
         // Inyectamos el $dbMock para interceptar las llamadas a la BD
@@ -74,7 +84,7 @@ class ZKTecoFlowTest extends TestCase
 
         // 6. Validaciones del Inserter
         $this->assertTrue($resultadoInsercion['exito'], 'La inserción debería reportarse como exitosa');
-        $this->assertEquals(2, $resultadoInsercion['estadisticas']['registros_insertados'], 'Debería intentar insertar 2 registros');
+        $this->assertEquals(2, $resultadoInsercion['estadisticas']['insertados'], 'Debería intentar insertar 2 registros');
         $this->assertEquals(0, $resultadoInsercion['estadisticas']['errores'], 'No debería haber errores de inserción');
         
         // Si llegamos aquí, el flujo Archivo -> Parser -> Mapeo -> Inserter -> SQL funciona correctamente.

@@ -1,16 +1,51 @@
 <?php
 // index.php - Front Controller
+error_log("=== index.php START ===");
 
-error_log("DEBUG: index.php iniciado - URI: " . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
-
-// 1. Carga de configuración y autoloader
+// Load config immediately for DB access
 require_once __DIR__ . '/config.php';
+error_log("config loaded");
+
+// Check for API request BEFORE session check
+$rawPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
+
+// API handling - execute EARLY before session check
+// Match both /api/ and /sistema_biometrico/api/
+$apiMatch = null;
+if (strpos($rawPath, '/sistema_biometrico/api/') === 0) {
+    $apiMatch = '/sistema_biometrico/api/';
+} elseif (strpos($rawPath, '/api/') === 0) {
+    $apiMatch = '/api/';
+}
+
+if ($apiMatch !== null) {
+    $apiRelPath = str_replace($apiMatch, '', $rawPath);
+    $apiFile = __DIR__ . '/api/' . $apiRelPath . '.php';
+    error_log("API: rawPath=$rawPath, apiRelPath=$apiRelPath, file=$apiFile");
+    
+    if (!empty($apiRelPath) && file_exists($apiFile)) {
+        header('Content-Type: application/json; charset=utf-8');
+        require_once $apiFile;
+        exit;
+    }
+    http_response_code(404);
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'API not found: ' . $rawPath]);
+    exit;
+}
+
+$uri = $rawPath;
+
+// Continue with normal loading
+error_log("Loading Controllers");
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/helpers/Csrf.php';
 require_once __DIR__ . '/controllers/BaseController.php';
 require_once __DIR__ . '/controllers/AuthController.php';
 require_once __DIR__ . '/controllers/ValidacionJefeController.php';
 require_once __DIR__ . '/controllers/LogsController.php';
+
+error_log("Controllers loaded");
 
 // Funciones para manejo de sesiones en base de datos
 function db_session_open($save_path, $session_name) {
@@ -22,7 +57,7 @@ function db_session_close() {
 }
 
 function db_session_read($id) {
-    $pdo = new PDO('mysql:host=localhost;dbname=sistema_biometrico', 'root', 'root');
+    $pdo = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASS, DB_OPTIONS);
     $stmt = $pdo->prepare("SELECT data FROM sessions WHERE id = ?");
     $stmt->execute([$id]);
     $result = $stmt->fetchColumn();
@@ -30,20 +65,20 @@ function db_session_read($id) {
 }
 
 function db_session_write($id, $data) {
-    $pdo = new PDO('mysql:host=localhost;dbname=sistema_biometrico', 'root', 'root');
+    $pdo = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASS, DB_OPTIONS);
     $timestamp = time();
     $stmt = $pdo->prepare("REPLACE INTO sessions (id, data, timestamp) VALUES (?, ?, ?)");
     return $stmt->execute([$id, $data, $timestamp]);
 }
 
 function db_session_destroy($id) {
-    $pdo = new PDO('mysql:host=localhost;dbname=sistema_biometrico', 'root', 'root');
+    $pdo = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASS, DB_OPTIONS);
     $stmt = $pdo->prepare("DELETE FROM sessions WHERE id = ?");
     return $stmt->execute([$id]);
 }
 
 function db_session_gc($maxlifetime) {
-    $pdo = new PDO('mysql:host=localhost;dbname=sistema_biometrico', 'root', 'root');
+    $pdo = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASS, DB_OPTIONS);
     $old = time() - $maxlifetime;
     $stmt = $pdo->prepare("DELETE FROM sessions WHERE timestamp < ?");
     return $stmt->execute([$old]);
@@ -63,26 +98,16 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Establecer headers de seguridad (CSP, X-Frame-Options, etc.)
+require_once __DIR__ . '/helpers/SecurityHelper.php';
+SecurityHelper::setSecurityHeaders();
+
 // 2. Definición del despachador de rutas
 $dispatcher = require 'routes.php';
 
-// 3. Verificar autenticación (excepto para rutas públicas)
-
-$rutasPublicas = ['/login', '/register', '/verify-2fa', '/api/tipos-justificacion', '/api/log-error'];
-
-// Obtener la URI y el método de la petición
+// Obtener la URI y el método de la peticiones
 $httpMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $rawPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
-
-// Excluir archivos estáticos de la verificación de sesión
-$staticExtensions = ['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.map'];
-$isStaticFile = false;
-foreach ($staticExtensions as $ext) {
-    if (str_ends_with($rawPath, $ext)) {
-        $isStaticFile = true;
-        break;
-    }
-}
 
 // Extraer el path base para sistema biométrico
 $uri = $rawPath;
@@ -94,10 +119,28 @@ if (!empty($basePath) && strpos($rawPath, $basePath) === 0) {
     if (empty($uri)) { $uri = '/'; }
 }
 
+// Excluir archivos estáticos de la verificación de sesión
+$staticExtensions = ['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.map'];
+$isStaticFile = false;
+foreach ($staticExtensions as $ext) {
+    if (str_ends_with($rawPath, $ext)) {
+        $isStaticFile = true;
+        break;
+    }
+}
+
 // Debug logging
 error_log("RawPath: $rawPath, URI: $uri, Method: $httpMethod");
 
-// Procesar entrada JSON para peticiones POST
+// 3. Verificar autenticación (excepto para rutas públicas)
+$rutasPublicas = [
+    '/login', '/register', '/verify-2fa', 
+    '/api/', '/api/tipos-justificacion', '/api/log-error',
+    '/api/lista-empleados', '/api/obtener_registros_justificacion',
+    '/api/actualizar_justificacion'
+];
+
+// Fin de la verificación de API - otras verificaciones se hacen abajo
 if ($httpMethod === 'POST' && isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
     $jsonInput = file_get_contents('php://input');
     $jsonData = json_decode($jsonInput, true);
@@ -116,7 +159,9 @@ if (class_exists('AuthController') && method_exists('AuthController', 'isLoggedI
 // Rutas API que deben devolver JSON en lugar de redirect cuando no hay sesión
 $jsonOnlyRoutes = [
     '/ai/analizar', '/ai/metricas', '/ai/alertas', '/ai/reportes',
-    '/logs/leer', '/logs/analizar-ai', '/logs/aplicar-fix'
+    '/logs/leer', '/logs/analizar-ai', '/logs/aplicar-fix',
+    '/menu-config/guardar', '/menu-config/getConfig',
+    '/usuarios/guardar-menu'
 ];
 
 // Verificar si la ruta requiere autenticación (excluir archivos estáticos)
@@ -137,6 +182,15 @@ if (!$isStaticFile && !in_array($uri, $rutasPublicas) && !$isLoggedIn) {
     }
     header('Location: ' . $basePath . '/login');
     exit;
+}
+
+// Verificar si es una ruta API que necesita servirse directamente desde archivo
+if (strpos($uri, '/api/') === 0) {
+    $apiFile = __DIR__ . str_replace('/sistema_biometrico', '', $uri);
+    if (file_exists($apiFile)) {
+        require_once $apiFile;
+        exit;
+    }
 }
 
 // 4. Despachar la ruta
@@ -169,7 +223,7 @@ switch ($routeInfo[0]) {
         $methodName = $handler[1];
 
 // Validación CSRF para endpoints AJAX
-        $isExcluded = str_contains($uri, '/login') || str_contains($uri, '/register') || str_contains($uri, '/validaciones/') || str_contains($uri, '/biometricos/') || str_contains($uri, '/catalogos/') || str_contains($uri, '/usuarios/') || str_contains($uri, '/justificaciones/') || str_contains($uri, '/logs/');
+        $isExcluded = str_contains($uri, '/login') || str_contains($uri, '/register') || str_contains($uri, '/validaciones/') || str_contains($uri, '/biometricos/') || str_contains($uri, '/catalogos/') || str_contains($uri, '/usuarios/') || str_contains($uri, '/justificaciones/') || str_contains($uri, '/logs/') || str_contains($uri, '/menu-config/') || str_contains($uri, '/permisos-menu') || str_contains($uri, '/api/');
         
         if ($httpMethod === 'POST' && !$isExcluded) {
             $csrfToken = $_POST['csrf_token'] ?? $_POST['_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;

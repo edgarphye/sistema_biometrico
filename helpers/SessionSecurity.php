@@ -180,6 +180,57 @@ class SessionSecurity {
     }
     
     /**
+     * Verifica si un identificador está bloqueado
+     * @param string $identifier Identificador (username_IP)
+     * @return bool True si está bloqueado, false si no
+     */
+    public static function isBlocked($identifier) {
+        $key = 'rate_limit_' . md5($identifier);
+        
+        if (!isset($_SESSION[$key])) {
+            return false;
+        }
+        
+        $rateLimit = $_SESSION[$key];
+        return $rateLimit['blocked_until'] && time() < $rateLimit['blocked_until'];
+    }
+    
+    /**
+     * Registra un intento fallido de login
+     * @param string $identifier Identificador (username_IP)
+     * @param int $maxAttempts Máximo de intentos antes de bloquear
+     * @param int $windowMinutes Ventana de tiempo en minutos
+     */
+    public static function recordFailedAttempt($identifier, $maxAttempts = 5, $windowMinutes = 15) {
+        $key = 'rate_limit_' . md5($identifier);
+        
+        if (!isset($_SESSION[$key])) {
+            $_SESSION[$key] = [
+                'attempts' => 0,
+                'first_attempt' => time(),
+                'blocked_until' => null
+            ];
+        }
+        
+        $rateLimit = &$_SESSION[$key];
+        
+        // Reset si ha pasado la ventana de tiempo
+        if (time() - $rateLimit['first_attempt'] > ($windowMinutes * 60)) {
+            $rateLimit['attempts'] = 0;
+            $rateLimit['first_attempt'] = time();
+            $rateLimit['blocked_until'] = null;
+        }
+        
+        // Incrementar intentos
+        $rateLimit['attempts']++;
+        
+        // Bloquear si excede el máximo
+        if ($rateLimit['attempts'] >= $maxAttempts) {
+            $rateLimit['blocked_until'] = time() + ($windowMinutes * 60);
+        }
+    }
+    
+    /**
      * Obtiene información del rate limiting
      * @param string $identifier Identificador
      * @return array Información del rate limiting

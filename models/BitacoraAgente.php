@@ -64,8 +64,7 @@ class BitacoraAgente {
             $params[] = $clasificacion;
         }
 
-        $sql .= " ORDER BY b.fecha DESC, b.hora DESC LIMIT ?";
-        $params[] = $limit;
+        $sql .= " ORDER BY b.fecha DESC, b.hora DESC LIMIT " . (int)$limit;
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);

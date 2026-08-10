@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/../models/Database.php';
 
 class PushNotificationService {
     private static $instance = null;

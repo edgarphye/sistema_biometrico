@@ -1,6 +1,5 @@
 <?php
 
-use const Dom\STRING_SIZE_ERR;
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/../helpers/Encryption.php';
 
@@ -59,7 +58,7 @@ class Empleado {
     }
 
     public function getById($id) {
-        $stmt = $this->db->getConnection()->prepare("SELECT id, nombre, apellido, rfc, curp, area, jerarquia, sexo, fecha_nacimiento, fecha_ingreso, entidad_federativa, foto_cara, jefe_directo_id, activo,
+        $stmt = $this->db->getConnection()->prepare("SELECT id, nombre, apellido, rfc, curp, area, jerarquia, sexo, fecha_nacimiento, fecha_ingreso, entidad_federativa, foto_cara, jefe_directo_id, jefe_directo_clave, clave_depto, activo,
             CASE WHEN huella_dactilar IS NOT NULL AND huella_dactilar != '' THEN 1 ELSE 0 END as tiene_huella 
             FROM empleados WHERE id = ?");
         $stmt->execute([$id]);
@@ -80,19 +79,60 @@ class Empleado {
     }
 
     public function create($data) {
+        // Validar campos requeridos (zkteo_id es opcional: se asigna al vincular biométricamente)
+        $errors = [];
+        if (empty($data['nombre'])) {
+            $errors[] = 'Nombre es requerido';
+        }
+        if (empty($data['apellido'])) {
+            $errors[] = 'Apellido es requerido';
+        }
+        if (empty($data['rfc'])) {
+            $errors[] = 'RFC es requerido';
+        }
+        if (empty($data['curp'])) {
+            $errors[] = 'CURP es requerido';
+        }
+        
+        if (!empty($errors)) {
+            return false;
+        }
+
         $stmt = $this->db->getConnection()->prepare("
-            INSERT INTO empleados (nombre, apellido, rfc, curp, area, area_fisica, jerarquia, sexo, fecha_nacimiento, entidad_federativa, huella_dactilar, foto_cara, clave_depto, jefe_directo_id, jefe_directo_clave)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO empleados (nombre, apellido, rfc, curp, zkteo_id, area, area_fisica, jerarquia, sexo, fecha_nacimiento, entidad_federativa, huella_dactilar, foto_cara, clave_depto, jefe_directo_id, jefe_directo_clave)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $huella = $data['huella_dactilar'] ?? null;
         if ($huella !== null) {
             $huella = Encryption::encrypt($huella);
         }
+        
+        // Si se seleccionó un jefe directo (clave_area), buscar su ID usando la tabla de mandos
+        $jefeId = null;
+        $claveJefe = $data['jefe_directo_clave'] ?? $data['jefe_directo_id'] ?? null;
+        if (!empty($claveJefe)) {
+            // Buscar el mando en catalogos_mandos usando la clave_area y obtener el empleado que tiene esa clave_depto
+            $mandoStmt = $this->db->getConnection()->prepare("
+                SELECT m.id as mando_id, m.clave_depto, e.id as empleado_id 
+                FROM catalogos_mandos m
+                LEFT JOIN empleados e ON e.clave_depto = m.clave_depto AND e.activo = 1
+                WHERE m.clave_area = ? AND m.activo = 1
+                LIMIT 1
+            ");
+            $mandoStmt->execute([$claveJefe]);
+            $mando = $mandoStmt->fetch();
+            
+            if ($mando && $mando['empleado_id']) {
+                $jefeId = $mando['empleado_id'];
+            }
+        }
+        
         $result = $stmt->execute([
             $data['nombre'],
             $data['apellido'],
             $data['rfc'],
             $data['curp'],
+            $data['zkteo_id'] ?? null,
             $data['area'],
             $data['area_fisica'] ?? null,
             $data['jerarquia'],
@@ -102,12 +142,12 @@ class Empleado {
             $huella,
             $data['foto_cara'] ?? null,
             $data['clave_depto'] ?? null,
-            $data['jefe_directo_id'] ?? null,
-            $data['jefe_directo_clave'] ?? null
+            $jefeId,
+            $claveJefe
         ]);
         
         if ($result) {
-            return $this->db->getConnection()->lastInsertId();
+            return (int)$this->db->getConnection()->lastInsertId();
         }
         return false;
     }
@@ -139,8 +179,24 @@ class Empleado {
             $huella = Encryption::encrypt($huella);
         }
         
-        // Usar la clave directamente como jefe_directo_id
-        $jefeId = !empty($data['jefe_directo_clave']) ? $data['jefe_directo_clave'] : null;
+        // Validar que el jefe_directo_id exista en empleados buscando en catalogos_mandos
+        $jefeId = null;
+        if (!empty($data['jefe_directo_clave'])) {
+            // Buscar el mando en catalogos_mandos que coincida con la clave seleccionada
+            $mandoStmt = $this->db->getConnection()->prepare("
+                SELECT m.id as mando_id, m.clave_depto, e.id as empleado_id 
+                FROM catalogos_mandos m
+                LEFT JOIN empleados e ON e.clave_depto = m.clave_depto AND e.activo = 1
+                WHERE m.clave_area = ? AND m.activo = 1
+                LIMIT 1
+            ");
+            $mandoStmt->execute([$data['jefe_directo_clave']]);
+            $mando = $mandoStmt->fetch();
+            
+            if ($mando && $mando['empleado_id']) {
+                $jefeId = $mando['empleado_id'];
+            }
+        }
         
         return $stmt->execute([
             $data['nombre'],
@@ -189,22 +245,25 @@ class Empleado {
             return null;
         }
 
-        // Obtener estadísticas adicionales
+        $mesActual = date('m-Y');
+
         $asistencias = $this->getAsistenciasByEmpleado($id);
         $retardos = $this->getRetardosByEmpleado($id);
         $comisiones = $this->getComisionesByEmpleado($id);
         $ausencias = $this->getAusenciasByEmpleado($id);
 
         $empleado['estadisticas'] = [
-            'total_asistencias' => count($asistencias),
-            'retardos_mes' => count(array_filter($retardos, function($r) {
-                return date('m-Y', strtotime($r['fecha'])) == date('m-Y');
+            'total_asistencias' => count(array_filter($asistencias, function($a) use ($mesActual) {
+                return date('m-Y', strtotime($a['fecha'])) == $mesActual;
+            })),
+            'retardos_mes' => count(array_filter($retardos, function($r) use ($mesActual) {
+                return date('m-Y', strtotime($r['fecha'])) == $mesActual;
             })),
             'comisiones_pendientes' => count(array_filter($comisiones, function($c) {
                 return !$c['justificada'];
             })),
-            'ausencias_mes' => count(array_filter($ausencias, function($a) {
-                return date('m-Y', strtotime($a['fecha_inicio'])) == date('m-Y');
+            'ausencias_mes' => count(array_filter($ausencias, function($a) use ($mesActual) {
+                return date('m-Y', strtotime($a['fecha_inicio'])) == $mesActual;
             }))
         ];
 
@@ -288,9 +347,7 @@ class Empleado {
         
         // Agregar ordenamiento y paginación usando índices
         $sql .= " ORDER BY area ASC, nombre ASC, apellido ASC";
-        $sql .= " LIMIT ? OFFSET ?";
-        $params[] = $limit;
-        $params[] = $offset;
+        $sql .= " LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
         
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->execute($params);

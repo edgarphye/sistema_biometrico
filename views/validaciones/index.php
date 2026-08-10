@@ -874,7 +874,7 @@ ob_start();
     </script>
     
     <!-- Scripts necesarios -->
-    <script src="/assets/js/validaciones.js?v=2026031807"></script>
+    <script src="/assets/js/validaciones.js?v=2026031809"></script>
     
     <!-- Encabezado principal -->
     <div class="row mb-4">
@@ -941,6 +941,9 @@ ob_start();
                                 <option value="comision">Comisiones</option>
                                 <option value="dia_economico">Días económicos</option>
                                 <option value="ausencia">Ausencias</option>
+                                <option value="constancia_tiempo">Constancias de Tiempo</option>
+                                <option value="licencia_medica">Licencias Médicas</option>
+                                <option value="justificacion">Justificaciones</option>
                             </select>
                         </div>
                         
@@ -1603,6 +1606,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
                 
+                <!-- Conversación con el empleado -->
+                <div class="card mb-4" id="cardConversacionJefe" style="border-top: 3px solid #17a2b8; display: none;">
+                    <div class="card-header" style="background: linear-gradient(135deg, #17a2b8 0%, #0d6b7d 100%); color: #ffffff;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-comments"></i>
+                            <h6 class="mb-0">Conversación con el Empleado</h6>
+                            <span class="badge bg-light text-dark ms-auto" id="mensajesCountBadge">0</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="conversacionJefe" style="max-height: 300px; overflow-y: auto;" class="mb-3">
+                            <p class="text-muted text-center py-3">Cargando mensajes...</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Formulario de decisión -->
                 <div class="card" style="border-top: 3px solid #BC955C;">
                     <div class="card-header" style="background: linear-gradient(135deg, #BC955C 0%, #9F2241 100%); color: #ffffff;">

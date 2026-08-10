@@ -293,7 +293,7 @@ class AgenteInteligenteService {
         $ausencias = $permisos['ausencias'] ?? 0;
         if ($ausencias >= 3) {
             $puntuacion += 20;
-            $factores[] = "多次缺席: $ausencias";
+            $factores[] = "Múltiples ausencias: $ausencias";
         }
         
         $comAprobadas = $comisiones['aprobadas'] ?? 0;
@@ -650,7 +650,7 @@ class AgenteInteligenteService {
             'arquitectura' => $nFeatures . '-1',
             'epocas' => $epoca ?? 0,
             'datos_entrenamiento' => count($entrenamiento),
-            'pesos' => array_map(fn($w) => round($w, 4), array_slice($pesos, 0, 3)) . ['...']
+            'pesos' => array_merge(array_map(fn($w) => round($w, 4), array_slice($pesos, 0, 3)), ['...'])
         ];
     }
     
@@ -770,7 +770,7 @@ class AgenteInteligenteService {
         $celdasMemoria = 8;
         
         $pesos = [
-            ' forget' => array_fill(0, $nFeatures, array_fill(0, $celdasMemoria, mt_rand(-30, 30) / 100)),
+            'forget' => array_fill(0, $nFeatures, array_fill(0, $celdasMemoria, mt_rand(-30, 30) / 100)),
             'input' => array_fill(0, $nFeatures, array_fill(0, $celdasMemoria, mt_rand(-30, 30) / 100)),
             'output' => array_fill(0, $nFeatures, array_fill(0, $celdasMemoria, mt_rand(-30, 30) / 100))
         ];
@@ -879,7 +879,7 @@ class AgenteInteligenteService {
         }
         
         $historicoOrdenado = array_reverse($datos['entrenamiento']);
-        $secuencia = array_map(fn($d) => $d['frecuencia'], $historicoOrdenado);
+        $secuencia = array_map(fn($d) => $d['frecuencia_retardos'] ?? 0, $historicoOrdenado);
         
         if (count($secuencia) < 3) {
             return ['prediccion' => $datos['promedio_riesgo'] ?? 50, 'confianza' => 'baja', 'tipo' => 'rnn'];
@@ -914,7 +914,7 @@ class AgenteInteligenteService {
         }
         
         $tokens = array_map(fn($d) => [
-            $d['frecuencia'], $d['tendencia'], $d['severidad'], $d['historico']
+            $d['frecuencia_retardos'] ?? 0, $d['tendencia_retardos'] ?? 0, $d['severidad'] ?? 0, $d['historico_retardos'] ?? 0
         ], $datos['entrenamiento']);
         
         $embedding = [];

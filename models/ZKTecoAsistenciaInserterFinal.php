@@ -430,12 +430,15 @@ class ZKTecoAsistenciaInserterFinal {
      */
     private function insertarEnRetardos($datosBase, $idAsistencia) {
         try {
+            // Obtener horario_id del empleado para esta fecha
+            $horarioId = $this->obtenerHorarioEmpleado($datosBase['empleado_id'], $datosBase['fecha']);
+            
             $sql = "
                 INSERT INTO retardos (
-                    empleado_id, fecha, minutos_retardo, tipo_retraso, 
+                    empleado_id, fecha, minutos_retardo, tipo_retraso, horario_id,
                     justificado, motivo_detalle, requiere_validacion_jefe, 
                     estado_validacion, asistencia_id, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
             ";
             
             $stmt = $this->db->getConnection()->prepare($sql);
@@ -450,6 +453,7 @@ class ZKTecoAsistenciaInserterFinal {
                 $datosBase['fecha'],
                 $minutosRetraso,
                 $minutosRetraso > 15 ? 'mayor' : 'menor',
+                $horarioId,
                 0, // justificado inicialmente en false
                 'Retardo detectado por sistema biométrico',
                 'pendiente', // requiere validación del jefe
@@ -475,6 +479,36 @@ class ZKTecoAsistenciaInserterFinal {
         } catch (Exception $e) {
             error_log("ERROR INSERT RETARDOS: " . $e->getMessage());
             return false;
+        }
+    }
+    
+    /**
+     * Obtiene el horario_id del empleado para una fecha específica
+     */
+    private function obtenerHorarioEmpleado($empleado_id, $fecha) {
+        try {
+            // Intentar obtener horario desde empleado_horarios
+            $stmt = $this->db->getConnection()->prepare("
+                SELECT horario_id 
+                FROM empleado_horarios 
+                WHERE empleado_id = ? 
+                AND fecha_inicio <= ? 
+                AND (fecha_fin IS NULL OR fecha_fin >= ?)
+                ORDER BY fecha_inicio DESC 
+                LIMIT 1
+            ");
+            $stmt->execute([$empleado_id, $fecha, $fecha]);
+            $row = $stmt->fetch();
+            
+            if ($row) {
+                return $row['horario_id'];
+            }
+            
+            // Default a horario matutino (id=1)
+            return 1;
+        } catch (Exception $e) {
+            error_log("ERROR OBTENER HORARIO: " . $e->getMessage());
+            return 1; // Default matutino
         }
     }
     

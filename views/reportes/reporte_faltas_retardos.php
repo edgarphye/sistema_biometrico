@@ -36,6 +36,10 @@ if ($reporte === 'no_justificados' || $reporte === 'faltas') {
     $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $tipoReporte = 'REPORTE DE RETARDOS NO JUSTIFICADOS';
     $total = count($registros);
+} else {
+    $registros = [];
+    $tipoReporte = 'REPORTE DESCONOCIDO';
+    $total = 0;
 }
 ?>
 <!DOCTYPE html>

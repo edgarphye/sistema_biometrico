@@ -92,6 +92,29 @@ class BaseController {
         }
     }
     
+    /**
+     * Valida el tipo MIME real de un archivo usando finfo
+     * @param array $file Elemento de $_FILES
+     * @param array $allowedMimes Tipos MIME permitidos
+     * @return bool True si el MIME es válido
+     */
+    protected function validateMime(array $file, array $allowedMimes): bool
+    {
+        if (!isset($file['tmp_name']) || empty($file['tmp_name'])) {
+            return false;
+        }
+        if (!file_exists($file['tmp_name'])) {
+            return false;
+        }
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        if ($finfo === false) {
+            return false;
+        }
+        $mime = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+        return in_array($mime, $allowedMimes, true);
+    }
+
     protected function logException(Exception $e, $context = []) {
         $logDir = dirname(__DIR__) . '/logs';
         if (!is_dir($logDir)) {

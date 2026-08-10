@@ -209,4 +209,18 @@ class Biometrico {
         }
         return $rows;
     }
+
+    /**
+     * Obtener catálogo de empleados para gestión biométrica
+     */
+    public function getEmpleadosConHuella() {
+        $stmt = $this->db->getConnection()->prepare("
+            SELECT id, nombre, apellido, rfc, zkteo_id
+            FROM empleados
+            WHERE activo = 1
+            ORDER BY nombre, apellido
+        ");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
 }

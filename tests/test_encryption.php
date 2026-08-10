@@ -100,7 +100,8 @@ echo "✅ TODOS LOS TESTS PASARON EXITOSAMENTE\n";
 echo "═══════════════════════════════════════════════════════════════\n\n";
 
 echo "🔐 El sistema de cifrado está funcionando correctamente.\n";
-echo "   Los datos biométricos serán cifrados con AES-256-CBC.\n\n";
+echo "   Los datos biométricos serán cifrados con AES-256-GCM.\n";
+echo "   Compatibilidad: datos legacy AES-256-CBC aún pueden descifrarse.\n\n";
 
 echo "Próximos pasos:\n";
 echo "   • Configura ENCRYPTION_KEY permanentemente (ver setup_encryption_key.php)\n";

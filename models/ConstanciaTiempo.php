@@ -39,9 +39,9 @@ class ConstanciaTiempo {
             SELECT * FROM constancias_tiempo 
             WHERE empleado_id = ? 
             ORDER BY created_at DESC 
-            LIMIT ?
+            LIMIT " . (int)$limit . "
         ");
-        $stmt->execute([$empleado_id, $limit]);
+        $stmt->execute([$empleado_id]);
         return $stmt->fetchAll();
     }
 

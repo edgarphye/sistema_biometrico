@@ -7,9 +7,9 @@ require_once 'helpers/Csrf.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verificación 2FA - Sistema Biométrico</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
+    <link href="<?php echo rtrim(BASE_URL, '/'); ?>/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?php echo rtrim(BASE_URL, '/'); ?>/assets/css/fontawesome-all.min.css" rel="stylesheet">
+    <style<?= SecurityHelper::nonceAttr() ?>>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
@@ -79,7 +79,7 @@ require_once 'helpers/Csrf.php';
         </div>
     </div>
 
-    <script>
+    <script<?= SecurityHelper::nonceAttr() ?>>
     document.addEventListener("DOMContentLoaded", function() {
         const input = document.getElementById("2fa_code");
         input.addEventListener("input", function(e) {

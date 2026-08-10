@@ -117,6 +117,14 @@ ob_start();
                                            value="<?php echo htmlspecialchars($empleado['clave_depto'] ?? ''); ?>">
                                 </div>
                             </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="jefe_directo_id">Jefe Directo (Clave Área):</label>
+                                    <input type="text" class="form-control" id="jefe_directo_id" name="jefe_directo_id"
+                                           value="<?php echo htmlspecialchars($empleado['jefe_directo_clave'] ?? ''); ?>">
+                                    <small class="form-text">Clave del área del jefe directo (según catálogo de mandos)</small>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="row">
@@ -210,6 +218,36 @@ ob_start();
                         </div>
 
                         <div class="form-group mt-4">
+                            <label>Claves Presupuestales:</label>
+                            <div id="clavesContainer">
+                                <?php $claves = $claves ?? []; ?>
+                                <?php if (empty($claves)): ?>
+                                    <div class="row clave-row mb-2">
+                                        <div class="col-md-10">
+                                            <input type="text" class="form-control" name="claves_presupuestales[]" placeholder="Ej. 071152E0220000000371">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn btn-outline-danger btn-sm btn-quitar-clave" disabled><i class="fas fa-times"></i></button>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <?php foreach ($claves as $clave): ?>
+                                        <div class="row clave-row mb-2">
+                                            <div class="col-md-10">
+                                                <input type="text" class="form-control" name="claves_presupuestales[]" value="<?php echo htmlspecialchars($clave); ?>">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button" class="btn btn-outline-danger btn-sm btn-quitar-clave"><i class="fas fa-times"></i></button>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btnAgregarClave"><i class="fas fa-plus"></i> Agregar clave</button>
+                            <div class="form-text">Se muestran unidas con " / " en los oficios oficiales. Opcional.</div>
+                        </div>
+
+                        <div class="form-group mt-4">
                             <button type="submit" class="btn btn-primary" style="background-color: #9F2241; border-color: #9F2241;">
                                 <i class="fas fa-save"></i> Actualizar Empleado
                             </button>
@@ -241,6 +279,47 @@ document.getElementById('foto_cara').addEventListener('change', function(e) {
         preview.style.display = 'none';
     }
 });
+
+// Claves presupuestales dinámicas
+(function() {
+    const container = document.getElementById('clavesContainer');
+    const btnAgregar = document.getElementById('btnAgregarClave');
+    if (!container || !btnAgregar) return;
+
+    function actualizarBotones() {
+        const filas = container.querySelectorAll('.clave-row');
+        filas.forEach((fila) => {
+            const btn = fila.querySelector('.btn-quitar-clave');
+            if (btn) btn.disabled = filas.length <= 1;
+        });
+    }
+
+    btnAgregar.addEventListener('click', () => {
+        const div = document.createElement('div');
+        div.className = 'row clave-row mb-2';
+        div.innerHTML = `
+            <div class="col-md-10">
+                <input type="text" class="form-control" name="claves_presupuestales[]" placeholder="Ej. 071152E0220000000371">
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-outline-danger btn-sm btn-quitar-clave"><i class="fas fa-times"></i></button>
+            </div>
+        `;
+        container.appendChild(div);
+        actualizarBotones();
+    });
+
+    container.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-quitar-clave')) {
+            const fila = e.target.closest('.clave-row');
+            if (container.querySelectorAll('.clave-row').length > 1) {
+                fila.remove();
+                actualizarBotones();
+            }
+        }
+    });
+    actualizarBotones();
+})();
 </script>
 <?php
 $content = ob_get_clean();

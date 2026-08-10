@@ -203,6 +203,10 @@ class AIActualizadorService {
     }
     
     private function actualizarSnapshotDiario($pdo, $empleadoId, $fecha, $campo, $valor) {
+        $allowed = ['retardos_dia', 'retardos_minutos', 'faltas_dia', 'asistencias_dia', 'incidencias_dia'];
+        if (!in_array($campo, $allowed, true)) {
+            return;
+        }
         $stmt = $pdo->prepare("
             INSERT INTO ai_snapshots_diarios (empleado_id, fecha, $campo)
             VALUES (?, ?, ?)
@@ -305,10 +309,10 @@ class AIActualizadorService {
         
         $stmt = $pdo->prepare("
             SELECT * FROM ai_snapshots_diarios
-            WHERE empleado_id = ? AND fecha >= DATE_SUB(?, INTERVAL ? DAY)
+            WHERE empleado_id = ? AND fecha >= DATE_SUB(?, INTERVAL " . (int)$dias . " DAY)
             ORDER BY fecha ASC
         ");
-        $stmt->execute([$empleadoId, $fechaMax, $dias]);
+        $stmt->execute([$empleadoId, $fechaMax]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
@@ -336,8 +340,8 @@ class AIActualizadorService {
         
         $stmt = $pdo->prepare("
             SELECT 
-                COUNT(*) as total_retardos_7dias,
-                COUNT(*) as total_faltas_7dias
+                SUM(CASE WHEN tipo_evento = 'retardo' THEN 1 ELSE 0 END) as total_retardos_7dias,
+                SUM(CASE WHEN tipo_evento = 'falta' THEN 1 ELSE 0 END) as total_faltas_7dias
             FROM ai_metricas_tiempo_real
             WHERE empleado_id = ? 
             AND tipo_evento IN ('retardo', 'falta')

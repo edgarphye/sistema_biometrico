@@ -276,8 +276,6 @@ class PrediccionAvanzadaService {
     public function analisisEstacionalidad($empleadoId = null) {
         $pdo = $this->db->getConnection();
         
-        $whereEmpleado = $empleadoId ? "AND empleado_id = $empleadoId" : "";
-        
         $sql = "
             SELECT 
                 DAYOFWEEK(fecha) as dia_semana,
@@ -285,11 +283,13 @@ class PrediccionAvanzadaService {
                 COUNT(*) as total,
                 SUM(CASE WHEN tipo_asistencia = 'falta' THEN 1 ELSE 0 END) as faltas
             FROM asistencia
-            WHERE fecha >= DATE_SUB(CURDATE(), INTERVAL 365 DAY) $whereEmpleado
+            WHERE fecha >= DATE_SUB(CURDATE(), INTERVAL 365 DAY)
+            " . ($empleadoId ? "AND empleado_id = ?" : "") . "
             GROUP BY DAYOFWEEK(fecha), MONTH(fecha)
         ";
         
-        $stmt = $pdo->query($sql);
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($empleadoId ? [$empleadoId] : []);
         $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         $diasSemana = [];

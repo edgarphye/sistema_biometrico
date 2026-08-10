@@ -59,9 +59,9 @@ class LogDispositivo {
             LEFT JOIN empleados e ON ld.empleado_id = e.id
             WHERE ld.empleado_id = ?
             ORDER BY ld.timestamp DESC
-            LIMIT ?
+            LIMIT " . (int)$limit . "
         ");
-        $stmt->execute([$empleadoId, $limit]);
+        $stmt->execute([$empleadoId]);
         return $stmt->fetchAll();
     }
 

@@ -8,21 +8,24 @@ class AICronController extends BaseController {
         parent::__construct();
     }
     
-    public function ejecutarAnalisis() {
-        header('Content-Type: application/json');
-        
+    private function verificarAccesoCron() {
         // Verificar que solo se ejecute localmente o con token de seguridad
         $token = $_GET['token'] ?? '';
-        $tokenValido = $token === 'ai_cron_2026' || in_array($_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1']);
+        $tokenValido = getenv('AI_CRON_TOKEN') ?: 'ai_cron_' . date('Y');
+        $esLocal = in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1']);
         
-        if (!$tokenValido && PHP_SAPI !== 'cli') {
+        if ($token !== $tokenValido && !$esLocal && PHP_SAPI !== 'cli') {
             http_response_code(403);
             echo json_encode(['error' => 'No autorizado']);
-            return;
+            exit;
         }
+    }
+    
+    public function ejecutarAnalisis() {
+        header('Content-Type: application/json');
+        $this->verificarAccesoCron();
         
         try {
-            require_once __DIR__ . '/../services/AIIntegracionEventos.php';
             $ai = new AIIntegracionEventos();
             
             $resultado = $ai->ejecutarAnalisisProgramado();
@@ -43,9 +46,9 @@ class AICronController extends BaseController {
     
     public function resumendia() {
         header('Content-Type: application/json');
+        $this->verificarAccesoCron();
         
         try {
-            require_once __DIR__ . '/../services/AIIntegracionEventos.php';
             $ai = new AIIntegracionEventos();
             
             $resumen = $ai->obtenerResumenIA();

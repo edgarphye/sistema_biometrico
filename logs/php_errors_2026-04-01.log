@@ -1,6 +1,0 @@
-[2026-04-01 23:32:01] [FATAL_ERROR] Uncaught Error: Undefined constant "CONFIG_PATH" in Command line code:5
-Stack trace:
-#0 {main}
-  thrown en Command line code línea 5
-URI: N/A
---------------------------------------------------------------------------------

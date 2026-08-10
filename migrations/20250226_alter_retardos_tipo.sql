@@ -1,6 +1,6 @@
--- Migración para asegurar que la columna tipo_retraso acepte valores genéricos
--- Se cambia a VARCHAR(50) para permitir tipos personalizados del catálogo
+-- Migración para actualizar la columna tipo_retraso con los valores extendidos del catálogo
+-- Se cambia de ENUM('menor','mayor') al conjunto completo de clasificaciones
 
-ALTER TABLE retardos MODIFY COLUMN tipo_retraso VARCHAR(50) NOT NULL DEFAULT 'retardo_menor';
+ALTER TABLE retardos MODIFY COLUMN tipo_retraso ENUM('normal','retardo_menor','retardo_mayor','falta','comision_entrada','comision_salida','comision_todo_dia','dia_economico','ausencia') NOT NULL;
 
 -- Fin de la migración

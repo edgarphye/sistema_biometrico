@@ -125,15 +125,12 @@ class PerformanceOptimizer
             FROM empleados e 
             $whereClause 
             ORDER BY e.nombre, e.apellido 
-            LIMIT ? OFFSET ?
+            LIMIT " . (int)$limit . " OFFSET " . (int)$offset . "
         ";
-        
-        $params[] = $limit;
-        $params[] = $offset;
         
         // Consulta para total
         $countSql = "SELECT COUNT(*) as total FROM empleados e $whereClause";
-        $countParams = array_slice($params, 0, -2); // Quitar limit y offset
+        $countParams = array_slice($params, 0, 0); // All params for count (no limit/offset needed)
         
         try {
             // Ejecutar consulta principal

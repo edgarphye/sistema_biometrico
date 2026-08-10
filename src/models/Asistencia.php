@@ -181,8 +181,7 @@ class Asistencia {
         $query .= " ORDER BY a.timestamp DESC";
 
         if (!empty($filtros['limit'])) {
-            $query .= " LIMIT ?";
-            $params[] = $filtros['limit'];
+            $query .= " LIMIT " . (int)$filtros['limit'];
         }
 
         $stmt = $this->db->getConnection()->prepare($query);

@@ -382,7 +382,7 @@ class ZKTecoSDK extends BiometricSDK
             $userPassword = substr($empleado['rfc'], 0, 8);
             $privilege = 0; // Usuario normal
 
-            $result = $zk->setUser($userId, $userPassword, $userName, '', $privilege);
+            $result = $zk->setUser($userId, $userId, $userName, $userPassword, $privilege);
 
             if ($result) {
                 $this->logger->info("Huella registrada en dispositivo", [
@@ -422,7 +422,7 @@ class ZKTecoSDK extends BiometricSDK
                     $userPassword = substr($employee['rfc'], 0, 8);
                     $privilege = $this->getUserPrivilege($employee);
 
-                    $result = $zk->setUser($userId, $userPassword, $userName, '', $privilege);
+                    $result = $zk->setUser($userId, $userId, $userName, $userPassword, $privilege);
                     
                     if ($result) {
                         $syncedCount++;
@@ -506,19 +506,174 @@ class ZKTecoSDK extends BiometricSDK
     }
 
     /**
+     * Actualizar datos de empleado en dispositivo (sin re-enrolar huella)
+     */
+    protected function updateEmployeeOnDeviceImplementation(int $deviceId, int $employeeId): bool
+    {
+        try {
+            $zk = $this->connectedDevices[$deviceId] ?? null;
+            if (!$zk) {
+                throw new Exception("Dispositivo $deviceId no está conectado");
+            }
+
+            $db = new Database();
+            $stmt = $db->getConnection()->prepare("SELECT nombre, apellido, zkteo_id FROM empleados WHERE id = ?");
+            $stmt->execute([$employeeId]);
+            $empleado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$empleado) {
+                throw new Exception("Empleado $employeeId no encontrado");
+            }
+
+            $userId = str_pad($empleado['zkteo_id'] ?? $employeeId, 5, '0', STR_PAD_LEFT);
+            $userName = $empleado['nombre'] . ' ' . $empleado['apellido'];
+
+            $usuariosDispositivo = $zk->getUser();
+            $password = '';
+            $privilege = 0;
+            $cardno = 0;
+
+            if (!empty($usuariosDispositivo) && isset($usuariosDispositivo[$userId])) {
+                $u = $usuariosDispositivo[$userId];
+                $password = $u['password'] ?? '';
+                $privilege = $u['role'] ?? 0;
+                $cardno = $u['cardno'] ?? 0;
+            }
+
+            $result = $zk->setUser($userId, $userId, $userName, $password, $privilege, $cardno);
+
+            if ($result) {
+                $this->logger->info("Nombre de empleado actualizado en dispositivo", [
+                    'device_id' => $deviceId,
+                    'employee_id' => $employeeId,
+                    'user_id' => $userId,
+                    'user_name' => $userName
+                ]);
+                return true;
+            }
+
+            $this->logger->error("Error al actualizar nombre de empleado en dispositivo", [
+                'device_id' => $deviceId,
+                'employee_id' => $employeeId,
+                'user_id' => $userId
+            ]);
+            return false;
+
+        } catch (Exception $e) {
+            $this->logger->error("Error actualizando empleado en dispositivo: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Descargar todas las asistencias del dispositivo e insertarlas en BD
+     */
+    protected function downloadAttendanceFromDeviceImplementation(int $deviceId): array
+    {
+        $result = ['imported' => 0, 'duplicates' => 0, 'errors' => 0, 'total' => 0];
+
+        try {
+            $zk = $this->connectedDevices[$deviceId] ?? null;
+            if (!$zk) {
+                throw new Exception("Dispositivo $deviceId no está conectado");
+            }
+
+            $attendance = $zk->getAttendance();
+            if (empty($attendance)) {
+                $this->logger->info("No hay registros de asistencia en el dispositivo", [
+                    'device_id' => $deviceId
+                ]);
+                return $result;
+            }
+
+            $result['total'] = count($attendance);
+            $db = new Database();
+
+            require_once __DIR__ . '/../../models/ZKTecoLogProcessor.php';
+            $logProcessor = new ZKTecoLogProcessor();
+
+            foreach ($attendance as $record) {
+                try {
+                    $zktecoId = $record['id'] ?? null;
+                    $timestamp = $record['timestamp'] ?? null;
+
+                    if (!$zktecoId || !$timestamp) {
+                        $result['errors']++;
+                        continue;
+                    }
+
+                    $empleado = $logProcessor->getEmpleadoPorZKTecoId($zktecoId);
+                    if (!$empleado || !isset($empleado['id'])) {
+                        $result['errors']++;
+                        continue;
+                    }
+
+                    $fecha = date('Y-m-d', strtotime($timestamp));
+                    $hora = date('H:i:s', strtotime($timestamp));
+
+                    $horaNum = (int)date('H', strtotime($timestamp));
+                    $tipo = ($horaNum < 14) ? 'entrada' : 'salida';
+
+                    $checkStmt = $db->getConnection()->prepare("
+                        SELECT id FROM asistencia
+                        WHERE empleado_id = ? AND DATE(fecha) = ? AND tipo_marcacion = ?
+                        LIMIT 1
+                    ");
+                    $checkStmt->execute([$empleado['id'], $fecha, $tipo]);
+
+                    if ($checkStmt->fetch()) {
+                        $result['duplicates']++;
+                        continue;
+                    }
+
+                    $insertStmt = $db->getConnection()->prepare("
+                        INSERT INTO asistencia (empleado_id, fecha, hora_entrada, hora_salida, dispositivo_id, tipo_marcacion, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, NOW())
+                    ");
+
+                    if ($tipo === 'entrada') {
+                        $insertStmt->execute([$empleado['id'], $fecha, $hora, null, $deviceId, $tipo]);
+                    } else {
+                        $insertStmt->execute([$empleado['id'], $fecha, null, $hora, $deviceId, $tipo]);
+                    }
+
+                    $result['imported']++;
+
+                } catch (Exception $e) {
+                    $result['errors']++;
+                    $this->logger->error("Error procesando registro de asistencia", [
+                        'record' => $record,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            $this->logger->info("Descarga de asistencias completada", [
+                'device_id' => $deviceId,
+                'result' => $result
+            ]);
+
+        } catch (Exception $e) {
+            $this->logger->error("Error descargando asistencias: " . $e->getMessage());
+        }
+
+        return $result;
+    }
+
+    /**
      * Obtener logs de dispositivo
      */
     public function getDeviceLogs(int $deviceId, int $limit = 50): array
     {
         try {
-            $db = new Database();
+            $db = Database::getInstance();
             $stmt = $db->getConnection()->prepare("
                 SELECT * FROM device_logs 
                 WHERE device_id = ? 
                 ORDER BY created_at DESC 
-                LIMIT ?
+                LIMIT " . (int)$limit . "
             ");
-            $stmt->execute([$deviceId, $limit]);
+            $stmt->execute([$deviceId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             return [];
