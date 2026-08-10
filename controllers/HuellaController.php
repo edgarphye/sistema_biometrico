@@ -231,7 +231,7 @@ class HuellaController extends BaseController {
     private function getDispositivos() {
         $stmt = $this->conn->prepare("
             SELECT * FROM dispositivos_biometricos 
-            WHERE estado = 'activo' AND marca = 'ZKTeco' 
+            WHERE activo = 1 
             ORDER BY nombre
         ");
         $stmt->execute();
@@ -244,7 +244,7 @@ class HuellaController extends BaseController {
     private function getDispositivo($dispositivo_id) {
         $stmt = $this->conn->prepare("
             SELECT * FROM dispositivos_biometricos 
-            WHERE id = ? AND estado = 'activo'
+            WHERE id = ? AND activo = 1
         ");
         $stmt->execute([$dispositivo_id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -292,9 +292,9 @@ class HuellaController extends BaseController {
      */
     private function getEmpleado($empleado_id) {
         $stmt = $this->conn->prepare("
-            SELECT e.*, z.zk_empleado_id 
+            SELECT e.*, z.zkteo_id 
             FROM empleados e 
-            LEFT JOIN zk_empleado_mapeo z ON e.id = z.empleado_id 
+            LEFT JOIN zkteo_empleado_mapeo z ON e.id = z.empleado_id 
             WHERE e.id = ? AND e.activo = 1
         ");
         $stmt->execute([$empleado_id]);

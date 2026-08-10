@@ -64,6 +64,12 @@ class ZKTecoSDK extends BiometricSDK
                 throw new Exception("Dispositivo $deviceId no configurado o IP/puerto no especificado");
             }
 
+            // Probe UDP corto: el SDK jmrashed tiene un timeout de recepción de ~60s
+            // y para dispositivos apagados/inaccesibles bloquearía cada operación.
+            if (!$this->probeDeviceUdp($deviceConfig['ip_address'], $deviceConfig['puerto'])) {
+                throw new Exception("Dispositivo $deviceId no accesible (sin respuesta UDP en {$deviceConfig['ip_address']}:{$deviceConfig['puerto']})");
+            }
+
             $this->logger->info("Conectando a dispositivo ZKTeco", [
                 'device_id' => $deviceId,
                 'ip' => $deviceConfig['ip_address'],
@@ -78,11 +84,14 @@ class ZKTecoSDK extends BiometricSDK
                 // Obtener información del dispositivo
                 $deviceInfo = [
                     'device_id' => $deviceId,
+                    'dispositivo_id' => $deviceId,
                     'name' => $deviceConfig['nombre'],
+                    'nombre' => $deviceConfig['nombre'],
                     'model' => $deviceConfig['modelo'] ?? 'Unknown',
                     'ip_address' => $deviceConfig['ip_address'],
                     'port' => $deviceConfig['puerto'],
                     'status' => 'conectado',
+                    'type' => $deviceConfig['tipo'] ?? 'huella',
                     'serial_number' => method_exists($this->zkInstance, 'getSerialNumber') ? $this->zkInstance->getSerialNumber() : '',
                     'firmware_version' => method_exists($this->zkInstance, 'getFirmwareVersion') ? $this->zkInstance->getFirmwareVersion() : '',
                     'device_time' => method_exists($this->zkInstance, 'getDeviceTime') ? $this->zkInstance->getDeviceTime() : '',
@@ -220,11 +229,19 @@ class ZKTecoSDK extends BiometricSDK
 
             foreach ($configuredDevices as $device) {
                 $deviceId = $device['dispositivo_id'];
-                
+
+                // Reutilizar el estado cacheado recientemente para no reprobar
+                // cada dispositivo (conectando o sondeando UDP) en cada request.
+                $cacheado = $this->leerEstadoCacheado($deviceId, 10);
+                if ($cacheado !== null) {
+                    $devices[] = $cacheado;
+                    continue;
+                }
+
                 if (isset($this->connectedDevices[$deviceId])) {
                     // Dispositivo conectado
                     $zk = $this->connectedDevices[$deviceId];
-                    $devices[] = [
+                    $estado = [
                         'dispositivo_id' => $deviceId,
                         'nombre' => $device['nombre'],
                         'sede' => $device['sede'],
@@ -236,11 +253,31 @@ class ZKTecoSDK extends BiometricSDK
                         'user_count' => method_exists($zk, 'getUser') ? count($zk->getUser() ?? []) : 0,
                         'record_count' => method_exists($zk, 'getAttendance') ? count($zk->getAttendance() ?? []) : 0
                     ];
+                    $devices[] = $estado;
+                    $this->guardarEstadoCacheado($deviceId, $estado);
                 } else {
-                    // Intentar conectar si no está conectado
+                    // Intentar conectar si no está conectado.
+                    // El SDK jmrashed usa un timeout de recepción UDP de ~60s por dispositivo,
+                    // así que primero se valida el alcance con un probe UDP corto.
+                    if (isset($device['ip_address'], $device['puerto']) && !$this->probeDeviceUdp($device['ip_address'], $device['puerto'])) {
+                        $estado = [
+                            'dispositivo_id' => $deviceId,
+                            'nombre' => $device['nombre'],
+                            'sede' => $device['sede'],
+                            'ip_address' => $device['ip_address'],
+                            'status' => 'offline',
+                            'connected' => false,
+                            'last_activity' => null,
+                            'error' => 'Dispositivo no accesible (puerto ' . $device['puerto'] . ')'
+                        ];
+                        $devices[] = $estado;
+                        $this->guardarEstadoCacheado($deviceId, $estado);
+                        continue;
+                    }
+
                     try {
                         $this->connectDevice($deviceId);
-                        $devices[] = [
+                        $estado = [
                             'dispositivo_id' => $deviceId,
                             'nombre' => $device['nombre'],
                             'sede' => $device['sede'],
@@ -249,8 +286,10 @@ class ZKTecoSDK extends BiometricSDK
                             'connected' => true,
                             'last_activity' => date('Y-m-d H:i:s')
                         ];
+                        $devices[] = $estado;
+                        $this->guardarEstadoCacheado($deviceId, $estado);
                     } catch (Exception $e) {
-                        $devices[] = [
+                        $estado = [
                             'dispositivo_id' => $deviceId,
                             'nombre' => $device['nombre'],
                             'sede' => $device['sede'],
@@ -260,6 +299,8 @@ class ZKTecoSDK extends BiometricSDK
                             'last_activity' => null,
                             'error' => $e->getMessage()
                         ];
+                        $devices[] = $estado;
+                        $this->guardarEstadoCacheado($deviceId, $estado);
                     }
                 }
             }
@@ -269,6 +310,98 @@ class ZKTecoSDK extends BiometricSDK
         }
 
         return $devices;
+    }
+
+    /**
+     * Verifica rápidamente si un dispositivo ZKTeco responde en UDP 4370.
+     * El SDK jmrashed fija un timeout de recepción de ~60s; este probe usa
+     * un socket UDP propio con timeout corto para evitar bloqueos al consultar
+     * el estado de dispositivos que están apagados o fuera de alcance.
+     *
+     * @param string $ip Dirección IP del dispositivo
+     * @param int $port Puerto ZKTeco (normalmente 4370)
+     * @param int $timeoutSec Timeout del probe en segundos
+     * @return bool True si el dispositivo respondió
+     */
+    private function probeDeviceUdp(string $ip, int $port, int $timeoutSec = 1): bool
+    {
+        if (!extension_loaded('sockets') || !class_exists('Jmrashed\\Zkteco\\Lib\\Helper\\Util')) {
+            return true; // Sin forma de probar -> intentar la conexión real
+        }
+
+        $sock = @socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        if ($sock === false) {
+            return true;
+        }
+
+        socket_set_option($sock, SOL_SOCKET, SO_RCVTIMEO, ['sec' => $timeoutSec, 'usec' => 0]);
+
+        $buf = \Jmrashed\Zkteco\Lib\Helper\Util::createHeader(
+            \Jmrashed\Zkteco\Lib\Helper\Util::CMD_CONNECT,
+            0,
+            0,
+            -1 + \Jmrashed\Zkteco\Lib\Helper\Util::USHRT_MAX,
+            ''
+        );
+
+        @socket_sendto($sock, $buf, strlen($buf), 0, $ip, $port);
+
+        $respuesta = '';
+        $origen = '';
+        $puertoOrigen = 0;
+        $recibido = @socket_recvfrom($sock, $respuesta, 1024, 0, $origen, $puertoOrigen);
+        socket_close($sock);
+
+        return $recibido !== false && strlen($respuesta) > 0;
+    }
+
+    /**
+     * Directorio de caché de estado de dispositivos
+     */
+    private function dirEstadoCacheado(): string
+    {
+        return __DIR__ . '/../../data/biometrico_status/';
+    }
+
+    /**
+     * Lee el estado cacheado de un dispositivo si sigue vigente.
+     *
+     * @param int $deviceId ID del dispositivo
+     * @param int $ttlSegundos Vigencia de la caché
+     * @return array|null Estado cacheado o null si no existe/expiro
+     */
+    private function leerEstadoCacheado(int $deviceId, int $ttlSegundos = 10): ?array
+    {
+        $archivo = $this->dirEstadoCacheado() . 'device_' . $deviceId . '.json';
+        if (!is_file($archivo)) {
+            return null;
+        }
+
+        $datos = @json_decode((string)file_get_contents($archivo), true);
+        if (!is_array($datos) || empty($datos['_ts'])) {
+            return null;
+        }
+
+        if (time() - (int)$datos['_ts'] > $ttlSegundos) {
+            return null;
+        }
+
+        unset($datos['_ts']);
+        return $datos;
+    }
+
+    /**
+     * Guarda el estado de un dispositivo en caché.
+     */
+    private function guardarEstadoCacheado(int $deviceId, array $estado): void
+    {
+        $dir = $this->dirEstadoCacheado();
+        if (!is_dir($dir) && !@mkdir($dir, 0775, true)) {
+            return;
+        }
+
+        $estado['_ts'] = time();
+        @file_put_contents($dir . 'device_' . $deviceId . '.json', json_encode($estado));
     }
 
     /**

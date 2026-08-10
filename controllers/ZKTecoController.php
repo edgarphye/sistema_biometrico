@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/BaseController.php';
-require_once __DIR__ . '/ZKTecoLogProcessor.php';
+require_once __DIR__ . '/../models/ZKTecoLogProcessor.php';
 
 /**
  * Controlador para procesamiento de logs ZKTeco

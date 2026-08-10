@@ -19,9 +19,9 @@ $conn = $db->getConnection();
 // Obtener empleados para el formulario de enrolamiento
 $stmt = $conn->prepare("
     SELECT e.id, e.nombre, e.apellido, e.rfc, e.area, e.puesto,
-           COALESCE(z.zk_empleado_id, e.id) as zk_empleado_id
+           COALESCE(z.zkteo_id, e.id) as zk_empleado_id
     FROM empleados e
-    LEFT JOIN zk_empleado_mapeo z ON e.id = z.empleado_id
+    LEFT JOIN zkteo_empleado_mapeo z ON e.id = z.empleado_id
     WHERE e.activo = 1
     ORDER BY e.nombre, e.apellido
 ");

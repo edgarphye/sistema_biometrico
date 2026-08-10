@@ -149,7 +149,12 @@ abstract class BiometricSDK implements BiometricInterface
         try {
             $this->logger->info("Conectando dispositivo", ['device_id' => $deviceId]);
             $result = $this->connectDeviceImplementation($deviceId);
-            $this->connectedDevices[$deviceId] = true;
+            // La implementación ya almacena la instancia del SDK (ej. ZKTecoSDK).
+            // Solo guardar un marcador aquí si la implementación no lo hizo,
+            // para no sobrescribir el objeto real que usan setUser/getAttendance.
+            if (!isset($this->connectedDevices[$deviceId])) {
+                $this->connectedDevices[$deviceId] = $result;
+            }
             $this->logger->info("Dispositivo conectado exitosamente", ['device_id' => $deviceId]);
             return $result;
         } catch (Exception $e) {

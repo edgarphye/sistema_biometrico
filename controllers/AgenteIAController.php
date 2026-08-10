@@ -10,7 +10,6 @@ class AgenteIAController extends BaseController {
     private $documentoService;
     private $excelService;
     private $reglaModel;
-    private $configModel;
 
     public function __construct() {
         parent::__construct();
@@ -19,7 +18,6 @@ class AgenteIAController extends BaseController {
         $this->documentoService = new GeneradorDocumentosService();
         $this->excelService = new ExportadorExcelService();
         $this->reglaModel = new ReglaNegocio();
-        $this->configModel = new Configuracion();
     }
 
     public function index() {

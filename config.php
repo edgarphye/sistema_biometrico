@@ -132,6 +132,7 @@ $defaultBiometricUrl = 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . ':80
 if (!defined('BIOMETRIC_API_URL')) define('BIOMETRIC_API_URL', getenv('BIOMETRIC_API_URL') ?: $defaultBiometricUrl); // URL adaptable al host actual
 if (!defined('BIOMETRIC_API_KEY')) define('BIOMETRIC_API_KEY', getenv('BIOMETRIC_API_KEY') ?: 'dev_key_12345'); // Clave de desarrollo
 if (!defined('BIOMETRIC_SIMULATION')) define('BIOMETRIC_SIMULATION', getenv('BIOMETRIC_SIMULATION') ?: 'true'); // Modo simulación activado
+if (!defined('BIOMETRIC_MODE')) define('BIOMETRIC_MODE', getenv('BIOMETRIC_MODE') ?: 'sdk'); // 'sdk' (dispositivos reales) o 'simulation'
 
 // Configuración de tolerancia
 if (!defined('TOLERANCE_MINUTES')) define('TOLERANCE_MINUTES', intval(getenv('TOLERANCE_MINUTES') ?: 10));

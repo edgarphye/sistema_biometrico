@@ -92,7 +92,7 @@ class BiometricosController extends BaseController {
             $this->redirect('/sistema_biometrico/biometricos');
         }
 
-        $dispositivo = $this->biometricoModel->conectarDispositivo($dispositivoId);
+        $dispositivo = $this->obtenerDispositivo($dispositivoId);
         $empleados = $this->biometricoModel->getEmpleadosConHuella();
         $logs = $this->logDispositivoModel->getByDispositivo($dispositivoId, 20);
 
@@ -120,7 +120,7 @@ class BiometricosController extends BaseController {
         }
 
         // Obtener información del dispositivo
-        $dispositivo = $this->biometricoModel->conectarDispositivo($dispositivoId);
+        $dispositivo = $this->obtenerDispositivo($dispositivoId);
 
         // Obtener asistencia del dispositivo
         $asistencia = $this->asistenciaModel->getByDispositivo($dispositivoId);
@@ -141,6 +141,36 @@ class BiometricosController extends BaseController {
             'logs' => $logs,
             'estadisticasDispositivo' => $estadisticasDispositivo
         ]);
+    }
+
+    /**
+     * Obtiene la información de un dispositivo para mostrar su gestión.
+     * Si el dispositivo no está accesible, devuelve la configuración con estado offline
+     * para que la página no falle.
+     */
+    private function obtenerDispositivo($dispositivoId) {
+        try {
+            return $this->biometricoModel->conectarDispositivo($dispositivoId);
+        } catch (Exception $e) {
+            $db = new Database();
+            $stmt = $db->getConnection()->prepare("SELECT * FROM dispositivos_biometricos WHERE dispositivo_id = ?");
+            $stmt->execute([$dispositivoId]);
+            $config = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return [
+                'device_id' => $dispositivoId,
+                'dispositivo_id' => $dispositivoId,
+                'name' => $config['nombre'] ?? 'Dispositivo ' . $dispositivoId,
+                'nombre' => $config['nombre'] ?? 'Dispositivo ' . $dispositivoId,
+                'model' => 'MB360',
+                'ip_address' => $config['ip_address'] ?? '',
+                'port' => $config['puerto'] ?? 4370,
+                'status' => 'desconectado',
+                'type' => $config['tipo'] ?? 'huella',
+                'firmware_version' => 'No disponible',
+                'error' => $e->getMessage()
+            ];
+        }
     }
 
     /**

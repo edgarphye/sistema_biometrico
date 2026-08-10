@@ -2,6 +2,7 @@
 require_once 'BiometricInterface.php';
 require_once 'BiometricSimulation.php';
 require_once 'BiometricSDK.php';
+require_once 'ZKTecoSDK.php';
 
 /**
  * Factory para crear instancias de implementaciones biométricas
@@ -15,7 +16,7 @@ class BiometricFactory
     private function __construct()
     {
         $this->config = [
-            'mode' => getenv('BIOMETRIC_MODE') ?: 'simulation', // 'simulation' o 'sdk'
+            'mode' => getenv('BIOMETRIC_MODE') ?: (defined('BIOMETRIC_MODE') ? BIOMETRIC_MODE : 'sdk'), // 'simulation' o 'sdk'
             'sdk_class' => getenv('BIOMETRIC_SDK_CLASS') ?: 'ZKTecoSDK',
             'debug' => getenv('BIOMETRIC_DEBUG') ?: false
         ];
