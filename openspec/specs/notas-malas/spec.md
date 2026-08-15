@@ -3,13 +3,26 @@
 ## Purpose
 Calcular notas malas por acumulación de retardos cada quincena según la fórmula AEFCM, evaluar sanciones automáticas por umbrales (suspensión, oficio, terminación) y gestionar límites anuales.
 
+## Requirements
 
 ### Requirement: Cálculo de notas malas
-El sistema SHALL calcular y mostrar notas malas por quincena (1ª: días 1-15, 2ª: días 16-fin del mes) combinando dos orígenes: los registros de la tabla `notas_malas` y los retardos no justificados (`justificado = 0`) cuya ventana de justificación ya venció (día 15/30), aplicando la fórmula: total = floor(retardos_menores/2) + (retardos_mayores + faltas). Las faltas (31+ min) se convierten a retardo_mayor antes de aplicar la fórmula. El conjunto de incidencias se determina por la fecha del retardo (`retardos.fecha`), no por el campo `notas_malas.periodo`.
+El sistema SHALL calcular y mostrar notas malas por periodo (mes completo, 1ª quincena: días 1-15, o 2ª quincena: días 16-fin del mes) a partir de dos fuentes: los retardos NO justificados (`justificado = 0`) del periodo y los retardos justificados que EXCEDEN los 2 permitidos por quincena, identificados por los registros de la tabla `notas_malas` que referencian su `retardo_id`. El conteo SHALL calcularse sobre los retardos directamente, sin sumar la tabla `notas_malas`, aplicando la fórmula: total = floor(menores_sin_justificar/2) + menores_justificados_en_exceso_con_registro + (mayores + faltas). Cada registro de `notas_malas` sobre un menor justificado en exceso ya representa un par completo (2 menores = 1 nota) y SHALL contar como 1 nota mala sin volver a dividirse. El emparejamiento de retardos menores sin justificar SHALL hacerse dentro del periodo seleccionado (el mes completo o la quincena elegida), sin fragmentarse por quincena cuando se consulta el mes completo, de modo que 2 menores sin justificar del mismo periodo sumen 1 nota mala aun en quincenas distintas. Los retardos mayores (21-30 min) cuentan 1 nota cada uno; pasando de los 30 minutos el registro se trata como falta y también cuenta como nota mayor, aunque esté clasificado como menor/mayor en BD. El conjunto de incidencias se determina por la fecha del retardo (`retardos.fecha`), no por el campo `notas_malas.periodo`.
 
 #### Scenario: Cálculo quincenal
 - **WHEN** se consulta el módulo de notas malas con un mes y una quincena (1ª o 2ª)
-- **THEN** el sistema muestra las notas malas del periodo considerando la tabla `notas_malas` y los retardos sin justificar del periodo
+- **THEN** el sistema muestra las notas malas del periodo considerando los retardos sin justificar del periodo y los justificados en exceso con nota registrada
+
+#### Scenario: Menores en quincenas distintas
+- **WHEN** un empleado acumula 2 retardos menores sin justificar en el mes, uno en cada quincena
+- **THEN** el sistema los empareja como 1 nota mala (el emparejamiento es sobre el periodo completo, no por quincena)
+
+#### Scenario: Retardo mayor por minutos
+- **WHEN** un retardo tiene más de 30 minutos de retraso, aunque esté registrado como menor
+- **THEN** el sistema lo trata como falta y cuenta como 1 nota mala (nota mayor)
+
+#### Scenario: Menores justificados en exceso
+- **WHEN** un empleado justifica más de 2 retardos en la misma quincena y los excedentes son menores con nota registrada en `notas_malas`
+- **THEN** cada registro de `notas_malas` sobre un menor en exceso cuenta como 1 nota mala (cada registro representa un par de menores excedentes)
 
 #### Scenario: Retardos con justificación vencida
 - **WHEN** un retardo sin justificar tiene su ventana de justificación vencida
@@ -23,7 +36,7 @@ El sistema SHALL crear registro en notas_malas cuando se detecte acumulación qu
 - **THEN** el sistema crea registros en notas_malas con tipo, cantidad, periodo
 
 ### Requirement: Evaluación de sanciones por notas malas
-El sistema SHALL evaluar si 4+ notas malas requieren oficio y 5+ requieren suspensión.
+El sistema SHALL evaluar si 1 o más notas malas (1-4) requieren oficio y 5+ requieren suspensión, según las reglas de `Retardo::calcularNotasMalas` y `Retardo::evaluarYSancionar`.
 
 #### Scenario: Suspensión por 5 notas malas
 - **WHEN** un empleado alcanza 5 notas malas
@@ -67,3 +80,18 @@ El sistema SHALL exponer en el módulo de notas malas las acciones "Generar ofic
 #### Scenario: Generar oficio desde el listado
 - **WHEN** el usuario RH hace clic en "Generar oficio" de un empleado
 - **THEN** el sistema genera y descarga el oficio .docx del empleado para el periodo seleccionado
+
+### Requirement: Acciones de entrega en la tarjeta del empleado
+El sistema SHALL mostrar en la tarjeta de cada empleado del módulo de notas malas las acciones de entrega del oficio según su estado: botón "Marcar entregado" cuando el oficio existe y no está entregado, y badge "Entregado" con fecha más botón "Deshacer entrega" cuando sí está entregado.
+
+#### Scenario: Tarjeta con oficio sin entregar
+- **WHEN** el empleado tiene oficio generado con `entregado = 0`
+- **THEN** la tarjeta muestra el botón "Marcar entregado"
+
+#### Scenario: Tarjeta con oficio entregado
+- **WHEN** el empleado tiene oficio generado con `entregado = 1`
+- **THEN** la tarjeta muestra el badge "Entregado" con la fecha de entrega y el botón "Deshacer entrega"
+
+#### Scenario: Sin oficio generado
+- **WHEN** el empleado no tiene oficio generado
+- **THEN** la tarjeta no muestra acciones de entrega

@@ -160,6 +160,35 @@ class DocumentoGenerado {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Marca un oficio de notas malas como entregado al empleado.
+     * Registra fecha/hora actual y el usuario que realiza la entrega.
+     * @return bool
+     */
+    public function marcarEntregado($id, $usuario_id) {
+        $pdo = $this->db->getConnection();
+        $stmt = $pdo->prepare("
+            UPDATE documentos_generados
+            SET entregado = 1, fecha_entrega = NOW(), entregado_por = ?
+            WHERE id = ? AND tipo_documento = 'oficio_notas_malas'
+        ");
+        return $stmt->execute([$usuario_id, (int)$id]);
+    }
+
+    /**
+     * Revertir el estado de entrega de un oficio de notas malas.
+     * @return bool
+     */
+    public function desmarcarEntregado($id) {
+        $pdo = $this->db->getConnection();
+        $stmt = $pdo->prepare("
+            UPDATE documentos_generados
+            SET entregado = 0, fecha_entrega = NULL, entregado_por = NULL
+            WHERE id = ? AND tipo_documento = 'oficio_notas_malas'
+        ");
+        return $stmt->execute([(int)$id]);
+    }
+
     public function getByFecha($fecha_inicio, $fecha_fin, $tipo = null) {
         $pdo = $this->db->getConnection();
         $sql = "SELECT d.*, e.nombre, e.apellido, e.area 

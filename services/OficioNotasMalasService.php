@@ -29,6 +29,37 @@ class OficioNotasMalasService {
     /** Días de la semana permitidos para programar suspensiones (1=Lun ... 7=Dom). */
     private const DIAS_SUSPENSION_SEMANA = [2, 3, 4];
 
+    // ── Diseño del documento original de referencia ──────────────────────────
+    /** Márgenes en twips del documento original (Letter 8.5x11). */
+    private const MARGEN_SUPERIOR = 2342;
+    private const MARGEN_INFERIOR = 1418;
+    private const MARGEN_LATERAL  = 1701;
+    private const DIST_HEADER     = 709;
+    private const DIST_FOOTER     = 350;
+
+    /** Fuentes usadas en el original: Montserrat para el cuerpo y Noto Sans para el título. */
+    private const FUENTE_CUERPO = 'Montserrat';
+    private const FUENTE_TITULO = 'Noto Sans';
+
+    /** Colores del original. */
+    private const COLOR_AREA      = '333333';
+    private const COLOR_MAROON    = '691135';
+    private const SOMBREADO_TABLA = 'D5DCE4';
+
+    /** Texto del membrete institucional (igual al documento original). */
+    private const JERARQUIA = [
+        'Autoridad Educativa Federal en la Ciudad de México',
+        'Dirección General de Innovación y Fortalecimiento Académico',
+        'Coordinación Administrativa',
+        'Recursos Humanos',
+        'Dirección de Recursos Materiales y Servicios',
+    ];
+
+    /** Pie de página institucional (color granate en el original). */
+    private const PIE_PAGINA =
+        'Colegio Salesiano 42, Colonia Anáhuac I Secc, Alcaldía Miguel Hidalgo, '
+        . 'C.P. 11320 Ciudad de México. www.gob.mx/aefcm';
+
     private static $MESES = [
         1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril', 5 => 'Mayo', 6 => 'Junio',
         7 => 'Julio', 8 => 'Agosto', 9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
@@ -107,15 +138,28 @@ class OficioNotasMalasService {
         $mayores = 0;
         $faltas = 0;
 
-        // Reglas del documento de referencia ("Comentarios"):
-        // - El emparejamiento de 2 retardos menores -> 1 nota mala ocurre DENTRO de la misma quincena.
+        // Reglas del documento de referencia:
+        // - 2 retardos menores sin justificar = 1 nota mala, emparejados DENTRO del periodo
+        //   seleccionado (el mes completo o la quincena elegida); NO se fragmenta por quincena
+        //   cuando se consulta el mes completo.
+        // - 1 retardo mayor = 1 nota mala (21-30 min); pasando de los 30 minutos es falta
+        //   y cuenta también como nota mayor.
         // - Solo cuentan retardos NO justificados por el jefe, o justificados que EXCEDEN los 2 permitidos
         //   por quincena (los excedentes ya no se pueden justificar y generan nota).
-        $menoresSinJustificar = [1 => 0, 2 => 0];
-        $menoresExcesoJustificado = [1 => 0, 2 => 0];
+        //   Para los menores justificados en exceso, cada registro de notas_malas ya representa
+        //   un PAR completo (2 menores = 1 nota), por lo que se cuenta 1 nota por registro y
+        //   NO se vuelve a dividir entre 2.
+        $menoresSinJustificar = 0;
+        $menoresExcesoJustificado = 0;
 
         foreach ($retardos as $r) {
             $tipo = $r['tipo_retraso'];
+            $minutos = (int)($r['minutos_retardo'] ?? 0);
+            // Regla del usuario: pasando de los 30 minutos es falta (cuenta como nota mayor),
+            // aunque el registro esté clasificado como menor/mayor.
+            if ($minutos > 30) {
+                $tipo = 'falta';
+            }
             $dia = (int)date('j', strtotime($r['fecha']));
             $mesNombre = self::$MESES[(int)date('n', strtotime($r['fecha']))];
             $hora = substr((string)$r['hora_entrada'], 0, 5);
@@ -126,13 +170,12 @@ class OficioNotasMalasService {
                 'hora' => $hora,
                 'tipo' => $tipo
             ];
-            $quincena = $dia <= 15 ? 1 : 2;
             if ($tipo === 'retardo_menor') {
                 $menores++;
                 if (!empty($r['justificado'])) {
-                    $menoresExcesoJustificado[$quincena]++;
+                    $menoresExcesoJustificado++;
                 } else {
-                    $menoresSinJustificar[$quincena]++;
+                    $menoresSinJustificar++;
                 }
                 $inciso_a[] = $fila;
             } elseif ($tipo === 'retardo_mayor') {
@@ -145,11 +188,9 @@ class OficioNotasMalasService {
         }
 
         $mayoresTotal = $mayores + $faltas;
-        $notasMenores = 0;
-        foreach ([1, 2] as $q) {
-            $notasMenores += floor($menoresSinJustificar[$q] / 2);
-            $notasMenores += floor($menoresExcesoJustificado[$q] / 2);
-        }
+        // Los menores sin justificar se emparejan de 2 en 2 (floor); los menores justificados
+        // en exceso ya llegan como un registro de notas_malas por cada par completo (1 = 1).
+        $notasMenores = floor($menoresSinJustificar / 2) + $menoresExcesoJustificado;
         $notas_malas = $notasMenores + $mayoresTotal;
         $dias_suspension = (int)floor($notas_malas / self::NOTAS_POR_SUSPENSION);
 
@@ -159,7 +200,8 @@ class OficioNotasMalasService {
             'apellido' => $empleado['apellido'],
             'rfc' => $empleado['rfc'],
             'area' => $empleado['area'],
-            'claves_presupuestales' => $this->claveModel->getClavesUnidas($empleado['id']),
+            'claves_presupuestales' => $this->claveModel->getClavesUnidas($empleado['id'])
+                ?: $this->plazasUnidas((int)$empleado['id']),
             'retardos' => $retardos,
             'inciso_a' => $inciso_a,
             'inciso_b' => $inciso_b,
@@ -172,6 +214,28 @@ class OficioNotasMalasService {
             'dias_suspension' => $dias_suspension,
             'requiere_suspension' => $dias_suspension > 0
         ];
+    }
+
+    /**
+     * Une las claves de plaza (tabla plazas) de un empleado con " / ",
+     * usado como respaldo cuando no hay claves presupuestales registradas.
+     * @param int $empleado_id
+     * @return string
+     */
+    private function plazasUnidas($empleado_id) {
+        try {
+            $pdo = $this->db->getConnection();
+            $stmt = $pdo->prepare("
+                SELECT PLAZA FROM plazas
+                WHERE id_empleado = ? AND PLAZA IS NOT NULL AND PLAZA != ''
+                ORDER BY id
+            ");
+            $stmt->execute([$empleado_id]);
+            $plazas = array_map('trim', $stmt->fetchAll(PDO::FETCH_COLUMN));
+            return implode(' / ', $plazas);
+        } catch (Exception $e) {
+            return '';
+        }
     }
 
     /**
@@ -254,17 +318,10 @@ class OficioNotasMalasService {
     }
 
     /**
-     * Cuerpo legal estándar del oficio (párrafo idéntico al documento de referencia).
+     * Cuerpo legal estándar del oficio (texto plano, idéntico al documento de referencia).
      */
     public static function construirCuerpoLegal(int $notasMalas, string $incisosTexto): string {
-        $numNotas = str_pad((string)$notasMalas, 2, '0', STR_PAD_LEFT);
-        return 'Derivado de la revisión efectuada a las listas de asistencia del personal, se detectó que '
-            . 'incumplió con lo establecido en el Art. 44 Fracción VI de la Ley Federal de los Trabajadores al '
-            . 'Servicio del Estado, en relación con el Art. 25 Fracción II (asistir con puntualidad al desempeño '
-            . 'de sus labores) del Reglamento de las Condiciones Generales de Trabajo del Personal de la Secretaría '
-            . 'de Educación Pública, siendo merecedor a ' . $numNotas . ' Nota (s) Mala (s) con fundamento en lo '
-            . 'dispuesto en los Artículos 70, 71 fracción II, 74, 76 y 80 inciso ' . $incisosTexto
-            . ' del reglamento aludido con antelación.';
+        return implode('', array_column(self::segmentosCuerpoLegal($notasMalas, $incisosTexto), 'text'));
     }
 
     /**
@@ -311,86 +368,93 @@ class OficioNotasMalasService {
      * Párrafo de suspensión (5+ notas malas). El mes se escribe en minúsculas como en el documento oficial.
      */
     public static function construirParrafoSuspension(array $diasSuspension): string {
+        return implode('', array_column(self::segmentosParrafoSuspension($diasSuspension), 'text'));
+    }
+
+    /**
+     * Segmentos (texto + negrita) del cuerpo legal, idénticos al documento original.
+     * En el original van en negrita el número de notas y el inciso citado.
+     */
+    public static function segmentosCuerpoLegal(int $notasMalas, string $incisosTexto): array {
+        $numNotas = str_pad((string)$notasMalas, 2, '0', STR_PAD_LEFT);
+        $prefijo = 'Derivado de la revisión efectuada a las listas de asistencia del personal, se detectó que '
+            . 'incumplió con lo establecido en el Art. 44 Fracción VI de la Ley Federal de los Trabajadores al '
+            . 'Servicio del Estado, en relación con el Art. 25 Fracción II (asistir con puntualidad al desempeño '
+            . 'de sus labores) del Reglamento de las Condiciones Generales de Trabajo del Personal de la Secretaría '
+            . 'de Educación Pública, siendo merecedor a ';
+        $medio = ' con fundamento en lo dispuesto en los Artículos 70, 71 fracción II, 74, 76 y 80 inciso ';
+        $fin = 'del reglamento aludido con antelación.';
+        return [
+            ['text' => $prefijo, 'bold' => false],
+            ['text' => $numNotas . ' Nota (s) Mala (s)', 'bold' => true],
+            ['text' => $medio, 'bold' => false],
+            ['text' => $incisosTexto . ' ', 'bold' => true],
+            ['text' => $fin, 'bold' => false],
+        ];
+    }
+
+    /**
+     * Segmentos del párrafo de advertencia (sin negritas en el original).
+     */
+    public static function segmentosParrafoAdvertencia(): array {
+        return [
+            ['text' => self::construirParrafoAdvertencia(), 'bold' => false],
+        ];
+    }
+
+    /**
+     * Segmentos del párrafo de suspensión. En el original van en negrita
+     * el número de días y las fechas programadas de suspensión.
+     */
+    public static function segmentosParrafoSuspension(array $diasSuspension): array {
         $totalDias = count($diasSuspension);
         if ($totalDias <= 0) {
-            return self::construirParrafoAdvertencia();
+            return self::segmentosParrafoAdvertencia();
         }
         $esAplicable = $totalDias === 1 ? 'le es aplicable' : 'le son aplicables';
         $diasTexto = $totalDias === 1
             ? '01 día'
             : str_pad((string)$totalDias, 2, '0', STR_PAD_LEFT) . ' días';
-        return 'Como resultado de lo anterior, ' . $esAplicable . ' ' . $diasTexto
-            . ' de suspensión de sus labores y sueldo con fundamento en lo dispuesto en los Artículos 70,71 '
-            . 'fracciones III y IV y articulo 80 inciso d) del Reglamento de las Condiciones Generales de Trabajo '
-            . 'del Personal de la Secretaria de Educación Publica, dicha suspensión aplicara '
-            . self::construirListaDiasSuspension($diasSuspension)
-            . ' del año en curso y de acumular 7 suspensiones en el termino de 1 año dará lugar a que se solicite '
-            . 'al Tribunal de Arbitraje la terminación de los efectos de su nombramiento motivo por el cual se le '
-            . 'exhorta a llegar con puntualidad a sus labores.';
+        $prefijo = 'Como resultado de lo anterior, ' . $esAplicable . ' ';
+        $medio = ' con fundamento en lo dispuesto en los Artículos 70,71 fracciones III y IV y articulo 80 inciso '
+            . 'd) del Reglamento de las Condiciones Generales de Trabajo del Personal de la Secretaria de Educación '
+            . 'Publica, dicha suspensión aplicara ';
+        $fechas = self::construirListaDiasSuspension($diasSuspension) . ' del año en curso';
+        $resto = ' y de acumular 7 suspensiones en el termino de 1 año dará lugar a que se solicite al Tribunal de '
+            . 'Arbitraje la terminación de los efectos de su nombramiento motivo por el cual se le exhorta a llegar '
+            . 'con puntualidad a sus labores.';
+        return [
+            ['text' => $prefijo, 'bold' => false],
+            ['text' => $diasTexto . ' de suspensión de sus labores y sueldo', 'bold' => true],
+            ['text' => $medio, 'bold' => false],
+            ['text' => $fechas, 'bold' => true],
+            ['text' => $resto, 'bold' => false],
+        ];
     }
 
     /**
-     * Construye el documento .docx con PhpWord
-     * @return array ['archivo' => ruta relativa, 'ruta_absoluta' => ...]
+     * Construye el modelo de render del oficio (compartido por el .docx y el HTML).
+     * Garantiza que la vista previa HTML y el Word generado tengan exactamente el mismo contenido.
      */
-    private function buildDocx(array $empleado, array $incidencias, array $config, $folio, $mes, $anio) {
-        $phpWord = new PhpWord();
-        $phpWord->setDefaultFontName('Arial');
-        $phpWord->setDefaultFontSize(11);
-
-        $section = $phpWord->addSection([
-            'orientation' => 'portrait',
-            'marginTop' => 720,
-            'marginBottom' => 720,
-            'marginLeft' => 1080,
-            'marginRight' => 1080
-        ]);
-
-        // Membrete en el header
-        $membrete = ConfigOficio::rutaMembrete($config);
-        if ($membrete && file_exists($membrete)) {
-            $header = $section->addHeader();
-            $header->addImage($membrete, [
-                'width' => 209,
-                'height' => 43,
-                'alignment' => Jc::CENTER,
-                'spaceAfter' => 60
-            ]);
-        }
-
+    private function construirModelo(array $empleado, array $incidencias, array $config, $folio, $mes, $anio): array {
         $fechaHoy = new DateTime();
-        $folioStr = ConfigOficio::formatearFolio($config, $folio);
-        $nombreCompleto = strtoupper(trim(($incidencias['apellido'] ?? '') . ' ' . ($incidencias['nombre'] ?? '')));
-
-        // Incisos citados en el cuerpo legal
+        $folioStr = (is_string($folio) && strpos($folio, '/') !== false)
+            ? $folio
+            : ConfigOficio::formatearFolio($config, $folio);
         $incisosTexto = self::construirTextoIncisos(
             $incidencias['inciso_a'] ?? [],
             $incidencias['inciso_b'] ?? []
         );
 
-        // 1. Título
-        $section->addText('ATENTA NOTA ' . $folioStr, ['bold' => true, 'size' => 12], ['spaceAfter' => 160]);
-
-        // 2. Fecha (fecha de generación)
-        $section->addText(self::construirFechaEmision($fechaHoy), [], ['spaceAfter' => 160]);
-
-        // 3. Destinatario
-        $section->addText($nombreCompleto . ' (ID ' . $empleado['id'] . ')', ['bold' => true]);
-        $section->addText('Filiación: ' . strtoupper((string)($empleado['rfc'] ?? 'N/A')));
-        if (!empty($incidencias['claves_presupuestales'])) {
-            $section->addText('Clave Presupuestal: ' . $incidencias['claves_presupuestales']);
+        $requiereSuspension = !empty($incidencias['requiere_suspension']);
+        $diasSuspension = [];
+        if ($requiereSuspension) {
+            $diasSuspension = self::programarDiasSuspension(
+                (int)($incidencias['dias_suspension'] ?? 1),
+                $fechaHoy
+            );
         }
-        if (!empty($empleado['area'])) {
-            $section->addText($empleado['area']);
-        }
-        $section->addText('P r e s e n t e.');
-        $section->addText('', [], ['spaceAfter' => 120]);
 
-        // 4. Cuerpo legal
-        $cuerpo = self::construirCuerpoLegal((int)$incidencias['notas_malas'], $incisosTexto);
-        $section->addText($cuerpo, [], ['spaceAfter' => 160]);
-
-        // 5. Tablas por inciso
         $incisos = [];
         if (!empty($incidencias['inciso_a'])) {
             $incisos[] = ['titulo' => '80 inciso a)', 'filas' => $incidencias['inciso_a']];
@@ -398,37 +462,222 @@ class OficioNotasMalasService {
         if (!empty($incidencias['inciso_b'])) {
             $incisos[] = ['titulo' => '80 inciso b)', 'filas' => $incidencias['inciso_b']];
         }
-        $this->agregarTablasIncisos($section, $incisos);
+
+        return [
+            'folio' => $folioStr,
+            'titulo' => 'ATENTA NOTA ' . $folioStr,
+            'fecha_emision' => self::construirFechaEmision($fechaHoy),
+            'empleado_id' => (int)($empleado['id'] ?? 0),
+            'nombre_completo' => strtoupper(trim(($incidencias['apellido'] ?? '') . ' ' . ($incidencias['nombre'] ?? ''))),
+            'rfc' => strtoupper((string)($empleado['rfc'] ?? 'N/A')),
+            'claves_presupuestales' => (string)($incidencias['claves_presupuestales'] ?? ''),
+            'area' => (string)($empleado['area'] ?? ''),
+            'cuerpo' => self::segmentosCuerpoLegal((int)$incidencias['notas_malas'], $incisosTexto),
+            'incisos' => $incisos,
+            'parrafo' => $requiereSuspension
+                ? self::segmentosParrafoSuspension($diasSuspension)
+                : self::segmentosParrafoAdvertencia(),
+            'requiere_suspension' => $requiereSuspension,
+            'dias_suspension' => array_map(function ($d) {
+                return $d->format('Y-m-d');
+            }, $diasSuspension),
+            'iniciales' => strtoupper((string)($config['iniciales'] ?? 'DGNQ*')),
+            'firmante' => (string)($config['nombre_firmante'] ?? 'JUAN JOSE OROZCO PONCE'),
+            'cargo' => (string)($config['cargo_firmante'] ?? 'JEFE DEL DEPARTAMENTO DE RECURSOS HUMANOS'),
+        ];
+    }
+
+    /**
+     * Agrega un run de texto con segmentos en negrita (estilo del cuerpo).
+     */
+    private function agregarRun($container, array $segmentos, array $parrafoStyle = []) {
+        $run = $container->addTextRun($parrafoStyle);
+        foreach ($segmentos as $seg) {
+            $run->addText(
+                (string)($seg['text'] ?? ''),
+                ['name' => self::FUENTE_CUERPO, 'size' => 9, 'bold' => !empty($seg['bold'])]
+            );
+        }
+        return $run;
+    }
+
+    /**
+     * Encabezado del documento: membrete + jerarquía institucional a la derecha
+     * (igual que el documento original).
+     */
+    private function agregarEncabezado($section, array $config) {
+        $header = $section->addHeader();
+
+        $logoIzq = dirname(__DIR__) . '/assets/images/membrete_izq.png';
+        $logoDer = dirname(__DIR__) . '/assets/images/membrete_der.png';
+
+        // Membrete en 3 columnas: logo SEP (izq), texto institucional (derecha), wordmark (der)
+        $table = $header->addTable([
+            'cellMarginTop' => 0,
+            'cellMarginBottom' => 0,
+            'cellMarginLeft' => 0,
+            'cellMarginRight' => 0
+        ]);
+        $table->addRow();
+
+        $celdaIzq = $table->addCell(3600, ['vAlign' => 'center']);
+        if (file_exists($logoIzq)) {
+            $celdaIzq->addImage($logoIzq, [
+                'width' => 175,
+                'height' => 22,
+                'alignment' => Jc::LEFT
+            ]);
+        }
+
+        $celdaCentro = $table->addCell(3900, ['vAlign' => 'center']);
+        foreach (self::JERARQUIA as $linea) {
+            $celdaCentro->addText(
+                $linea,
+                ['name' => self::FUENTE_TITULO, 'size' => 6.5],
+                ['alignment' => Jc::RIGHT, 'spacing' => ['line' => 240, 'lineRule' => 'exact']]
+            );
+        }
+
+        $celdaDer = $table->addCell(1300, ['vAlign' => 'center']);
+        if (file_exists($logoDer)) {
+            $celdaDer->addImage($logoDer, [
+                'width' => 36,
+                'height' => 36,
+                'alignment' => Jc::RIGHT
+            ]);
+        }
+
+        $header->addText('', [], ['spacing' => ['line' => 240, 'lineRule' => 'exact'], 'spaceAfter' => 80]);
+    }
+
+    /**
+     * Construye el documento .docx con PhpWord replicando el diseño del original.
+     * @return array ['archivo' => ruta relativa, 'ruta_absoluta' => ..., 'periodo' => ..., 'modelo' => ...]
+     */
+    private function buildDocx(array $empleado, array $incidencias, array $config, $folio, $mes, $anio) {
+        $modelo = $this->construirModelo($empleado, $incidencias, $config, $folio, $mes, $anio);
+
+        $phpWord = new PhpWord();
+        $phpWord->setDefaultFontName(self::FUENTE_CUERPO);
+        $phpWord->setDefaultFontSize(9);
+
+        $section = $phpWord->addSection([
+            'orientation' => 'portrait',
+            'pageSizeW' => 12240,
+            'pageSizeH' => 15840,
+            'marginTop' => self::MARGEN_SUPERIOR,
+            'marginBottom' => self::MARGEN_INFERIOR,
+            'marginLeft' => self::MARGEN_LATERAL,
+            'marginRight' => self::MARGEN_LATERAL,
+            'headerHeight' => self::DIST_HEADER,
+            'footerHeight' => self::DIST_FOOTER
+        ]);
+
+        $this->agregarEncabezado($section, $config);
+
+        // 1. Título (justificado, Noto Sans, igual que el original)
+        $section->addText(
+            $modelo['titulo'],
+            ['name' => self::FUENTE_TITULO, 'bold' => true, 'size' => 12],
+            ['alignment' => Jc::BOTH, 'spacing' => ['line' => 360, 'lineRule' => 'auto'], 'spaceAfter' => 160]
+        );
+
+        // 2. Fecha (alineada a la derecha, Montserrat 9)
+        $section->addText(
+            $modelo['fecha_emision'],
+            ['name' => self::FUENTE_CUERPO, 'size' => 9],
+            ['alignment' => Jc::RIGHT, 'spacing' => ['line' => 240, 'lineRule' => 'exact'], 'spaceAfter' => 160]
+        );
+
+        // 3. Destinatario (justificado, negritas; el área en gris claro 8pt)
+        $destinatario = [
+            $modelo['nombre_completo'] . ' (ID ' . $modelo['empleado_id'] . ')' => true,
+            'Filiación: ' . $modelo['rfc'] => true,
+        ];
+        if (!empty($modelo['claves_presupuestales'])) {
+            $destinatario['Clave Presupuestal: ' . $modelo['claves_presupuestales']] = true;
+        }
+        if (!empty($modelo['area']) && trim((string)$modelo['area']) !== trim((string)$modelo['claves_presupuestales'])) {
+            $destinatario['__area__'] = false;
+        }
+        $destinatario['P r e s e n t e.'] = true;
+
+        foreach ($destinatario as $texto => $negrita) {
+            $font = ['name' => self::FUENTE_CUERPO, 'size' => 9, 'bold' => $negrita];
+            if ($texto === '__area__') {
+                $font = ['name' => self::FUENTE_CUERPO, 'size' => 8, 'bold' => false, 'color' => self::COLOR_AREA];
+                $texto = $modelo['area'];
+            }
+            $section->addText(
+                $texto,
+                $font,
+                ['alignment' => Jc::BOTH, 'spacing' => ['line' => 240, 'lineRule' => 'exact']]
+            );
+        }
+        $section->addText('', [], ['spacing' => ['line' => 240, 'lineRule' => 'exact'], 'spaceAfter' => 120]);
+
+        // 4. Cuerpo legal (justificado, con negritas)
+        $this->agregarRun($section, $modelo['cuerpo'], [
+            'alignment' => Jc::BOTH,
+            'spacing' => ['line' => 240, 'lineRule' => 'exact'],
+            'spaceAfter' => 160
+        ]);
+
+        // 5. Tablas por inciso
+        $this->agregarTablasIncisos($section, $modelo['incisos']);
 
         // 6. Advertencia / Suspensión
-        if (!empty($incidencias['requiere_suspension'])) {
-            $diasSuspension = self::programarDiasSuspension(
-                (int)($incidencias['dias_suspension'] ?? 1),
-                new DateTime()
-            );
-            $parrafo = self::construirParrafoSuspension($diasSuspension);
-        } else {
-            $parrafo = self::construirParrafoAdvertencia();
-        }
-        $section->addText($parrafo, [], ['spaceAfter' => 160]);
+        $this->agregarRun($section, $modelo['parrafo'], [
+            'alignment' => Jc::BOTH,
+            'spacing' => ['line' => 240, 'lineRule' => 'exact'],
+            'spaceAfter' => 160
+        ]);
 
         // 7. Cierre
-        $section->addText('Sin otro particular, reciba un cordial saludo.', [], ['spaceAfter' => 200]);
+        $section->addText(
+            'Sin otro particular, reciba un cordial saludo.',
+            ['name' => self::FUENTE_CUERPO, 'size' => 9],
+            ['alignment' => Jc::BOTH, 'spacing' => ['line' => 240, 'lineRule' => 'exact'], 'spaceAfter' => 200]
+        );
 
         // 8. Firma
-        $section->addText('ATENTAMENTE', ['bold' => true], ['spaceAfter' => 320]);
-        $section->addText($config['nombre_firmante'] ?? 'JUAN JOSE OROZCO PONCE', ['bold' => true]);
-        $section->addText($config['cargo_firmante'] ?? 'JEFE DEL DEPARTAMENTO DE RECURSOS HUMANOS');
-        $section->addText(strtoupper((string)($config['iniciales'] ?? 'DGNQ*')));
-
-        // 9. Pie de página institucional
-        $footer = $section->addFooter();
-        $footer->addText(
-            'Colegio Salesiano 42, Colonia Anáhuac I Secc, Alcaldía Miguel Hidalgo, '
-            . 'C.P. 11320 Ciudad de México. www.gob.mx/aefcm',
-            ['size' => 8],
-            ['alignment' => Jc::CENTER]
+        $section->addText(
+            'ATENTAMENTE',
+            ['name' => self::FUENTE_CUERPO, 'bold' => true, 'size' => 9],
+            ['spacing' => ['line' => 240, 'lineRule' => 'exact'], 'spaceAfter' => 320]
         );
+        $section->addText(
+            $modelo['firmante'],
+            ['name' => self::FUENTE_CUERPO, 'bold' => true, 'size' => 9],
+            ['spacing' => ['line' => 240, 'lineRule' => 'exact']]
+        );
+        $section->addText(
+            $modelo['cargo'],
+            ['name' => self::FUENTE_CUERPO, 'bold' => true, 'size' => 9],
+            ['spacing' => ['line' => 240, 'lineRule' => 'exact']]
+        );
+        $section->addText(
+            $modelo['iniciales'],
+            ['name' => self::FUENTE_CUERPO, 'size' => 7],
+            ['alignment' => Jc::RIGHT, 'spacing' => ['line' => 240, 'lineRule' => 'exact']]
+        );
+
+        // 9. Pie de página institucional (cinta con dirección y sello, igual que el original)
+        $footer = $section->addFooter();
+        $pieImg = dirname(__DIR__) . '/assets/images/pie_completo.png';
+        if (file_exists($pieImg)) {
+            $footer->addImage($pieImg, [
+                'width' => 383,
+                'height' => 46,
+                'alignment' => Jc::CENTER
+            ]);
+        } else {
+            $footer->addText(
+                self::PIE_PAGINA,
+                ['name' => 'Noto Sans SemiBold', 'size' => 6.5, 'color' => self::COLOR_MAROON],
+                ['alignment' => Jc::CENTER]
+            );
+        }
 
         // Guardar
         $periodo = sprintf('%04d-%02d', (int)$anio, (int)$mes);
@@ -447,60 +696,197 @@ class OficioNotasMalasService {
         return [
             'archivo' => $rutaRelativa,
             'ruta_absoluta' => $rutaAbsoluta,
-            'periodo' => $periodo . '-01'
+            'periodo' => $periodo . '-01',
+            'modelo' => $modelo
         ];
     }
 
     /**
-     * Agrega las tablas MES|DÍA|HORA por inciso, lado a lado si hay dos.
+     * Agrega las tablas MES|DÍA|HORA por inciso (una tabla por inciso).
      */
     private function agregarTablasIncisos($section, array $incisos) {
-        $styleTable = ['borderSize' => 4, 'borderColor' => '000000', 'cellMargin' => 40];
-        $styleHeaderCell = ['valign' => 'center'];
-        $styleCell = ['valign' => 'center'];
-
-        if (count($incisos) === 1) {
-            $this->agregarTablaInciso($section, $incisos[0]['titulo'], $incisos[0]['filas'], $styleTable, $styleHeaderCell, $styleCell);
-            return;
-        }
-
-        // Dos tablas lado a lado dentro de una tabla contenedora sin bordes
-        $contenedor = $section->addTable(['cellMargin' => 40]);
-        $fila = $contenedor->addRow();
         foreach ($incisos as $inc) {
-            $celda = $fila->addCell(4000);
-            $this->agregarTablaIncisoEnCelda($celda, $inc['titulo'], $inc['filas'], $styleTable, $styleHeaderCell, $styleCell);
+            $this->agregarTablaInciso($section, $inc['titulo'], $inc['filas']);
         }
     }
 
-    private function agregarTablaInciso($section, $titulo, $filas, $styleTable, $styleHeaderCell, $styleCell) {
-        $section->addText($titulo, [], ['spaceAfter' => 40]);
+    /**
+     * Tabla del inciso: título en celda combinada, encabezados con sombreado
+     * #D5DCE4 y datos centrados en negrita (igual que el original).
+     */
+    private function agregarTablaInciso($section, $titulo, $filas) {
+        $styleTable = [
+            'alignment' => Jc::CENTER,
+            'layout' => 'fixed',
+            'borderSize' => 4,
+            'borderColor' => '000000',
+            'cellMargin' => 40,
+        ];
+        $anchos = [1555, 1134, 1417];
+        $celdaBase = ['valign' => 'center'];
+        $parrafoCelda = ['alignment' => Jc::CENTER, 'spacing' => ['line' => 240, 'lineRule' => 'exact']];
+
+        // Título del inciso (celda combinada sin sombreado)
         $tabla = $section->addTable($styleTable);
-        $tabla->addRow();
-        foreach (['MES', 'DÍA', 'HORA'] as $enc) {
-            $tabla->addCell(1500, $styleHeaderCell)->addText($enc, ['bold' => true]);
+        $filaTitulo = $tabla->addRow();
+        $filaTitulo->addCell(array_sum($anchos), ['gridSpan' => 3, 'valign' => 'center'])
+            ->addText($titulo, ['name' => self::FUENTE_CUERPO, 'bold' => true, 'size' => 9], $parrafoCelda);
+
+        // Encabezados MES | DÍA | HORA con sombreado
+        $filaEnc = $tabla->addRow();
+        foreach (['MES', 'DÍA', 'HORA'] as $i => $enc) {
+            $filaEnc->addCell($anchos[$i], ['valign' => 'center', 'shading' => ['fill' => self::SOMBREADO_TABLA]])
+                ->addText($enc, ['name' => self::FUENTE_CUERPO, 'bold' => true, 'size' => 9], $parrafoCelda);
         }
+
+        // Datos
         foreach ($filas as $f) {
-            $tabla->addRow();
-            $tabla->addCell(1500, $styleCell)->addText($f['mes']);
-            $tabla->addCell(1500, $styleCell)->addText((string)$f['dia']);
-            $tabla->addCell(1500, $styleCell)->addText($f['hora']);
+            $fila = $tabla->addRow();
+            $datos = [$f['mes'], (string)$f['dia'], $f['hora']];
+            foreach ($datos as $i => $valor) {
+                $fila->addCell($anchos[$i], $celdaBase)
+                    ->addText($valor, ['name' => self::FUENTE_CUERPO, 'bold' => true, 'size' => 9], $parrafoCelda);
+            }
         }
     }
 
-    private function agregarTablaIncisoEnCelda($celda, $titulo, $filas, $styleTable, $styleHeaderCell, $styleCell) {
-        $celda->addText($titulo, [], ['spaceAfter' => 40]);
-        $tabla = $celda->addTable($styleTable);
-        $tabla->addRow();
-        foreach (['MES', 'DÍA', 'HORA'] as $enc) {
-            $tabla->addCell(1200, $styleHeaderCell)->addText($enc, ['bold' => true]);
+    /**
+     * Convierte segmentos [texto, bold] a HTML con <b>.
+     */
+    private function segmentosHtml(array $segmentos): string {
+        $out = '';
+        foreach ($segmentos as $seg) {
+            $texto = htmlspecialchars((string)($seg['text'] ?? ''), ENT_QUOTES, 'UTF-8');
+            $out .= !empty($seg['bold']) ? '<b>' . $texto . '</b>' : $texto;
         }
-        foreach ($filas as $f) {
-            $tabla->addRow();
-            $tabla->addCell(1200, $styleCell)->addText($f['mes']);
-            $tabla->addCell(1200, $styleCell)->addText((string)$f['dia']);
-            $tabla->addCell(1200, $styleCell)->addText($f['hora']);
+        return $out;
+    }
+
+    /**
+     * Reconstruye el modelo de un documento generado (desde el JSON guardado
+     * en contenido, o recalculándolo si el registro es antiguo).
+     */
+    public function obtenerModeloDocumento(array $doc): array {
+        if (!empty($doc['contenido'])) {
+            $json = json_decode($doc['contenido'], true);
+            if (is_array($json) && isset($json['titulo'])) {
+                return $json;
+            }
         }
+
+        $periodo = (string)($doc['periodo'] ?? '');
+        $anio = (int)substr($periodo, 0, 4);
+        $mes = (int)substr($periodo, 5, 2);
+        if ($anio <= 0) {
+            $anio = (int)date('Y');
+            $mes = (int)date('n');
+        }
+        $quincena = (int)($doc['quincena'] ?? 0);
+        $empleado = $this->empleadoModel->getById((int)($doc['empleado_id'] ?? 0));
+        $incidencias = $empleado
+            ? $this->obtenerIncidenciasEmpleado((int)$doc['empleado_id'], $mes, $anio, $quincena)
+            : null;
+        $config = $this->configModel->getConfig($anio);
+        $folio = self::extraerFolio($doc['titulo'] ?? '');
+
+        if (!$empleado || !$incidencias || !$config) {
+            throw new RuntimeException('No fue posible reconstruir el documento para la vista previa.');
+        }
+
+        return $this->construirModelo($empleado, $incidencias, $config, $folio, $mes, $anio);
+    }
+
+    /**
+     * Genera el HTML de la vista previa replicando el diseño del documento original.
+     */
+    public function renderPreviewHtml(array $modelo): string {
+        $base = defined('BASE_URL') ? BASE_URL : '';
+        $e = function ($v) {
+            return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+        };
+
+        $cuerpoHtml = $this->segmentosHtml($modelo['cuerpo'] ?? []);
+        $parrafoHtml = $this->segmentosHtml($modelo['parrafo'] ?? []);
+
+        $destinatario = '<p class="b">' . $e($modelo['nombre_completo'] ?? '')
+            . ' (ID ' . (int)($modelo['empleado_id'] ?? 0) . ')</p>'
+            . '<p class="b">Filiación: ' . $e($modelo['rfc'] ?? '') . '</p>';
+        if (!empty($modelo['claves_presupuestales'])) {
+            $destinatario .= '<p class="b">Clave Presupuestal: ' . $e($modelo['claves_presupuestales']) . '</p>';
+        }
+        if (!empty($modelo['area']) && trim((string)$modelo['area']) !== trim((string)$modelo['claves_presupuestales'])) {
+            $destinatario .= '<p class="area">' . $e($modelo['area']) . '</p>';
+        }
+        $destinatario .= '<p class="b">P r e s e n t e.</p>';
+
+        $tablas = '';
+        foreach (($modelo['incisos'] ?? []) as $inc) {
+            $filas = '';
+            foreach (($inc['filas'] ?? []) as $f) {
+                $filas .= '<tr><td>' . $e($f['mes'] ?? '') . '</td><td>' . $e($f['dia'] ?? '')
+                    . '</td><td>' . $e($f['hora'] ?? '') . '</td></tr>';
+            }
+            $tablas .= '<table class="inciso">'
+                . '<thead><tr><th class="titulo" colspan="3">' . $e($inc['titulo'] ?? '') . '</th></tr>'
+                . '<tr><th>MES</th><th>DÍA</th><th>HORA</th></tr></thead>'
+                . '<tbody>' . $filas . '</tbody></table>';
+        }
+
+        $jerarquia = '';
+        foreach (self::JERARQUIA as $linea) {
+            $jerarquia .= '<div>' . $e($linea) . '</div>';
+        }
+
+        return '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">'
+            . '<title>Vista previa del oficio</title><style>'
+            . "@font-face{font-family:'Montserrat';src:url('$base/assets/fonts/Montserrat-400.ttf');font-weight:400;}"
+            . "@font-face{font-family:'Montserrat';src:url('$base/assets/fonts/Montserrat-600.ttf');font-weight:600;}"
+            . "@font-face{font-family:'Montserrat';src:url('$base/assets/fonts/Montserrat-700.ttf');font-weight:700;}"
+            . "@font-face{font-family:'Noto Sans';src:url('$base/assets/fonts/NotoSans-400.ttf');font-weight:400;}"
+            . "@font-face{font-family:'Noto Sans';src:url('$base/assets/fonts/NotoSans-700.ttf');font-weight:700;}"
+            . 'body{margin:0;padding:24px 0;background:#525659;font-family:Montserrat,"Noto Sans",Arial,sans-serif;font-size:9pt;color:#000;}'
+            . '.page{background:#fff;width:8.5in;min-height:11in;margin:0 auto 32px;padding:1.63in 1.18in 0.98in;box-shadow:0 4px 24px rgba(0,0,0,.4);box-sizing:border-box;}'
+            . '.membrete-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;}'
+            . '.membrete-izq{height:22pt;width:auto;}'
+            . '.membrete-der{height:36pt;width:auto;}'
+            . '.jerarquia{font-family:"Noto Sans",Arial,sans-serif;font-size:6.5pt;text-align:right;flex:1;line-height:1.3;margin:0 8px;}'
+            . '.titulo{text-align:justify;font-family:"Noto Sans",Arial,sans-serif;font-weight:700;font-size:12pt;line-height:1.4;margin:0 0 10px;}'
+            . '.fecha{text-align:right;font-size:9pt;margin:0 0 14px;}'
+            . '.dest{text-align:justify;margin:0 0 14px;line-height:1.35;}'
+            . '.dest p{margin:0 0 2px;}'
+            . '.dest .b{font-weight:700;}'
+            . '.dest .area{color:#333333;font-size:8pt;font-weight:400;}'
+            . '.cuerpo{text-align:justify;line-height:1.25;margin:0 0 14px;}'
+            . 'table.inciso{border-collapse:collapse;margin:0 auto 16px;font-weight:700;text-align:center;}'
+            . 'table.inciso th,table.inciso td{border:1px solid #000;padding:2px 14px;font-size:9pt;}'
+            . 'table.inciso th.titulo{background:#fff;font-weight:700;}'
+            . 'table.inciso thead tr:last-child th{background:#D5DCE4;}'
+            . '.parrafo{text-align:justify;line-height:1.25;margin:0 0 14px;}'
+            . '.cierre{text-align:justify;margin:0 0 18px;}'
+            . '.firma p{margin:0;}'
+            . '.firma .atentamente{font-weight:700;margin-bottom:26px;}'
+            . '.firma .firmante{font-weight:700;}'
+            . '.iniciales{text-align:right;font-size:7pt;}'
+             . '.pie-img{width:100%;margin-top:26px;display:block;}'
+            . '</style></head><body><div class="page">'
+            . '<div class="membrete-row">'
+            . '<img class="membrete-izq" src="' . $e($base . '/assets/images/membrete_izq.png') . '" alt="">'
+            . '<div class="jerarquia">' . $jerarquia . '</div>'
+            . '<img class="membrete-der" src="' . $e($base . '/assets/images/membrete_der.png') . '" alt="">'
+            . '</div>'
+            . '<p class="titulo">' . $e($modelo['titulo'] ?? '') . '</p>'
+            . '<p class="fecha">' . $e($modelo['fecha_emision'] ?? '') . '</p>'
+            . '<div class="dest">' . $destinatario . '</div>'
+            . '<div class="cuerpo">' . $cuerpoHtml . '</div>'
+            . $tablas
+            . '<div class="parrafo">' . $parrafoHtml . '</div>'
+            . '<p class="cierre">Sin otro particular, reciba un cordial saludo.</p>'
+            . '<div class="firma"><p class="atentamente">ATENTAMENTE</p>'
+            . '<p class="firmante">' . $e($modelo['firmante'] ?? '') . '</p>'
+            . '<p class="firmante">' . $e($modelo['cargo'] ?? '') . '</p>'
+            . '<p class="iniciales">' . $e($modelo['iniciales'] ?? '') . '</p></div>'
+             . '<img class="pie-img" src="' . $e($base . '/assets/images/pie_completo.png') . '" alt="">'
+            . '</div></body></html>';
     }
 
     /**
@@ -520,6 +906,9 @@ class OficioNotasMalasService {
         $incidencias = $this->obtenerIncidenciasEmpleado($empleado_id, $mes, $anio, $quincena);
         if (!$incidencias) {
             return ['success' => false, 'error' => 'El empleado no tiene incidencias en el periodo seleccionado'];
+        }
+        if ((int)$incidencias['notas_malas'] <= 0) {
+            return ['success' => false, 'error' => 'El empleado no acumula notas malas en el periodo seleccionado'];
         }
 
         // Prevención de duplicados
@@ -566,7 +955,7 @@ class OficioNotasMalasService {
             'empleado_id' => $empleado_id,
             'tipo_documento' => self::TIPO_DOCUMENTO,
             'titulo' => $titulo,
-            'contenido' => null,
+            'contenido' => json_encode($resultado['modelo'], JSON_UNESCAPED_UNICODE),
             'archivo_path' => $resultado['archivo'],
             'periodo' => $resultado['periodo'],
             'quincena' => (int)$quincena,
@@ -594,9 +983,16 @@ class OficioNotasMalasService {
         $anio = (int)$anio;
         $mes = str_pad((int)$mes, 2, '0', STR_PAD_LEFT);
         $incidencias = $this->getIncidenciasPeriodo($mes, $anio, $quincena);
-
         if (empty($incidencias)) {
             return ['success' => false, 'error' => 'No hay empleados con incidencias en el periodo seleccionado'];
+        }
+
+        // Solo se generan oficios para quienes acumulan al menos 1 nota mala.
+        $incidencias = array_filter($incidencias, function ($inc) {
+            return (int)($inc['notas_malas'] ?? 0) > 0;
+        });
+        if (empty($incidencias)) {
+            return ['success' => false, 'error' => 'Ningún empleado acumula notas malas en el periodo seleccionado'];
         }
 
         $generados = 0;

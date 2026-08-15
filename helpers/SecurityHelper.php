@@ -329,8 +329,8 @@ class SecurityHelper {
             return;
         }
         
-        // Prevenir clickjacking
-        header('X-Frame-Options: DENY');
+        // Prevenir clickjacking (permitir iframes del mismo origen, p.ej. vista previa de documentos)
+        header('X-Frame-Options: SAMEORIGIN');
         
         // Prevenir MIME type sniffing
         header('X-Content-Type-Options: nosniff');
@@ -341,7 +341,7 @@ class SecurityHelper {
         // Content Security Policy (nonce para scripts, unsafe-inline para estilos/eventos legacy)
         $nonce = base64_encode(random_bytes(16));
         $_SESSION['csp_nonce'] = $nonce;
-        header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none';");
+        header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'self';");
         
         // Referrer Policy
         header('Referrer-Policy: strict-origin-when-cross-origin');

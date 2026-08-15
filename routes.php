@@ -96,6 +96,8 @@ return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/notas-malas/ajax', ['NotasMalasController', 'ajaxList']);
     $r->addRoute('GET', '/notas-malas/oficio/{id:\d+}', ['NotasMalasController', 'descargarOficio']);
     $r->addRoute('GET', '/notas-malas/oficio/{id:\d+}/preview', ['NotasMalasController', 'verOficioHtml']);
+    $r->addRoute('POST', '/notas-malas/oficio/{id:\d+}/marcar-entregado', ['NotasMalasController', 'marcarEntregado']);
+    $r->addRoute('POST', '/notas-malas/oficio/{id:\d+}/desmarcar-entregado', ['NotasMalasController', 'desmarcarEntregado']);
     $r->addRoute('POST', '/notas-malas/generar-oficio', ['NotasMalasController', 'generarOficio']);
     $r->addRoute('POST', '/notas-malas/generar-todos', ['NotasMalasController', 'generarTodos']);
     $r->addRoute('GET', '/notas-malas/config', ['NotasMalasController', 'configuracion']);

@@ -38,7 +38,7 @@ El sistema SHALL evaluar acumulación de retardos para determinar notas malas y 
 
 #### Scenario: Evaluación quincenal
 - **WHEN** se ejecuta recalcular_notas_malas_quincena
-- **THEN** el sistema calcula notas malas según fórmula: floor(retardos_menores/2) + (retardos_mayores + faltas). Las faltas (31+ min) se convierten a retardo_mayor antes del cálculo.
+- **THEN** el sistema calcula notas malas según fórmula: floor(retardos_menores/2) + (retardos_mayores + faltas). El emparejamiento de menores ocurre dentro del periodo evaluado (mes completo o quincena); las faltas (31+ min) se convierten a retardo_mayor antes del cálculo.
 
 ### Requirement: Nota mala automática
 El sistema SHALL aplicar regla: 2 retardo_menor = 1 nota mala, 1 retardo_mayor o falta = 1 nota mala.

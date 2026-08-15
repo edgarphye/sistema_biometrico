@@ -40,7 +40,7 @@ class NotasMalasController extends BaseController {
         // Documentos de oficio ya generados en el periodo
         $periodoIni = "$anio-" . str_pad($mesNum, 2, '0', STR_PAD_LEFT) . '-01';
         $stmtDocs = $db->prepare("
-            SELECT empleado_id, id, titulo, archivo_path, fecha_generacion
+            SELECT empleado_id, id, titulo, archivo_path, fecha_generacion, entregado, fecha_entrega
             FROM documentos_generados
             WHERE tipo_documento = 'oficio_notas_malas' AND periodo = ?
         ");
@@ -122,7 +122,7 @@ class NotasMalasController extends BaseController {
             <div class="row mb-4">
                 <div class="col-md-8">
                     <h2><i class="fas fa-exclamation-triangle me-2 text-warning"></i>Notas Malas e Incidencias</h2>
-                    <p class="text-secondary">Cálculo en tiempo real: 2 retardos menores por quincena = 1 nota mala | 1 retardo mayor = 1 nota mala | 5 notas = 1 día de suspensión</p>
+                    <p class="text-secondary">Cálculo en tiempo real: 2 retardos menores sin justificar = 1 nota mala | 1 retardo mayor = 1 nota mala | más de 30 minutos = falta | 5 notas = 1 día de suspensión</p>
                 </div>
                 <div class="col-md-4 text-end">
                     <form method="GET" action="' . BASE_URL . '/notas-malas" class="d-flex gap-2">
@@ -263,10 +263,28 @@ class NotasMalasController extends BaseController {
         if (!empty($empleadosRetardos)) {
             foreach ($empleadosRetardos as $emp) {
                 $oficio = $emp['oficio'] ?? null;
+                $totalNotas = (int)($emp['total_notas'] ?? 0);
                 $estadoOficio = '';
-                if ($oficio) {
+                if ($totalNotas <= 0) {
+                    // Sin notas malas: no corresponde oficio ni acciones de oficio.
+                    $estadoOficio = '<span class="text-muted small"><i class="fas fa-minus-circle me-1"></i>Sin notas malas en el periodo</span>';
+                } elseif ($oficio) {
+                    $fechaEntrega = $oficio['fecha_entrega'] ?? null;
+                    $entregado = !empty($oficio['entregado']);
+                    $botonEntrega = '';
+                    if ($entregado) {
+                        $fechaLabel = $fechaEntrega
+                            ? date('d/m/Y H:i', strtotime($fechaEntrega))
+                            : 'Fecha desconocida';
+                        $botonEntrega = '
+                            <span class="badge bg-success me-1" title="Entregado a: ' . htmlspecialchars($fechaLabel) . '"><i class="fas fa-check-circle me-1"></i>Entregado (' . htmlspecialchars($fechaLabel) . ')</span>
+                            <button type="button" class="btn btn-sm btn-outline-warning btn-desmarcar-entrega me-1" data-id="' . (int)$oficio['id'] . '"><i class="fas fa-undo me-1"></i>Deshacer entrega</button>';
+                    } else {
+                        $botonEntrega = '<button type="button" class="btn btn-sm btn-outline-success btn-marcar-entrega me-1" data-id="' . (int)$oficio['id'] . '"><i class="fas fa-handshake me-1"></i>Marcar entregado</button>';
+                    }
                     $estadoOficio = '
                         <span class="badge bg-success me-1" title="' . htmlspecialchars($oficio['titulo']) . '">Oficio generado</span>
+                        ' . $botonEntrega . '
                         <button type="button" class="btn btn-sm btn-outline-success btn-ver-oficio me-1" data-id="' . (int)$oficio['id'] . '" data-titulo="' . htmlspecialchars($oficio['titulo']) . '"><i class="fas fa-eye me-1"></i>Ver</button>
                         <a href="' . BASE_URL . '/notas-malas/oficio/' . (int)$oficio['id'] . '" class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-download me-1"></i>Descargar Word</a>
                         <button type="button" class="btn btn-sm btn-outline-warning btn-regenerar" data-id="' . (int)$emp['empleado_id'] . '"><i class="fas fa-redo me-1"></i>Regenerar</button>';
@@ -274,10 +292,10 @@ class NotasMalasController extends BaseController {
                     $estadoOficio = '<button type="button" class="btn btn-sm btn-primary btn-generar" data-id="' . (int)$emp['empleado_id'] . '"><i class="fas fa-file-word me-1"></i>Generar oficio</button>';
                 }
                 $content .= '
-                    <div class="mb-4 border rounded p-3">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="card shadow mb-4" style="border:1px solid #e6c6ce;border-left:5px solid #9F2241;border-radius:.5rem;">
+                        <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-start gap-2 py-3">
                             <div>
-                                <h5 class="mb-1">' . htmlspecialchars($emp['nombre'] . ' ' . $emp['apellido']) . '</h5>
+                                <h5 class="mb-1 fw-bold" style="color:#691C32;">' . htmlspecialchars($emp['nombre'] . ' ' . $emp['apellido']) . '</h5>
                                 <small class="text-muted">RFC: ' . htmlspecialchars($emp['rfc'] ?? 'N/A') . ' | Área: ' . htmlspecialchars($emp['area'] ?? 'Sin área') . '</small>
                             </div>
                             <div class="text-end">
@@ -288,6 +306,7 @@ class NotasMalasController extends BaseController {
                                 <br><div class="mt-2">' . $estadoOficio . '</div>
                             </div>
                         </div>
+                        <div class="card-body pt-1">
                         <div class="table-responsive">
                             <table class="table table-sm table-hover mb-0">
                                 <thead class="table-light">
@@ -315,6 +334,7 @@ class NotasMalasController extends BaseController {
                 $content .= '
                                 </tbody>
                             </table>
+                            </div>
                         </div>
                     </div>';
             }
@@ -411,6 +431,45 @@ class NotasMalasController extends BaseController {
                     return;
                 }
                 postGenerar($(this).data("id"), true);
+            });
+
+            function postEntrega(docId, accion, btn) {
+                var textoOriginal = btn.html();
+                btn.prop("disabled", true).html("<i class=\"fas fa-spinner fa-spin me-1\"></i>Procesando...");
+
+                $.ajax({
+                    url: BASE_URL + "/notas-malas/oficio/" + docId + "/" + accion,
+                    method: "POST",
+                    headers: { "X-CSRF-Token": getCsrf() },
+                    dataType: "json",
+                    success: function(res) {
+                        if (res.success) {
+                            alert(accion === "marcar-entregado"
+                                ? "Oficio marcado como entregado."
+                                : "Se deshizo la entrega del oficio.");
+                            location.reload();
+                        } else {
+                            alert("Error: " + (res.error || "No se pudo procesar la entrega."));
+                        }
+                    },
+                    error: function(xhr) {
+                        alert("Error: " + (xhr.responseJSON?.error || xhr.status));
+                    },
+                    complete: function() {
+                        btn.prop("disabled", false).html(textoOriginal);
+                    }
+                });
+            }
+
+            $(document).on("click", ".btn-marcar-entrega", function() {
+                postEntrega($(this).data("id"), "marcar-entregado", $(this));
+            });
+
+            $(document).on("click", ".btn-desmarcar-entrega", function() {
+                if (!confirm("¿Deshacer la entrega del oficio? El oficio volverá a estado \'no entregado\'.")) {
+                    return;
+                }
+                postEntrega($(this).data("id"), "desmarcar-entregado", $(this));
             });
 
             $(document).on("click", ".btn-ver-oficio", function() {
@@ -573,7 +632,8 @@ class NotasMalasController extends BaseController {
 
     /**
      * GET /notas-malas/oficio/{id}/preview
-     * Vista previa del oficio en HTML autocontenido (convierte el docx con LibreOffice y cachea)
+     * Vista previa del oficio en HTML autocontenido, renderizada con el mismo
+     * modelo compartido que genera el .docx (paridad exacta de contenido).
      */
     public function verOficioHtml($id) {
         require_once __DIR__ . '/../models/PlantillaDocumento.php';
@@ -584,36 +644,106 @@ class NotasMalasController extends BaseController {
             return;
         }
 
-        $docx = __DIR__ . '/../' . $doc['archivo_path'];
-        if (!file_exists($docx) || !is_file($docx)) {
-            http_response_code(404);
-            echo 'Archivo no encontrado';
+        $servicio = new OficioNotasMalasService();
+        try {
+            $modelo = $servicio->obtenerModeloDocumento($doc);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo 'No fue posible reconstruir el documento para la vista previa.';
             return;
-        }
-
-        $dir = dirname($docx) . '/.preview';
-        if (!is_dir($dir)) {
-            mkdir($dir, 0775, true);
-        }
-        $html = $dir . '/' . pathinfo($docx, PATHINFO_FILENAME) . '.html';
-
-        if (!file_exists($html) || filemtime($docx) > filemtime($html)) {
-            $cmd = 'soffice --headless --norestore --convert-to "html:HTML:EmbedImages" --outdir '
-                . escapeshellarg($dir)
-                . ' -env:UserInstallation=file:///tmp/lo_oficios_www '
-                . escapeshellarg($docx) . ' 2>&1';
-            shell_exec($cmd);
-            if (!file_exists($html)) {
-                http_response_code(500);
-                echo 'No fue posible generar la vista previa.';
-                return;
-            }
         }
 
         header('Content-Type: text/html; charset=utf-8');
         header('X-Robots-Tag: noindex');
-        readfile($html);
+        echo $servicio->renderPreviewHtml($modelo);
         exit;
+    }
+
+    /**
+     * POST /notas-malas/oficio/{id}/marcar-entregado
+     * Marca un oficio de notas malas como entregado al empleado.
+     */
+    public function marcarEntregado($id) {
+        $this->requireAuth();
+        $rol = $_SESSION['rol'] ?? '';
+        if (!in_array($rol, ['superadmin', 'admin', 'rh'])) {
+            $this->jsonResponse(['success' => false, 'error' => 'Sin permisos para marcar la entrega'], 403);
+        }
+
+        $csrfToken = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
+        $sessionToken = $_SESSION['csrf_token'] ?? null;
+        if ($sessionToken && $csrfToken !== $sessionToken) {
+            $this->jsonResponse(['success' => false, 'error' => 'Token CSRF inválido'], 403);
+        }
+
+        try {
+            require_once __DIR__ . '/../models/PlantillaDocumento.php';
+            $modelo = new DocumentoGenerado();
+            $doc = $modelo->getById((int)$id);
+            if (!$doc || $doc['tipo_documento'] !== 'oficio_notas_malas') {
+                $this->jsonResponse(['success' => false, 'error' => 'Documento no encontrado'], 404);
+            }
+            if (!empty($doc['entregado'])) {
+                $this->jsonResponse(['success' => false, 'error' => 'El oficio ya está marcado como entregado'], 400);
+            }
+
+            $usuario_id = $_SESSION['user_id'] ?? null;
+            if (!$modelo->marcarEntregado((int)$id, $usuario_id)) {
+                $this->jsonResponse(['success' => false, 'error' => 'No fue posible marcar la entrega'], 500);
+            }
+
+            $this->jsonResponse([
+                'success' => true,
+                'entregado' => 1,
+                'fecha_entrega' => date('Y-m-d H:i:s')
+            ]);
+        } catch (Exception $e) {
+            $this->logException($e);
+            $this->jsonResponse(['success' => false, 'error' => 'Error interno: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * POST /notas-malas/oficio/{id}/desmarcar-entregado
+     * Revertir la entrega de un oficio de notas malas.
+     */
+    public function desmarcarEntregado($id) {
+        $this->requireAuth();
+        $rol = $_SESSION['rol'] ?? '';
+        if (!in_array($rol, ['superadmin', 'admin', 'rh'])) {
+            $this->jsonResponse(['success' => false, 'error' => 'Sin permisos para deshacer la entrega'], 403);
+        }
+
+        $csrfToken = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
+        $sessionToken = $_SESSION['csrf_token'] ?? null;
+        if ($sessionToken && $csrfToken !== $sessionToken) {
+            $this->jsonResponse(['success' => false, 'error' => 'Token CSRF inválido'], 403);
+        }
+
+        try {
+            require_once __DIR__ . '/../models/PlantillaDocumento.php';
+            $modelo = new DocumentoGenerado();
+            $doc = $modelo->getById((int)$id);
+            if (!$doc || $doc['tipo_documento'] !== 'oficio_notas_malas') {
+                $this->jsonResponse(['success' => false, 'error' => 'Documento no encontrado'], 404);
+            }
+            if (empty($doc['entregado'])) {
+                $this->jsonResponse(['success' => false, 'error' => 'El oficio no está marcado como entregado'], 400);
+            }
+
+            if (!$modelo->desmarcarEntregado((int)$id)) {
+                $this->jsonResponse(['success' => false, 'error' => 'No fue posible deshacer la entrega'], 500);
+            }
+
+            $this->jsonResponse([
+                'success' => true,
+                'entregado' => 0,
+                'fecha_entrega' => null
+            ]);
+        } catch (Exception $e) {
+            $this->logException($e);
+            $this->jsonResponse(['success' => false, 'error' => 'Error interno: ' . $e->getMessage()], 500);
+        }
     }
 
     /**

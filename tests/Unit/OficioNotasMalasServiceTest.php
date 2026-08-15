@@ -58,6 +58,15 @@ class OficioNotasMalasServiceTest extends TestCase {
         return (int)$this->pdo->lastInsertId();
     }
 
+    private function crearRetardoConMinutos(int $empleado_id, string $fecha, string $tipo, int $minutos, int $justificado = 0): int {
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO retardos (empleado_id, fecha, hora_entrada, minutos_retardo, tipo_retraso, justificado)
+             VALUES (?, ?, '08:30:00', ?, ?, ?)"
+        );
+        $stmt->execute([$empleado_id, $fecha, $minutos, $tipo, $justificado]);
+        return (int)$this->pdo->lastInsertId();
+    }
+
     private function crearNotaMala(int $empleado_id, int $retardo_id, string $tipo, string $periodo): void {
         $stmt = $this->pdo->prepare(
             "INSERT INTO notas_malas (empleado_id, retardo_id, tipo, cantidad, periodo, motivo)
@@ -157,11 +166,11 @@ class OficioNotasMalasServiceTest extends TestCase {
         $this->assertNull($inc);
     }
 
-    public function testEmparejamientoPorQuincena() {
+    public function testEmparejamientoMenoresPorPeriodo() {
         $empleado_id = $this->crearEmpleado();
 
         // 3 menores en la 1ª quincena (días 2,4,6) + 1 menor en la 2ª quincena (día 20)
-        // Regla: emparejamiento DENTRO de la misma quincena => floor(3/2) + floor(1/2) = 1 nota
+        // Regla: el emparejamiento es sobre el periodo completo (mes) => floor(4/2) = 2 notas
         $this->crearRetardo($empleado_id, '2026-03-02', 'retardo_menor');
         $this->crearRetardo($empleado_id, '2026-03-04', 'retardo_menor');
         $this->crearRetardo($empleado_id, '2026-03-06', 'retardo_menor');
@@ -170,9 +179,38 @@ class OficioNotasMalasServiceTest extends TestCase {
         $inc = $this->servicio->obtenerIncidenciasEmpleado($empleado_id, 3, 2026, 0);
 
         $this->assertEquals(4, $inc['menores']);
-        $this->assertEquals(1, $inc['notas_malas'], 'El emparejamiento de menores debe ser por quincena');
-        $this->assertEquals(1, $inc['notas_menores']);
+        $this->assertEquals(2, $inc['notas_malas'], 'Los menores deben emparejarse sobre el periodo completo, no por quincena');
+        $this->assertEquals(2, $inc['notas_menores']);
         $this->assertEquals(0, $inc['notas_mayores']);
+    }
+
+    public function testMenoresEnQuincenasDistintasGeneranNota() {
+        $empleado_id = $this->crearEmpleado();
+
+        // 1 menor en cada quincena: antes daban 0 notas (fragmentación por quincena).
+        $this->crearRetardo($empleado_id, '2026-03-05', 'retardo_menor');
+        $this->crearRetardo($empleado_id, '2026-03-20', 'retardo_menor');
+
+        $inc = $this->servicio->obtenerIncidenciasEmpleado($empleado_id, 3, 2026, 0);
+
+        $this->assertEquals(1, $inc['notas_menores'], '2 menores en quincenas distintas suman 1 nota mala');
+        $this->assertEquals(1, $inc['notas_malas']);
+        $this->assertCount(2, $inc['inciso_a']);
+    }
+
+    public function testMinutosMayoresA30CuentanComoFalta() {
+        $empleado_id = $this->crearEmpleado();
+
+        // Retardo guardado como retardo_menor pero con más de 30 min => cuenta como falta (nota mayor).
+        $this->crearRetardoConMinutos($empleado_id, '2026-03-05', 'retardo_menor', 45);
+
+        $inc = $this->servicio->obtenerIncidenciasEmpleado($empleado_id, 3, 2026, 0);
+
+        $this->assertEquals(1, $inc['faltas']);
+        $this->assertEquals(0, $inc['menores']);
+        $this->assertEquals(1, $inc['notas_malas']);
+        $this->assertEquals(1, $inc['notas_mayores']);
+        $this->assertCount(1, $inc['inciso_b']);
     }
 
     public function testJustificadosExcesoPorQuincenaCuentan() {
@@ -191,6 +229,47 @@ class OficioNotasMalasServiceTest extends TestCase {
 
         $this->assertEquals(1, $inc['mayores']);
         $this->assertEquals(1, $inc['notas_malas'], 'Solo el excedente de los 2 permitidos por quincena genera nota');
+    }
+
+    public function testJustificadosExcesoMenoresCuentanPorPar() {
+        $empleado_id = $this->crearEmpleado();
+
+        // 4 retardos menores JUSTIFICADOS en la misma quincena: los primeros 2 se permiten,
+        // los 2 excedentes forman un par = 1 nota mala. El sistema guarda UN registro de
+        // notas_malas por cada par excedente (2 menores excedentes = 1 registro = 1 nota).
+        $r1 = $this->crearRetardo($empleado_id, '2026-03-02', 'retardo_menor', 1);
+        $r2 = $this->crearRetardo($empleado_id, '2026-03-04', 'retardo_menor', 1);
+        $r3 = $this->crearRetardo($empleado_id, '2026-03-06', 'retardo_menor', 1);
+        $r4 = $this->crearRetardo($empleado_id, '2026-03-08', 'retardo_menor', 1);
+
+        // Los 2 permitidos no llevan nota; cada par excedente (r3-r4) lleva UN registro.
+        $this->crearNotaMala($empleado_id, $r4, 'retardo_menor', '2026-03-01');
+
+        $inc = $this->servicio->obtenerIncidenciasEmpleado($empleado_id, 3, 2026, 0);
+
+        $this->assertEquals(1, $inc['notas_menores'], 'El par de menores excedentes genera 1 nota mala');
+        $this->assertEquals(1, $inc['notas_malas']);
+        // Los justificados se listan en el oficio solo si cuentan con nota registrada:
+        // el par excedente tiene un solo registro (sobre el 2º menor del par).
+        $this->assertCount(1, $inc['inciso_a']);
+    }
+
+    public function testJustificadosExcesoMenoresVariosPares() {
+        $empleado_id = $this->crearEmpleado();
+
+        // 6 menores JUSTIFICADOS en la misma quincena: 2 permitidos + 4 excedentes = 2 pares = 2 notas.
+        // Un registro de notas_malas por cada par excedente.
+        $ids = [];
+        foreach ([2, 4, 6, 8, 10, 12] as $i => $dia) {
+            $ids[] = $this->crearRetardo($empleado_id, '2026-03-' . str_pad((string)$dia, 2, '0', STR_PAD_LEFT), 'retardo_menor', 1);
+        }
+        $this->crearNotaMala($empleado_id, $ids[4], 'retardo_menor', '2026-03-01');
+        $this->crearNotaMala($empleado_id, $ids[5], 'retardo_menor', '2026-03-01');
+
+        $inc = $this->servicio->obtenerIncidenciasEmpleado($empleado_id, 3, 2026, 0);
+
+        $this->assertEquals(2, $inc['notas_menores'], '4 menores excedentes = 2 pares = 2 notas malas');
+        $this->assertEquals(2, $inc['notas_malas']);
     }
 
     public function testJustificadosDentroDeLaCuotaNoCuentan() {
@@ -303,5 +382,64 @@ class OficioNotasMalasServiceTest extends TestCase {
         $this->assertStringContainsString('el día 11 de agosto', $lista);
         $this->assertStringContainsString('el día 18 de agosto', $lista);
         $this->assertStringContainsString(' y ', $lista);
+    }
+
+    public function testSegmentosCuerpoLegalMarcanNegritas() {
+        $segmentos = OficioNotasMalasService::segmentosCuerpoLegal(4, '“a”');
+        $textos = array_column($segmentos, 'text');
+        $negritas = array_column($segmentos, 'bold');
+
+        $this->assertCount(5, $segmentos);
+        $this->assertSame('04 Nota (s) Mala (s)', $textos[1]);
+        $this->assertTrue($negritas[1], 'El número de notas debe ir en negrita');
+        $this->assertSame('“a” ', $textos[3]);
+        $this->assertTrue($negritas[3], 'El inciso citado debe ir en negrita');
+        $this->assertFalse($negritas[0]);
+        $this->assertFalse($negritas[4]);
+    }
+
+    public function testConstruirCuerpoLegalCoincideConSegmentos() {
+        $texto = OficioNotasMalasService::construirCuerpoLegal(4, '“a” y “b”');
+        $segmentos = OficioNotasMalasService::segmentosCuerpoLegal(4, '“a” y “b”');
+        $this->assertSame($texto, implode('', array_column($segmentos, 'text')));
+    }
+
+    public function testSegmentosParrafoSuspensionMarcanNegritas() {
+        $dias = OficioNotasMalasService::programarDiasSuspension(2, new DateTime('2026-08-09'));
+        $segmentos = OficioNotasMalasService::segmentosParrafoSuspension($dias);
+        $negritas = array_column($segmentos, 'bold');
+
+        $this->assertTrue($negritas[1], 'El número de días debe ir en negrita');
+        $this->assertStringContainsString('02 días de suspensión', $segmentos[1]['text']);
+        $this->assertTrue($negritas[3], 'Las fechas programadas deben ir en negrita');
+        $this->assertStringContainsString('el día 11 de agosto', $segmentos[3]['text']);
+    }
+
+    public function testConstruirParrafoSuspensionCoincideConSegmentos() {
+        $dias = OficioNotasMalasService::programarDiasSuspension(2, new DateTime('2026-08-09'));
+        $texto = OficioNotasMalasService::construirParrafoSuspension($dias);
+        $segmentos = OficioNotasMalasService::segmentosParrafoSuspension($dias);
+        $this->assertSame($texto, implode('', array_column($segmentos, 'text')));
+    }
+
+    public function testModeloFolioFormateadoNoSeDuplica() {
+        $metodo = new ReflectionMethod(OficioNotasMalasService::class, 'construirModelo');
+        $metodo->setAccessible(true);
+        $empleado = ['id' => 401, 'rfc' => 'X', 'area' => 'RH'];
+        $incidencias = [
+            'apellido' => 'PRUEBA', 'nombre' => 'EMPLEADO',
+            'claves_presupuestales' => 'C1', 'inciso_a' => [], 'inciso_b' => [],
+            'requiere_suspension' => false, 'dias_suspension' => 0, 'notas_malas' => 2,
+        ];
+        $config = ['prefijo' => 'DGIFA/CA/RH', 'anio' => 2026, 'iniciales' => 'X', 'nombre_firmante' => 'X', 'cargo_firmante' => 'X'];
+
+        // Folio ya formateado (como lo extrae extraerFolio del título): no debe duplicarse.
+        $modelo = $metodo->invoke(new OficioNotasMalasService(), $empleado, $incidencias, $config, 'DGIFA/CA/RH-002/2026', '04', 2026);
+        $this->assertSame('DGIFA/CA/RH-002/2026', $modelo['folio']);
+        $this->assertSame('ATENTA NOTA DGIFA/CA/RH-002/2026', $modelo['titulo']);
+
+        // Folio numérico (como en generarOficio): se formatea.
+        $modelo2 = $metodo->invoke(new OficioNotasMalasService(), $empleado, $incidencias, $config, 3, '04', 2026);
+        $this->assertSame('DGIFA/CA/RH-003/2026', $modelo2['folio']);
     }
 }
