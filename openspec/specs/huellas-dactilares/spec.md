@@ -4,7 +4,7 @@
 Capturar, almacenar y sincronizar huellas dactilares desde dispositivos ZKTeco con encriptación AES-256-CBC, gestión del proceso de enrolamiento y compatibilidad con almacenamiento legacy.
 
 ### Requirement: Captura de huellas
-El sistema SHALL capturar huellas dactilares desde dispositivos ZKTeco y almacenar plantillas en huellas_empleados con empleado_id, zk_empleado_id, indice_huella (0-9), huella_template (blob), calidad_huella (0-100), tipo_huella (dedo: índice/pulgar/medio/anular/menique, derecho/izquierdo), dispositivo_id, estado (activo/inactivo/error/sincronizando).
+El sistema SHALL capturar huellas dactilares desde dispositivos ZKTeco y almacenar plantillas en huellas_empleados con empleado_id, zk_empleado_id, indice_huella (0-9), huella_template (blob), calidad_huella (0-100), tipo_huella (dedo: índice/pulgar/medio/anular/menique, derecho/izquierdo), dispositivo_id, estado (activo/inactivo/error/sincronizando). El listado de dispositivos usa la tabla real `dispositivos_biometricos` (campo `activo`) y el `zkteo_id` se resuelve desde `zkteo_empleado_mapeo`.
 
 #### Scenario: Captura de huella exitosa
 - **WHEN** se enrola huella de un empleado desde el sistema
@@ -14,9 +14,17 @@ El sistema SHALL capturar huellas dactilares desde dispositivos ZKTeco y almacen
 - **WHEN** se hace clic en "Iniciar Registro de Huella" en el form de empleado
 - **THEN** el sistema muestra modal con 4 pasos: conexión, captura, procesamiento, guardado
 
+#### Scenario: Listado de dispositivos activos
+- **WHEN** se consultan los dispositivos para captura de huella
+- **THEN** el sistema filtra por `dispositivos_biometricos.activo` (no por una columna `estado` inexistente)
+
+#### Scenario: Resolución de zkteo_id desde zkteo_empleado_mapeo
+- **WHEN** se procesa un empleado para registrar su huella en el dispositivo
+- **THEN** el sistema obtiene el `zkteo_id` real desde `zkteo_empleado_mapeo` en lugar de generarlo artificialmente
+
 #### Scenario: Conexión con dispositivo
 - **WHEN** se selecciona un dispositivo biométrico
-- **THEN** el sistema valida conexión vía POST a /biometricos/test-dispositivo/{deviceId}
+- **THEN** el sistema valida conexión vía POST a /biometricos/test-dispositivo/{deviceId} (con sondeo UDP corto)
 
 #### Scenario: Captura vía endpoint
 - **WHEN** el dispositivo está conectado y el empleado coloca su dedo

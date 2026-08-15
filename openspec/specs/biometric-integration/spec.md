@@ -5,15 +5,15 @@ Integrar el sistema con dispositivos biométricos ZKTeco para sincronización de
 
 
 ### Requirement: Conexión con dispositivos ZKTeco
-El sistema SHALL conectarse a dispositivos biométricos ZKTeco mediante SDK (jmrashed/zkteco), TCP socket directo (puerto 4370) y HTTP API.
+El sistema SHALL conectarse a dispositivos biométricos ZKTeco mediante el SDK real `jmrashed/zkteco` sobre UDP puerto 4370, activado por defecto (`BIOMETRIC_MODE=sdk`). Antes de la conexión completa realiza un sondeo UDP corto (≤1s) para detectar dispositivos inaccesibles sin bloquear ~60s.
 
-#### Scenario: Conexión vía SDK exitosa
-- **WHEN** se ejecuta test de conexión a dispositivo con IP y puerto válidos
-- **THEN** el sistema retorna estado de conexión exitosa
+#### Scenario: Conexión vía SDK real exitosa
+- **WHEN** se ejecuta test de conexión a dispositivo con IP y puerto válidos y accesibles
+- **THEN** el sistema sondea UDP (≤1s), crea la instancia del SDK, conecta y retorna estado de conexión exitosa con `type` y `dispositivo_id`
 
-#### Scenario: Conexión vía TCP socket directo
-- **WHEN** se usa ZKTecoMB360 para comunicación directa
-- **THEN** el sistema establece conexión socket al puerto 4370 del dispositivo
+#### Scenario: Dispositivo inaccesible detectado rápido
+- **WHEN** el dispositivo no responde al sondeo UDP en ≤1s
+- **THEN** el sistema retorna error claro de conexión sin esperar el timeout de ~60s del SDK
 
 ### Requirement: Sincronización de empleados
 El sistema SHALL sincronizar la lista de empleados entre la BD y los dispositivos biométricos.
@@ -67,11 +67,15 @@ El sistema SHALL leer y procesar archivos .dat de asistencia generados por dispo
 - **THEN** ZKTecoUniversalParser detecta formato, extrae registros y los inserta en asistencia
 
 ### Requirement: Modo simulación
-El sistema SHALL soportar modo simulación para desarrollo sin dispositivos físicos.
+El sistema SHALL soportar modo simulación para desarrollo sin dispositivos físicos, pero SOLO cuando se configura explícitamente (`BIOMETRIC_MODE=simulation`). Por defecto opera en modo SDK real.
 
-#### Scenario: Simulación activa
-- **WHEN** BIOMETRIC_SIMULATION=true
-- **THEN** BiometricFactory retorna instancia de BiometricSimulation
+#### Scenario: Simulación explícita
+- **WHEN** `BIOMETRIC_MODE=simulation` está configurado
+- **THEN** `BiometricFactory` retorna instancia de `BiometricSimulation`
+
+#### Scenario: Modo real por defecto
+- **WHEN** no se configura `BIOMETRIC_MODE`
+- **THEN** `BiometricFactory` retorna `ZKTecoSDK` (modo real) y no simulación
 
 ### Requirement: Gestión de múltiples dispositivos
 El sistema SHALL administrar múltiples dispositivos biométricos configurados en la tabla dispositivos_biometricos.
