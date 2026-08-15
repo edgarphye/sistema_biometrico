@@ -27,6 +27,7 @@
 .opencode/node_modules/
 .phpunit.result.cache
 temp.sql
+cookies.txt
 test_cookies.txt
 /api/test*.php
 /assets/images/sep.jpg
